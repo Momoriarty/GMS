@@ -19,14 +19,14 @@ const Dashboard = () => {
                 </div>
 
                 <nav className="flex-1 space-y-2">
-                    <p className="text-xs font-semibold text-slate-500 uppercase mb-3">Menu</p>
+                    <p className="mb-3 text-xs font-semibold uppercase text-slate-500">Menu</p>
 
                     <NavItem icon={<LayoutDashboard size={18} />} label="Dashboard" active />
                     <NavItem icon={<Calendar size={18} />} label="Kelola Event" />
                     <NavItem icon={<Users size={18} />} label="Peserta" badge="15" />
                     <NavItem icon={<FileText size={18} />} label="Jadwal" />
 
-                    <p className="text-xs font-semibold text-slate-500 uppercase mt-8 mb-3">Sistem</p>
+                    <p className="mt-8 mb-3 text-xs font-semibold uppercase text-slate-500">Sistem</p>
 
                     <NavItem icon={<Bell size={18} />} label="Notifikasi" badge="3" />
                     <NavItem icon={<Settings size={18} />} label="Setting" />
@@ -37,18 +37,18 @@ const Dashboard = () => {
             <main className="flex-1 p-6 md:p-8">
 
                 {/* HEADER */}
-                <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
+                <header className="flex flex-col gap-4 mb-8 md:flex-row md:justify-between md:items-center">
                     <div>
                         <h2 className="text-2xl font-bold text-slate-800">Dashboard Overview</h2>
                         <p className="text-sm text-slate-500">Selamat datang kembali, Admin</p>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="bg-white px-4 py-2 rounded-lg shadow text-sm">
+                        <div className="px-4 py-2 text-sm bg-white rounded-lg shadow">
                             26 April 2026
                         </div>
 
-                        <div className="relative bg-white p-2 rounded-lg shadow">
+                        <div className="relative p-2 bg-white rounded-lg shadow">
                             <Bell size={18} />
                             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1 rounded-full">
                                 3
@@ -58,7 +58,7 @@ const Dashboard = () => {
                 </header>
 
                 {/* STATS */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
 
                     <StatCard title="TOTAL EVENT" value="24" trend="+3 bulan ini" color="bg-indigo-600" />
                     <StatCard title="TOTAL PESERTA" value="1,240" trend="+87 minggu ini" color="bg-blue-500" />
@@ -68,12 +68,12 @@ const Dashboard = () => {
                 </div>
 
                 {/* TABLE */}
-                <div className="bg-white rounded-xl shadow border overflow-hidden">
+                <div className="overflow-hidden bg-white border shadow rounded-xl">
 
                     {/* TOP BAR */}
-                    <div className="p-5 border-b flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                    <div className="flex flex-col gap-3 p-5 border-b md:flex-row md:justify-between md:items-center">
                         <div>
-                            <h3 className="font-bold text-lg">Pendaftaran Terbaru</h3>
+                            <h3 className="text-lg font-bold">Pendaftaran Terbaru</h3>
                             <p className="text-sm text-slate-500">Data masuk terbaru</p>
                         </div>
 
@@ -81,12 +81,12 @@ const Dashboard = () => {
                             <div className="relative">
                                 <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
                                 <input
-                                    className="pl-9 pr-3 py-2 bg-slate-50 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="py-2 pr-3 text-sm border rounded-lg outline-none pl-9 bg-slate-50 focus:ring-2 focus:ring-blue-500"
                                     placeholder="Cari..."
                                 />
                             </div>
 
-                            <button className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm">
+                            <button className="px-4 py-2 text-sm text-white rounded-lg bg-slate-800">
                                 Export
                             </button>
                         </div>
@@ -96,14 +96,14 @@ const Dashboard = () => {
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[800px] text-sm">
 
-                            <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
+                            <thead className="text-xs uppercase bg-slate-50 text-slate-500">
                                 <tr>
-                                    <th className="text-left p-4">Nama</th>
-                                    <th className="text-left p-4">Tim</th>
-                                    <th className="text-left p-4">Event</th>
-                                    <th className="text-left p-4">Kategori</th>
-                                    <th className="text-left p-4">Status</th>
-                                    <th className="text-left p-4">Aksi</th>
+                                    <th className="p-4 text-left">Nama</th>
+                                    <th className="p-4 text-left">Tim</th>
+                                    <th className="p-4 text-left">Event</th>
+                                    <th className="p-4 text-left">Kategori</th>
+                                    <th className="p-4 text-left">Status</th>
+                                    <th className="p-4 text-left">Aksi</th>
                                 </tr>
                             </thead>
 
@@ -160,14 +160,14 @@ const NavItem = ({ icon, label, active, badge }) => (
 );
 
 const StatCard = ({ title, value, trend, color, warning, success }) => (
-    <div className="bg-white p-5 rounded-xl shadow border flex items-center gap-4 hover:shadow-md transition">
+    <div className="flex items-center gap-4 p-5 transition bg-white border shadow rounded-xl hover:shadow-md">
 
         <div className={`${color} p-3 rounded-xl text-white`}>
             <TrendingUp size={20} />
         </div>
 
         <div>
-            <p className="text-xs text-slate-400 font-semibold uppercase">{title}</p>
+            <p className="text-xs font-semibold uppercase text-slate-400">{title}</p>
             <h3 className="text-2xl font-bold">{value}</h3>
 
             <p className={`text-xs mt-1 ${warning ? 'text-orange-500' :
@@ -195,7 +195,7 @@ const TableRow = ({ name, email, tim, event, cat, status }) => (
         <td className="p-4 text-slate-500">{event}</td>
 
         <td className="p-4">
-            <span className="text-xs px-2 py-1 rounded bg-slate-100">
+            <span className="px-2 py-1 text-xs rounded bg-slate-100">
                 {cat}
             </span>
         </td>
@@ -209,18 +209,18 @@ const TableRow = ({ name, email, tim, event, cat, status }) => (
             </span>
         </td>
 
-        <td className="p-4 flex gap-2">
+        <td className="flex gap-2 p-4">
             {status === 'Pending' ? (
                 <>
-                    <button className="bg-green-500 text-white p-1 rounded">
+                    <button className="p-1 text-white bg-green-500 rounded">
                         <Check size={14} />
                     </button>
-                    <button className="bg-red-500 text-white p-1 rounded">
+                    <button className="p-1 text-white bg-red-500 rounded">
                         <X size={14} />
                     </button>
                 </>
             ) : (
-                <button className="flex items-center gap-1 text-xs border px-3 py-1 rounded">
+                <button className="flex items-center gap-1 px-3 py-1 text-xs border rounded">
                     <Eye size={12} /> Detail
                 </button>
             )}
@@ -228,4 +228,3 @@ const TableRow = ({ name, email, tim, event, cat, status }) => (
 
     </tr>
 );
-export default Dashboard;
