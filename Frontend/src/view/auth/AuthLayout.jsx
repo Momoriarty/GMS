@@ -45,7 +45,7 @@ export function AuthCard({ children }) {
     return (
         <div className="min-h-screen bg-slate-950 flex">
             {/* Left Panel — Dekoratif */}
-            <div className="hidden lg:flex w-[420px] bg-slate-900 border-r border-white/5 flex-col justify-between p-10 relative overflow-hidden shrink-0">
+            <div className="hidden lg:flex bg-slate-900 border-r border-white/5 flex-col justify-between p-10 relative overflow-hidden shrink-0">
                 <div
                     className="absolute inset-0 opacity-5"
                     style={{
