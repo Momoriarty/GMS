@@ -4,21 +4,23 @@ import Login from "./view/auth/login";
 import Register from "./view/auth/Register";
 import Forgot from "./view/auth/Forgot";
 import { Route, Routes } from "react-router-dom";
-import LandingPage from "./view/guest/LandingPage";
+import Home from "./view/guest/Home";
 
 function RouteApp() {
   return (
     <>
       <Routes>
+        {/* AUTH */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<Forgot />} />
+
         {/* ADMIN */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
         </Route>
         {/*Guest*/}
-        <Route path="/landingPage" element={<LandingPage />} />
+        <Route path="/" element={<Home />} />
       </Routes>
     </>
   );
