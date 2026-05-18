@@ -6,7 +6,7 @@ import Forgot from "./view/auth/Forgot";
 import { Route, Routes } from "react-router-dom";
 import LandingPage from "./view/guest/LandingPage";
 
-function App() {
+function RouteApp() {
   return (
     <>
       <Routes>
@@ -24,4 +24,4 @@ function App() {
   );
 }
 
-export default App;
+export default RouteApp;

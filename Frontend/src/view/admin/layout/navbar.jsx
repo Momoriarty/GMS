@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Calendar, ChevronDown } from "lucide-react";
+import { Bell, Calendar, ChevronDown, Settings, User, HelpCircle, LogOut } from "lucide-react";
 
 export default function Navbar({
     title = "Dashboard Overview",
@@ -12,21 +12,28 @@ export default function Navbar({
 
     const today = new Date();
     const formattedDate = today.toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
+        weekday: "long", day: "numeric", month: "long", year: "numeric",
     });
 
     const notifications = [
-        { text: "Pendaftaran baru dari Reza Firmansyah", time: "5 menit lalu", unread: true },
-        { text: "Event Liga Garuda Futsal Cup dimulai besok", time: "1 jam lalu", unread: true },
-        { text: "Laporan bulan Juni telah tersedia", time: "3 jam lalu", unread: false },
+        { text: "Pendaftaran baru dari Reza Firmansyah", time: "5 menit lalu", unread: true, icon: "👤" },
+        { text: "Event Liga Garuda Futsal Cup dimulai besok", time: "1 jam lalu", unread: true, icon: "⚽" },
+        { text: "Laporan bulan Juni telah tersedia", time: "3 jam lalu", unread: false, icon: "📄" },
     ];
 
-    const closeAll = () => {
-        setNotifOpen(false);
-        setProfileOpen(false);
+    const profileMenuItems = [
+        { label: "Profil Saya", icon: User },
+        { label: "Pengaturan", icon: Settings },
+        { label: "Bantuan", icon: HelpCircle },
+    ];
+
+    const closeAll = () => { setNotifOpen(false); setProfileOpen(false); };
+
+    // Warna dropdown abu-abu gelap disesuaikan dengan tema
+    const dropdownStyle = {
+        background: "#0f172a", // slate-900
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
     };
 
     return (
@@ -35,18 +42,29 @@ export default function Navbar({
                 <div className="fixed inset-0 z-40" onClick={closeAll} />
             )}
 
-            <header className="fixed top-0 left-[220px] right-0 h-[70px] bg-white border-b border-slate-100 flex items-center justify-between px-7 z-50">
-                {/* Left: Title */}
+            <header
+                className="fixed top-0 left-[220px] right-0 h-[68px] flex items-center justify-between px-7 z-50"
+                style={{
+                    background: "rgba(15,23,42,0.95)", // Menggunakan dasar slate-900 dengan opacity
+                    backdropFilter: "blur(12px)",
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                }}
+            >
+                {/* Left */}
                 <div>
-                    <h1 className="text-lg font-bold text-slate-900 leading-tight">{title}</h1>
-                    <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+                    <h1 className="text-[15px] font-bold text-white leading-tight">{title}</h1>
+                    <p className="text-[11px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>{subtitle}</p>
                 </div>
 
-                {/* Right: Actions */}
-                <div className="flex items-center gap-3">
-                    {/* Date Badge */}
-                    <div className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-500 font-medium">
-                        <Calendar size={13} className="text-slate-400" />
+                {/* Right */}
+                <div className="flex items-center gap-2.5">
+
+                    {/* Date */}
+                    <div
+                        className="flex items-center gap-2 px-4 py-2 text-[12px] font-medium rounded-xl"
+                        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.55)" }}
+                    >
+                        <Calendar size={13} style={{ color: "rgba(255,255,255,0.4)" }} />
                         {formattedDate}
                     </div>
 
@@ -54,34 +72,62 @@ export default function Navbar({
                     <div className="relative z-50">
                         <button
                             onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}
-                            className="relative w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors duration-150 cursor-pointer"
+                            className="relative w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}
                         >
-                            <Bell size={17} className="text-slate-500" strokeWidth={1.8} />
-                            <span className="absolute -top-1 -right-1 w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white">
+                            <Bell size={16} style={{ color: "rgba(255,255,255,0.6)" }} strokeWidth={1.8} />
+                            <span className="absolute -top-1 -right-1 w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[9px] font-extrabold flex items-center justify-center border-2" style={{ borderColor: "#0f172a" }}>
                                 3
                             </span>
                         </button>
 
                         {notifOpen && (
-                            <div className="absolute top-12 right-0 w-[300px] bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-                                <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-100">
-                                    <span className="font-bold text-sm text-slate-900">Notifikasi</span>
-                                    <span className="text-xs text-blue-500 font-semibold cursor-pointer hover:text-blue-600">
+                            <div className="absolute top-14 right-0 w-[320px] rounded-2xl overflow-hidden mt-1" style={dropdownStyle}>
+                                <div
+                                    className="flex items-center justify-between px-4 py-3.5"
+                                    style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-bold text-[13px] text-white">Notifikasi</span>
+                                        <span className="bg-red-500 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">3</span>
+                                    </div>
+                                    <button className="text-[11px] font-semibold" style={{ color: "#fbbf24" }}>
                                         Tandai semua dibaca
-                                    </span>
+                                    </button>
                                 </div>
+
                                 {notifications.map((n, i) => (
                                     <div
                                         key={i}
-                                        className={`px-4 py-3 border-b border-slate-50 cursor-pointer transition-colors hover:bg-slate-50 ${n.unread ? "bg-blue-50/60" : "bg-white"
-                                            }`}
+                                        className="flex items-start gap-3 px-4 py-3.5 cursor-pointer transition-colors"
+                                        style={{
+                                            borderBottom: "1px solid rgba(255,255,255,0.04)",
+                                            background: n.unread ? "rgba(251,191,36,0.04)" : "transparent",
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
+                                        onMouseLeave={e => e.currentTarget.style.background = n.unread ? "rgba(251,191,36,0.04)" : "transparent"}
                                     >
-                                        <p className={`text-[13px] text-slate-800 ${n.unread ? "font-semibold" : "font-normal"}`}>
-                                            {n.text}
-                                        </p>
-                                        <p className="text-[11px] text-slate-400 mt-1">{n.time}</p>
+                                        <div
+                                            className="w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0"
+                                            style={{ background: n.unread ? "rgba(251,191,36,0.12)" : "rgba(255,255,255,0.06)" }}
+                                        >
+                                            {n.icon}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className={`text-[12px] leading-snug ${n.unread ? "font-semibold text-white" : "font-normal"}`} style={!n.unread ? { color: "rgba(255,255,255,0.5)" } : {}}>
+                                                {n.text}
+                                            </p>
+                                            <p className="text-[10px] mt-1 font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>{n.time}</p>
+                                        </div>
+                                        {n.unread && <div className="w-2 h-2 rounded-full mt-1 shrink-0" style={{ background: "#fbbf24" }} />}
                                     </div>
                                 ))}
+
+                                <div className="px-4 py-3" style={{ background: "rgba(255,255,255,0.02)" }}>
+                                    <button className="w-full text-center text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>
+                                        Lihat semua notifikasi →
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -90,33 +136,56 @@ export default function Navbar({
                     <div className="relative z-50">
                         <button
                             onClick={() => { setProfileOpen(!profileOpen); setNotifOpen(false); }}
-                            className="flex items-center gap-2 px-2 py-1.5 pr-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors duration-150 cursor-pointer"
+                            className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl transition-all"
+                            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}
                         >
-                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-400 to-blue-700 flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-[11px] font-extrabold shrink-0">
                                 AG
                             </div>
                             <div className="text-left">
-                                <p className="text-[13px] font-semibold text-slate-800 leading-tight">Admin Garuda</p>
-                                <p className="text-[10px] text-slate-400">Super Admin</p>
+                                <p className="text-[12px] font-bold text-white leading-none">Admin Garuda</p>
+                                <p className="text-[10px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>Super Admin</p>
                             </div>
-                            <ChevronDown size={13} className="text-slate-400 ml-1" />
+                            <ChevronDown size={12} className={`ml-0.5 transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`} style={{ color: "rgba(255,255,255,0.4)" }} />
                         </button>
 
                         {profileOpen && (
-                            <div className="absolute top-12 right-0 w-44 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-                                {["Profil Saya", "Pengaturan", "Bantuan"].map((item, i) => (
-                                    <button
-                                        key={i}
-                                        className="w-full px-4 py-2.5 text-left text-[13px] text-slate-600 hover:bg-slate-50 transition-colors border-b border-slate-50 cursor-pointer"
-                                    >
-                                        {item}
-                                    </button>
-                                ))}
-                                <div className="border-t border-slate-100">
+                            <div className="absolute top-14 right-0 w-48 rounded-2xl overflow-hidden mt-1" style={dropdownStyle}>
+                                {/* Profile header */}
+                                <div className="px-4 py-3.5 flex items-center gap-2.5" style={{ background: "rgba(251,191,36,0.08)", borderBottom: "1px solid rgba(251,191,36,0.12)" }}>
+                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-xs font-extrabold shrink-0">
+                                        AG
+                                    </div>
+                                    <div>
+                                        <p className="text-white font-bold text-[13px] leading-none">Admin Garuda</p>
+                                        <p className="text-[10px] mt-0.5 font-medium" style={{ color: "#fbbf24" }}>Super Admin</p>
+                                    </div>
+                                </div>
+
+                                <div className="py-1.5">
+                                    {profileMenuItems.map(({ label, icon: Icon }, i) => (
+                                        <button
+                                            key={i}
+                                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium transition-colors text-left"
+                                            style={{ color: "rgba(255,255,255,0.65)" }}
+                                            onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+                                            onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                                        >
+                                            <Icon size={14} strokeWidth={1.8} style={{ color: "rgba(255,255,255,0.4)" }} />
+                                            {label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} className="py-1.5">
                                     <button
                                         onClick={() => navigate("/")}
-                                        className="w-full px-4 py-2.5 text-left text-[13px] text-red-500 font-semibold hover:bg-red-50 transition-colors cursor-pointer"
+                                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-bold text-left transition-colors"
+                                        style={{ color: "#f87171" }}
+                                        onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.08)"}
+                                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                                     >
+                                        <LogOut size={14} strokeWidth={1.8} />
                                         Logout
                                     </button>
                                 </div>
