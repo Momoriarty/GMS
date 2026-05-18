@@ -5,6 +5,8 @@ import Register from "./view/auth/Register";
 import Forgot from "./view/auth/Forgot";
 import { Route, Routes } from "react-router-dom";
 import Home from "./view/guest/Home";
+import Navbar from "./view/guest/layout/navbar";
+import Footer from "./view/guest/layout/footer";
 
 function RouteApp() {
   return (
