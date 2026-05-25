@@ -14,21 +14,11 @@ import {
 
 const menuUtama = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
-  { label: "Event", icon: CalendarDays, href: "/admin/event" },
-  { label: "Peserta", icon: Users, href: "/admin/peserta" },
-  {
-    label: "Pendaftaran",
-    icon: ClipboardList,
-    href: "/admin/pendaftaran",
-    badge: 15,
-  },
+  { label: "Pengguna", icon: Users, href: "/admin/pengguna" },
 ];
 
 const menuSistem = [
   { label: "Profil", icon: User, href: "/admin/profile" },
-  { label: "Laporan", icon: FileBarChart2, href: "/admin/laporan" },
-  { label: "Notifikasi", icon: Bell, href: "/admin/notifikasi", badge: 3 },
-  { label: "Manajemen Admin", icon: UserCog, href: "/admin/users" },
 ];
 
 function NavItem({ item }) {
@@ -124,46 +114,6 @@ export default function Sidebar() {
             >
               Futsal & SSB
             </p>
-          </div>
-        </div>
-      </div>
-
-      {/* User Card */}
-      <div
-        className="mx-3 mt-4 mb-1 p-3 rounded-xl"
-        style={{
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.06)",
-        }}
-      >
-        <div className="flex items-center gap-2.5">
-          <div className="relative shrink-0">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-extrabold"
-              style={{
-                background: "linear-gradient(135deg, #f59e0b, #d97706)",
-              }}
-            >
-              AG
-            </div>
-            <div
-              className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2"
-              style={{ background: "#10b981", borderColor: "#161b27" }}
-            />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white font-bold text-[12px] leading-none">
-              Admin Garuda
-            </p>
-            <div className="flex items-center gap-1 mt-1">
-              <Zap size={9} style={{ color: "#f59e0b" }} className="shrink-0" />
-              <p
-                className="text-[10px] font-semibold"
-                style={{ color: "rgba(245,158,11,0.7)" }}
-              >
-                Super Admin
-              </p>
-            </div>
           </div>
         </div>
       </div>

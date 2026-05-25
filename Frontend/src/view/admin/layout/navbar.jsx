@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Bell, Calendar, ChevronDown, Settings, User, HelpCircle, LogOut } from "lucide-react";
 
 export default function Navbar({
@@ -8,6 +9,8 @@ export default function Navbar({
 }) {
     const [notifOpen, setNotifOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
+    const [user, setUser] = useState(null);
+    const [loadingUser, setLoadingUser] = useState(true);
 
     const today = new Date();
     const formattedDate = today.toLocaleDateString("id-ID", {
@@ -25,6 +28,29 @@ export default function Navbar({
     const closeAll = () => { setNotifOpen(false); setProfileOpen(false); };
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setLoadingUser(false);
+                return;
+            }
+
+            try {
+                const response = await axios.get("http://localhost:8000/api/user", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setUser(response.data);
+            } catch (error) {
+                console.error("Gagal memuat user:", error);
+            } finally {
+                setLoadingUser(false);
+            }
+        };
+
+        fetchUser();
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -151,11 +177,11 @@ export default function Navbar({
                             style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}
                         >
                             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-[11px] font-extrabold shrink-0">
-                                AD
+                                {user?.name ? user.name.split(" ").map((part) => part[0]).slice(0, 2).join("") : "AD"}
                             </div>
                             <div className="text-left">
-                                <p className="text-[12px] font-bold text-white leading-none">Admin</p>
-                                <p className="text-[10px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>Administrator</p>
+                                <p className="text-[12px] font-bold text-white leading-none">{user?.name || "Admin"}</p>
+                                <p className="text-[10px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>{user?.role || "Administrator"}</p>
                             </div>
                             <ChevronDown size={12} className={`ml-0.5 transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`} style={{ color: "rgba(255,255,255,0.4)" }} />
                         </button>
@@ -165,11 +191,11 @@ export default function Navbar({
                                 {/* Profile header */}
                                 <div className="px-4 py-3.5 flex items-center gap-2.5" style={{ background: "rgba(251,191,36,0.08)", borderBottom: "1px solid rgba(251,191,36,0.12)" }}>
                                     <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-xs font-extrabold shrink-0">
-                                        AG
+                                        {user?.name ? user.name.split(" ").map((part) => part[0]).slice(0, 2).join("") : "AD"}
                                     </div>
                                     <div>
-                                        <p className="text-white font-bold text-[13px] leading-none">Admin Garuda</p>
-                                        <p className="text-[10px] mt-0.5 font-medium" style={{ color: "#fbbf24" }}>Super Admin</p>
+                                        <p className="text-white font-bold text-[13px] leading-none">{user?.name || "Admin"}</p>
+                                        <p className="text-[10px] mt-0.5 font-medium" style={{ color: "#fbbf24" }}>{user?.role || "Super Admin"}</p>
                                     </div>
                                 </div>
 

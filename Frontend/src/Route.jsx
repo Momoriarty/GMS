@@ -7,7 +7,8 @@ import { Route, Routes } from "react-router-dom";
 import Home from "./view/guest/Home";
 import ProtectedRoute from "./ProtectedRoute"; // 1. Perbaikan: Import komponen proteksi tadi
 import GuestProfile from "./view/guest/profile";
-import Profile from "./view/admin/profile";
+import Profile from "./view/admin/Profile";
+import Pengguna from "./view/admin/Pengguna";
 
 function RouteApp() {
   return (
@@ -24,6 +25,7 @@ function RouteApp() {
             <Route path="" element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="Pengguna" element={<Pengguna />} />
           </Route>
         </Route>
 

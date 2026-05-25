@@ -45,7 +45,9 @@ export default function Login() {
       // 4. Kalau role peserta atau role lain, arahkan ke beranda guest
       navigate("/");
     } catch (err) {
-      // Menangkap pesan error dari validasi Laravel atau pesan kustom kita kemarin
+      // Hapus token/role lama jika login gagal, agar sesi sebelumnya tidak tetap aktif
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
       setError(err.response?.data?.message || "Email atau password salah.");
     } finally {
       setLoading(false); // Matikan status loading setelah proses selesai
