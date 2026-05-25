@@ -1,297 +1,512 @@
 function AdminDashboard() {
-    const stats = [
-        { label: "Total Event", value: "24", sub: "+3 bulan ini", icon: "🏆", accent: "#f59e0b", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.2)" },
-        { label: "Total Peserta", value: "1,240", sub: "+87 minggu ini", icon: "👥", accent: "#3b82f6", bg: "rgba(59,130,246,0.12)", border: "rgba(59,130,246,0.2)" },
-        { label: "Pending", value: "15", sub: "Perlu ditinjau", icon: "⏳", accent: "#f97316", bg: "rgba(249,115,22,0.12)", border: "rgba(249,115,22,0.2)" },
-        { label: "Event Aktif", value: "8", sub: "Sedang berjalan", icon: "▶", accent: "#10b981", bg: "rgba(16,185,129,0.12)", border: "rgba(16,185,129,0.2)" },
-    ];
+  const stats = [
+    {
+      label: "Total Event",
+      value: "0",
+      sub: "Data akan diperbarui",
+      icon: "🏆",
+      accent: "#f59e0b",
+      bg: "rgba(245,158,11,0.12)",
+      border: "rgba(245,158,11,0.2)",
+    },
+    {
+      label: "Total Peserta",
+      value: "0",
+      sub: "Data akan diperbarui",
+      icon: "👥",
+      accent: "#3b82f6",
+      bg: "rgba(59,130,246,0.12)",
+      border: "rgba(59,130,246,0.2)",
+    },
+    {
+      label: "Pending",
+      value: "0",
+      sub: "Tidak ada tugas saat ini",
+      icon: "⏳",
+      accent: "#f97316",
+      bg: "rgba(249,115,22,0.12)",
+      border: "rgba(249,115,22,0.2)",
+    },
+    {
+      label: "Event Aktif",
+      value: "0",
+      sub: "Data akan diperbarui",
+      icon: "▶",
+      accent: "#10b981",
+      bg: "rgba(16,185,129,0.12)",
+      border: "rgba(16,185,129,0.2)",
+    },
+  ];
 
-    const pendaftaran = [
-        { nama: "Reza Firmansyah", email: "reza.f@email.com", tim: "FC Garuda Muda", event: "Liga Garuda Futsal Championship 2025", kategori: "Futsal", status: "Pending" },
-        { nama: "Siti Rahayu", email: "siti.r@email.com", tim: "SSB Melayu Jaya", event: "Piala Garuda Junior SSB 2025", kategori: "SSB", status: "Approved" },
-        { nama: "Budi Santoso", email: "budi.s@email.com", tim: "Tim Perkasa FC", event: "Melayu Open Futsal Cup Antar Daerah", kategori: "Futsal", status: "Pending" },
-        { nama: "Dewi Anggraini", email: "dewi.a@email.com", tim: "Akademi Melayu SSB", event: "Turnamen SSB U-17 Piala Melayu", kategori: "SSB", status: "Approved" },
-        { nama: "Andi Kurniawan", email: "andi.k@email.com", tim: "Garuda United FC", event: "Championship Antar Daerah 2025", kategori: "Futsal", status: "Pending" },
-        { nama: "Ahmad Fauzi", email: "ahmad.f@email.com", tim: "Riau Putra SSB", event: "Piala Garuda Junior SSB 2025", kategori: "SSB", status: "Pending" },
-    ];
+  const pendaftaran = [];
 
-    const avatarGradients = [
-        "from-amber-400 to-orange-500",
-        "from-blue-400 to-blue-600",
-        "from-violet-400 to-purple-600",
-        "from-emerald-400 to-teal-600",
-        "from-rose-400 to-pink-600",
-        "from-cyan-400 to-blue-500",
-    ];
+  const avatarGradients = [
+    "from-amber-400 to-orange-500",
+    "from-blue-400 to-blue-600",
+    "from-violet-400 to-purple-600",
+    "from-emerald-400 to-teal-600",
+    "from-rose-400 to-pink-600",
+    "from-cyan-400 to-blue-500",
+  ];
 
-    const chartData = [
-        { label: "Liga Garuda", futsal: 175, ssb: 0 },
-        { label: "Piala Garuda Jr", futsal: 0, ssb: 145 },
-        { label: "Melayu Open", futsal: 205, ssb: 0 },
-        { label: "SSB U-17", futsal: 0, ssb: 160 },
-        { label: "Championship", futsal: 190, ssb: 0 },
-    ];
-    const max = 220;
+  const chartData = [];
+  const max = 220;
 
-    return (
-        <div className="space-y-5 p-1">
-
-            {/* Stat Cards */}
-            <div className="grid grid-cols-4 gap-4">
-                {stats.map((s, i) => (
-                    <div
-                        key={i}
-                        className="rounded-2xl p-5 relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-default"
-                        style={{ background: "#1c2333", border: "1px solid rgba(255,255,255,0.06)" }}
-                    >
-                        <div
-                            className="absolute -right-6 -top-6 w-24 h-24 rounded-full blur-2xl opacity-20 group-hover:opacity-35 transition-opacity duration-300"
-                            style={{ background: s.accent }}
-                        />
-                        <div className="relative">
-                            <div className="flex items-center justify-between mb-4">
-                                <div
-                                    className="w-11 h-11 rounded-xl flex items-center justify-center text-lg"
-                                    style={{ background: s.bg, border: `1px solid ${s.border}` }}
-                                >
-                                    {s.icon}
-                                </div>
-                                <span
-                                    className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
-                                    style={{ background: s.bg, color: s.accent }}
-                                >
-                                    {s.sub}
-                                </span>
-                            </div>
-                            <p className="text-[32px] font-extrabold text-white leading-none tracking-tight">{s.value}</p>
-                            <p className="text-[10px] font-bold uppercase tracking-[2px] mt-1.5" style={{ color: "rgba(255,255,255,0.3)" }}>{s.label}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Chart */}
-            <div className="rounded-2xl p-6" style={{ background: "#1c2333", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <div className="flex items-start justify-between mb-6">
-                    <div>
-                        <h2 className="font-bold text-white text-[15px]">Statistik Peserta per Event</h2>
-                        <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>5 event terakhir yang diselenggarakan</p>
-                    </div>
-                    <div
-                        className="flex items-center gap-4 text-xs px-4 py-2.5 rounded-xl"
-                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
-                    >
-                        <span className="flex items-center gap-2 font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
-                            <span className="w-3 h-3 rounded" style={{ background: "#f59e0b" }} /> Futsal
-                        </span>
-                        <div className="w-px h-4" style={{ background: "rgba(255,255,255,0.1)" }} />
-                        <span className="flex items-center gap-2 font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
-                            <span className="w-3 h-3 rounded bg-blue-400" /> SSB
-                        </span>
-                    </div>
-                </div>
-
-                <div className="flex items-end gap-3 px-2" style={{ height: "200px" }}>
-                    {chartData.map((d, i) => {
-                        const val = d.futsal || d.ssb;
-                        const h = (val / max) * 100;
-                        const isFutsal = d.futsal > 0;
-                        return (
-                            <div key={i} className="flex-1 flex flex-col items-center gap-2 group/bar">
-                                <span
-                                    className="text-[11px] font-bold opacity-0 group-hover/bar:opacity-100 transition-opacity duration-150"
-                                    style={{ color: isFutsal ? "#f59e0b" : "#60a5fa" }}
-                                >
-                                    {val}
-                                </span>
-                                <div className="w-full flex items-end justify-center" style={{ height: "152px" }}>
-                                    <div
-                                        className="w-full rounded-t-lg transition-all duration-300 group-hover/bar:brightness-110"
-                                        style={{
-                                            height: `${h}%`,
-                                            background: isFutsal
-                                                ? "linear-gradient(to top, #b45309, #f59e0b)"
-                                                : "linear-gradient(to top, #1d4ed8, #60a5fa)",
-                                            boxShadow: isFutsal
-                                                ? "0 0 16px rgba(245,158,11,0.25)"
-                                                : "0 0 16px rgba(96,165,250,0.25)",
-                                        }}
-                                    />
-                                </div>
-                                <p className="text-[10px] text-center leading-snug" style={{ color: "rgba(255,255,255,0.25)" }}>{d.label}</p>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Pendaftaran Terbaru */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: "#1c2333", border: "1px solid rgba(255,255,255,0.06)" }}>
-
-                {/* Header */}
-                <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                    <div>
-                        <h2 className="font-bold text-white text-[15px]">Pendaftaran Terbaru</h2>
-                        <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>Daftar pendaftaran yang masuk baru-baru ini</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>🔍</span>
-                            <input
-                                type="text"
-                                placeholder="Cari pendaftaran..."
-                                className="pl-8 pr-4 py-2 text-[12px] rounded-xl outline-none w-44"
-                                style={{
-                                    background: "rgba(255,255,255,0.05)",
-                                    border: "1px solid rgba(255,255,255,0.08)",
-                                    color: "rgba(255,255,255,0.7)",
-                                }}
-                            />
-                        </div>
-                        <button
-                            className="flex items-center gap-1.5 px-3.5 py-2 text-[11px] rounded-xl font-bold active:scale-95 transition-all"
-                            style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.2)" }}
-                        >
-                            📄 PDF
-                        </button>
-                        <button
-                            className="flex items-center gap-1.5 px-3.5 py-2 text-[11px] rounded-xl font-bold active:scale-95 transition-all"
-                            style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.2)" }}
-                        >
-                            📊 Excel
-                        </button>
-                    </div>
-                </div>
-
-                {/* Table */}
-                <table className="w-full text-sm">
-                    <thead>
-                        <tr style={{ background: "rgba(255,255,255,0.025)" }}>
-                            {["Nama", "Tim", "Event", "Kategori", "Status", "Aksi"].map((h) => (
-                                <th
-                                    key={h}
-                                    className="text-left py-3 px-5 text-[10px] font-extrabold uppercase tracking-widest"
-                                    style={{ color: "rgba(255,255,255,0.2)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-                                >
-                                    {h}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {pendaftaran.map((p, i) => (
-                            <tr
-                                key={i}
-                                className="transition-colors"
-                                style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-                                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.03)"}
-                                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                            >
-                                <td className="py-3.5 px-5">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${avatarGradients[i % avatarGradients.length]} flex items-center justify-center text-white text-xs font-extrabold shrink-0 shadow-lg`}>
-                                            {p.nama.split(" ").map(n => n[0]).slice(0, 2).join("")}
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-[13px] text-white leading-tight">{p.nama}</p>
-                                            <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>{p.email}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="py-3.5 px-5">
-                                    <span className="text-[13px] font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>{p.tim}</span>
-                                </td>
-                                <td className="py-3.5 px-5 max-w-[190px]">
-                                    <span className="text-[12px] leading-snug line-clamp-2" style={{ color: "rgba(255,255,255,0.4)" }}>{p.event}</span>
-                                </td>
-                                <td className="py-3.5 px-5">
-                                    <span
-                                        className="text-[11px] font-bold px-3 py-1.5 rounded-lg"
-                                        style={p.kategori === "Futsal"
-                                            ? { background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.2)" }
-                                            : { background: "rgba(96,165,250,0.12)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.2)" }
-                                        }
-                                    >
-                                        {p.kategori}
-                                    </span>
-                                </td>
-                                <td className="py-3.5 px-5">
-                                    {p.status === "Approved" ? (
-                                        <span
-                                            className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg"
-                                            style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.2)" }}
-                                        >
-                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                            Approved
-                                        </span>
-                                    ) : (
-                                        <span
-                                            className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg"
-                                            style={{ background: "rgba(249,115,22,0.12)", color: "#f97316", border: "1px solid rgba(249,115,22,0.2)" }}
-                                        >
-                                            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
-                                            Pending
-                                        </span>
-                                    )}
-                                </td>
-                                <td className="py-3.5 px-5">
-                                    {p.status === "Pending" ? (
-                                        <div className="flex items-center gap-1.5">
-                                            <button
-                                                className="px-3 py-1.5 text-[11px] font-bold rounded-lg active:scale-95 transition-all"
-                                                style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }}
-                                            >
-                                                ✓ Approve
-                                            </button>
-                                            <button
-                                                className="px-3 py-1.5 text-[11px] font-bold rounded-lg active:scale-95 transition-all"
-                                                style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
-                                            >
-                                                ✕ Reject
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <button
-                                            className="px-3 py-1.5 text-[11px] font-bold rounded-lg active:scale-95 transition-all"
-                                            style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.08)" }}
-                                        >
-                                            Detail →
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-
-                {/* Pagination */}
+  return (
+    <div className="space-y-5 p-1">
+      {/* Stat Cards */}
+      <div className="grid grid-cols-4 gap-4">
+        {stats.map((s, i) => (
+          <div
+            key={i}
+            className="rounded-2xl p-5 relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-default"
+            style={{
+              background: "#1c2333",
+              border: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            <div
+              className="absolute -right-6 -top-6 w-24 h-24 rounded-full blur-2xl opacity-20 group-hover:opacity-35 transition-opacity duration-300"
+              style={{ background: s.accent }}
+            />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
                 <div
-                    className="flex items-center justify-between px-6 py-4"
-                    style={{ borderTop: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.015)" }}
+                  className="w-11 h-11 rounded-xl flex items-center justify-center text-lg"
+                  style={{ background: s.bg, border: `1px solid ${s.border}` }}
                 >
-                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
-                        Menampilkan <span style={{ color: "rgba(255,255,255,0.55)", fontWeight: 600 }}>6</span> dari <span style={{ color: "rgba(255,255,255,0.55)", fontWeight: 600 }}>15</span> pendaftaran
-                    </p>
-                    <div className="flex items-center gap-1">
-                        <button className="w-8 h-8 rounded-lg text-sm flex items-center justify-center" style={{ border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.25)" }}>‹</button>
-                        {[1, 2, 3].map((n) => (
-                            <button
-                                key={n}
-                                className="w-8 h-8 rounded-lg text-[12px] font-bold flex items-center justify-center transition-all"
-                                style={n === 1
-                                    ? { background: "#f59e0b", color: "#0d1117" }
-                                    : { border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.3)" }
-                                }
-                            >
-                                {n}
-                            </button>
-                        ))}
-                        <button className="w-8 h-8 rounded-lg text-sm flex items-center justify-center" style={{ border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.25)" }}>›</button>
-                    </div>
+                  {s.icon}
                 </div>
+                <span
+                  className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                  style={{ background: s.bg, color: s.accent }}
+                >
+                  {s.sub}
+                </span>
+              </div>
+              <p className="text-[32px] font-extrabold text-white leading-none tracking-tight">
+                {s.value}
+              </p>
+              <p
+                className="text-[10px] font-bold uppercase tracking-[2px] mt-1.5"
+                style={{ color: "rgba(255,255,255,0.3)" }}
+              >
+                {s.label}
+              </p>
             </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Chart */}
+      <div
+        className="rounded-2xl p-6"
+        style={{
+          background: "#1c2333",
+          border: "1px solid rgba(255,255,255,0.06)",
+        }}
+      >
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h2 className="font-bold text-white text-[15px]">
+              Statistik Peserta per Event
+            </h2>
+            <p
+              className="text-xs mt-1"
+              style={{ color: "rgba(255,255,255,0.3)" }}
+            >
+              5 event terakhir yang diselenggarakan
+            </p>
+          </div>
+          <div
+            className="flex items-center gap-4 text-xs px-4 py-2.5 rounded-xl"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.07)",
+            }}
+          >
+            <span
+              className="flex items-center gap-2 font-medium"
+              style={{ color: "rgba(255,255,255,0.6)" }}
+            >
+              <span
+                className="w-3 h-3 rounded"
+                style={{ background: "#f59e0b" }}
+              />{" "}
+              Futsal
+            </span>
+            <div
+              className="w-px h-4"
+              style={{ background: "rgba(255,255,255,0.1)" }}
+            />
+            <span
+              className="flex items-center gap-2 font-medium"
+              style={{ color: "rgba(255,255,255,0.6)" }}
+            >
+              <span className="w-3 h-3 rounded bg-blue-400" /> SSB
+            </span>
+          </div>
         </div>
-    );
+
+        <div
+          className="flex items-center justify-center px-2"
+          style={{ height: "200px" }}
+        >
+          {chartData && chartData.length ? (
+            // Menambahkan .map() untuk melakukan perulangan array dengan benar
+            chartData.map((d, i) => {
+              const val = d.futsal || d.ssb || 0; // fallback ke 0 jika keduanya kosong
+              const h = max > 0 ? (val / max) * 100 : 0; // proteksi terhadap division by zero
+              const isFutsal = d.futsal > 0;
+
+              return (
+                <div
+                  key={i}
+                  className="flex-1 flex flex-col items-center gap-2 group/bar"
+                >
+                  <span
+                    className="text-[11px] font-bold opacity-0 group-hover/bar:opacity-100 transition-opacity duration-150"
+                    style={{ color: isFutsal ? "#f59e0b" : "#60a5fa" }}
+                  >
+                    {val}
+                  </span>
+                  <div
+                    className="w-full flex items-end justify-center"
+                    style={{ height: "152px" }}
+                  >
+                    <div
+                      className="w-full rounded-t-lg transition-all duration-300 group-hover/bar:brightness-110"
+                      style={{
+                        height: `${h}%`,
+                        background: isFutsal
+                          ? "linear-gradient(to top, #b45309, #f59e0b)"
+                          : "linear-gradient(to top, #1d4ed8, #60a5fa)",
+                        boxShadow: isFutsal
+                          ? "0 0 16px rgba(245,158,11,0.25)"
+                          : "0 0 16px rgba(96,165,250,0.25)",
+                      }}
+                    />
+                  </div>
+                  <p
+                    className="text-[10px] text-center leading-snug"
+                    style={{ color: "rgba(255,255,255,0.25)" }}
+                  >
+                    {d.label}
+                  </p>
+                </div>
+              );
+            })
+          ) : (
+            <div
+              className="text-center text-sm text-slate-400"
+              style={{ color: "rgba(255,255,255,0.55)" }}
+            >
+              Statistik peserta belum tersedia.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Pendaftaran Terbaru */}
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{
+          background: "#1c2333",
+          border: "1px solid rgba(255,255,255,0.06)",
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between px-6 py-5"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <div>
+            <h2 className="font-bold text-white text-[15px]">
+              Pendaftaran Terbaru
+            </h2>
+            <p
+              className="text-xs mt-0.5"
+              style={{ color: "rgba(255,255,255,0.3)" }}
+            >
+              Daftar pendaftaran yang masuk baru-baru ini
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <span
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-xs"
+                style={{ color: "rgba(255,255,255,0.2)" }}
+              >
+                🔍
+              </span>
+              <input
+                type="text"
+                placeholder="Cari pendaftaran..."
+                className="pl-8 pr-4 py-2 text-[12px] rounded-xl outline-none w-44"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.7)",
+                }}
+              />
+            </div>
+            <button
+              className="flex items-center gap-1.5 px-3.5 py-2 text-[11px] rounded-xl font-bold active:scale-95 transition-all"
+              style={{
+                background: "rgba(245,158,11,0.12)",
+                color: "#f59e0b",
+                border: "1px solid rgba(245,158,11,0.2)",
+              }}
+            >
+              📄 PDF
+            </button>
+            <button
+              className="flex items-center gap-1.5 px-3.5 py-2 text-[11px] rounded-xl font-bold active:scale-95 transition-all"
+              style={{
+                background: "rgba(16,185,129,0.12)",
+                color: "#10b981",
+                border: "1px solid rgba(16,185,129,0.2)",
+              }}
+            >
+              📊 Excel
+            </button>
+          </div>
+        </div>
+
+        {/* Table */}
+        <table className="w-full text-sm">
+          <thead>
+            <tr style={{ background: "rgba(255,255,255,0.025)" }}>
+              {["Nama", "Tim", "Event", "Kategori", "Status", "Aksi"].map(
+                (h) => (
+                  <th
+                    key={h}
+                    className="text-left py-3 px-5 text-[10px] font-extrabold uppercase tracking-widest"
+                    style={{
+                      color: "rgba(255,255,255,0.2)",
+                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    }}
+                  >
+                    {h}
+                  </th>
+                ),
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {pendaftaran.length ? (
+              pendaftaran.map((p, i) => (
+                <tr
+                  key={i}
+                  className="transition-colors"
+                  style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background =
+                      "rgba(255,255,255,0.03)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "transparent")
+                  }
+                >
+                  <td className="py-3.5 px-5">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-9 h-9 rounded-xl bg-gradient-to-br ${avatarGradients[i % avatarGradients.length]} flex items-center justify-center text-white text-xs font-extrabold shrink-0 shadow-lg`}
+                      >
+                        {p.nama
+                          .split(" ")
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join("")}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-[13px] text-white leading-tight">
+                          {p.nama}
+                        </p>
+                        <p
+                          className="text-[11px] mt-0.5"
+                          style={{ color: "rgba(255,255,255,0.3)" }}
+                        >
+                          {p.email}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3.5 px-5">
+                    <span
+                      className="text-[13px] font-medium"
+                      style={{ color: "rgba(255,255,255,0.55)" }}
+                    >
+                      {p.tim}
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-5 max-w-[190px]">
+                    <span
+                      className="text-[12px] leading-snug line-clamp-2"
+                      style={{ color: "rgba(255,255,255,0.4)" }}
+                    >
+                      {p.event}
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-5">
+                    <span
+                      className="text-[11px] font-bold px-3 py-1.5 rounded-lg"
+                      style={
+                        p.kategori === "Futsal"
+                          ? {
+                              background: "rgba(245,158,11,0.12)",
+                              color: "#f59e0b",
+                              border: "1px solid rgba(245,158,11,0.2)",
+                            }
+                          : {
+                              background: "rgba(96,165,250,0.12)",
+                              color: "#60a5fa",
+                              border: "1px solid rgba(96,165,250,0.2)",
+                            }
+                      }
+                    >
+                      {p.kategori}
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-5">
+                    {p.status === "Approved" ? (
+                      <span
+                        className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg"
+                        style={{
+                          background: "rgba(16,185,129,0.12)",
+                          color: "#10b981",
+                          border: "1px solid rgba(16,185,129,0.2)",
+                        }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        Approved
+                      </span>
+                    ) : (
+                      <span
+                        className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg"
+                        style={{
+                          background: "rgba(249,115,22,0.12)",
+                          color: "#f97316",
+                          border: "1px solid rgba(249,115,22,0.2)",
+                        }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                        Pending
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-3.5 px-5">
+                    {p.status === "Pending" ? (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          className="px-3 py-1.5 text-[11px] font-bold rounded-lg active:scale-95 transition-all"
+                          style={{
+                            background: "rgba(16,185,129,0.15)",
+                            color: "#10b981",
+                            border: "1px solid rgba(16,185,129,0.25)",
+                          }}
+                        >
+                          ✓ Approve
+                        </button>
+                        <button
+                          className="px-3 py-1.5 text-[11px] font-bold rounded-lg active:scale-95 transition-all"
+                          style={{
+                            background: "rgba(239,68,68,0.12)",
+                            color: "#f87171",
+                            border: "1px solid rgba(239,68,68,0.2)",
+                          }}
+                        >
+                          ✕ Reject
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        className="px-3 py-1.5 text-[11px] font-bold rounded-lg active:scale-95 transition-all"
+                        style={{
+                          background: "rgba(255,255,255,0.06)",
+                          color: "rgba(255,255,255,0.45)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                        }}
+                      >
+                        Detail →
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={6}
+                  className="py-10 text-center text-sm text-slate-400"
+                  style={{ color: "rgba(255,255,255,0.55)" }}
+                >
+                  Tidak ada pendaftaran terbaru.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {/* Pagination */}
+        <div
+          className="flex items-center justify-between px-6 py-4"
+          style={{
+            borderTop: "1px solid rgba(255,255,255,0.05)",
+            background: "rgba(255,255,255,0.015)",
+          }}
+        >
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+            Menampilkan{" "}
+            <span style={{ color: "rgba(255,255,255,0.55)", fontWeight: 600 }}>
+              6
+            </span>{" "}
+            dari{" "}
+            <span style={{ color: "rgba(255,255,255,0.55)", fontWeight: 600 }}>
+              15
+            </span>{" "}
+            pendaftaran
+          </p>
+          <div className="flex items-center gap-1">
+            <button
+              className="w-8 h-8 rounded-lg text-sm flex items-center justify-center"
+              style={{
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.25)",
+              }}
+            >
+              ‹
+            </button>
+            {[1, 2, 3].map((n) => (
+              <button
+                key={n}
+                className="w-8 h-8 rounded-lg text-[12px] font-bold flex items-center justify-center transition-all"
+                style={
+                  n === 1
+                    ? { background: "#f59e0b", color: "#0d1117" }
+                    : {
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        color: "rgba(255,255,255,0.3)",
+                      }
+                }
+              >
+                {n}
+              </button>
+            ))}
+            <button
+              className="w-8 h-8 rounded-lg text-sm flex items-center justify-center"
+              style={{
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.25)",
+              }}
+            >
+              ›
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default AdminDashboard;

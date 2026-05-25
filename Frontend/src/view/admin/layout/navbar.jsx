@@ -8,18 +8,13 @@ export default function Navbar({
 }) {
     const [notifOpen, setNotifOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
-    const navigate = useNavigate();
 
     const today = new Date();
     const formattedDate = today.toLocaleDateString("id-ID", {
         weekday: "long", day: "numeric", month: "long", year: "numeric",
     });
 
-    const notifications = [
-        { text: "Pendaftaran baru dari Reza Firmansyah", time: "5 menit lalu", unread: true, icon: "👤" },
-        { text: "Event Liga Garuda Futsal Cup dimulai besok", time: "1 jam lalu", unread: true, icon: "⚽" },
-        { text: "Laporan bulan Juni telah tersedia", time: "3 jam lalu", unread: false, icon: "📄" },
-    ];
+    const notifications = [];
 
     const profileMenuItems = [
         { label: "Profil Saya", icon: User },
@@ -28,6 +23,14 @@ export default function Navbar({
     ];
 
     const closeAll = () => { setNotifOpen(false); setProfileOpen(false); };
+
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        navigate("/login");
+    };
 
     // Warna dropdown abu-abu gelap disesuaikan dengan tema
     const dropdownStyle = {
@@ -76,9 +79,11 @@ export default function Navbar({
                             style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}
                         >
                             <Bell size={16} style={{ color: "rgba(255,255,255,0.6)" }} strokeWidth={1.8} />
-                            <span className="absolute -top-1 -right-1 w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[9px] font-extrabold flex items-center justify-center border-2" style={{ borderColor: "#0f172a" }}>
-                                3
-                            </span>
+                            {notifications.length > 0 && (
+                                <span className="absolute -top-1 -right-1 w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[9px] font-extrabold flex items-center justify-center border-2" style={{ borderColor: "#0f172a" }}>
+                                    {notifications.filter((n) => n.unread).length}
+                                </span>
+                            )}
                         </button>
 
                         {notifOpen && (
@@ -96,32 +101,38 @@ export default function Navbar({
                                     </button>
                                 </div>
 
-                                {notifications.map((n, i) => (
-                                    <div
-                                        key={i}
-                                        className="flex items-start gap-3 px-4 py-3.5 cursor-pointer transition-colors"
-                                        style={{
-                                            borderBottom: "1px solid rgba(255,255,255,0.04)",
-                                            background: n.unread ? "rgba(251,191,36,0.04)" : "transparent",
-                                        }}
-                                        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
-                                        onMouseLeave={e => e.currentTarget.style.background = n.unread ? "rgba(251,191,36,0.04)" : "transparent"}
-                                    >
+                                {notifications.length > 0 ? (
+                                    notifications.map((n, i) => (
                                         <div
-                                            className="w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0"
-                                            style={{ background: n.unread ? "rgba(251,191,36,0.12)" : "rgba(255,255,255,0.06)" }}
+                                            key={i}
+                                            className="flex items-start gap-3 px-4 py-3.5 cursor-pointer transition-colors"
+                                            style={{
+                                                borderBottom: "1px solid rgba(255,255,255,0.04)",
+                                                background: n.unread ? "rgba(251,191,36,0.04)" : "transparent",
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
+                                            onMouseLeave={e => e.currentTarget.style.background = n.unread ? "rgba(251,191,36,0.04)" : "transparent"}
                                         >
-                                            {n.icon}
+                                            <div
+                                                className="w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0"
+                                                style={{ background: n.unread ? "rgba(251,191,36,0.12)" : "rgba(255,255,255,0.06)" }}
+                                            >
+                                                {n.icon}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className={`text-[12px] leading-snug ${n.unread ? "font-semibold text-white" : "font-normal"}`} style={!n.unread ? { color: "rgba(255,255,255,0.5)" } : {}}>
+                                                    {n.text}
+                                                </p>
+                                                <p className="text-[10px] mt-1 font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>{n.time}</p>
+                                            </div>
+                                            {n.unread && <div className="w-2 h-2 rounded-full mt-1 shrink-0" style={{ background: "#fbbf24" }} />}
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className={`text-[12px] leading-snug ${n.unread ? "font-semibold text-white" : "font-normal"}`} style={!n.unread ? { color: "rgba(255,255,255,0.5)" } : {}}>
-                                                {n.text}
-                                            </p>
-                                            <p className="text-[10px] mt-1 font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>{n.time}</p>
-                                        </div>
-                                        {n.unread && <div className="w-2 h-2 rounded-full mt-1 shrink-0" style={{ background: "#fbbf24" }} />}
+                                    ))
+                                ) : (
+                                    <div className="px-4 py-4 text-[12px] text-slate-400" style={{ color: "rgba(255,255,255,0.55)" }}>
+                                        Tidak ada notifikasi terbaru.
                                     </div>
-                                ))}
+                                )}
 
                                 <div className="px-4 py-3" style={{ background: "rgba(255,255,255,0.02)" }}>
                                     <button className="w-full text-center text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>
@@ -140,11 +151,11 @@ export default function Navbar({
                             style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}
                         >
                             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-[11px] font-extrabold shrink-0">
-                                AG
+                                AD
                             </div>
                             <div className="text-left">
-                                <p className="text-[12px] font-bold text-white leading-none">Admin Garuda</p>
-                                <p className="text-[10px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>Super Admin</p>
+                                <p className="text-[12px] font-bold text-white leading-none">Admin</p>
+                                <p className="text-[10px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>Administrator</p>
                             </div>
                             <ChevronDown size={12} className={`ml-0.5 transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`} style={{ color: "rgba(255,255,255,0.4)" }} />
                         </button>
@@ -179,7 +190,7 @@ export default function Navbar({
 
                                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} className="py-1.5">
                                     <button
-                                        onClick={() => navigate("/")}
+                                        onClick={handleLogout}
                                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-bold text-left transition-colors"
                                         style={{ color: "#f87171" }}
                                         onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.08)"}

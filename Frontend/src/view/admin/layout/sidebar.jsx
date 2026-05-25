@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Bell,
   FileBarChart2,
+  User,
   UserCog,
   LogOut,
   Zap,
@@ -24,6 +25,7 @@ const menuUtama = [
 ];
 
 const menuSistem = [
+  { label: "Profil", icon: User, href: "/admin/profile" },
   { label: "Laporan", icon: FileBarChart2, href: "/admin/laporan" },
   { label: "Notifikasi", icon: Bell, href: "/admin/notifikasi", badge: 3 },
   { label: "Manajemen Admin", icon: UserCog, href: "/admin/users" },
@@ -81,6 +83,12 @@ function NavItem({ item }) {
 
 export default function Sidebar() {
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/login");
+  };
 
   return (
     <aside
@@ -200,7 +208,7 @@ export default function Sidebar() {
         style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
       >
         <button
-          onClick={() => navigate("/")}
+          onClick={handleLogout}
           className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-[13px] font-semibold active:scale-95 transition-all duration-200 group"
           style={{
             color: "rgba(248,113,113,0.7)",

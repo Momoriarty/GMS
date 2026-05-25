@@ -26,14 +26,24 @@ export default function Login() {
         password: password,
       });
 
-      // 1. Ambil token dari response Laravel
+      // 1. Ambil token dan role dari response Laravel
       const token = response.data.access_token;
+      const role = response.data.user?.role;
 
-      // 2. Simpan token ke dalam localStorage browser
+      // 2. Simpan token dan role ke localStorage browser
       localStorage.setItem("token", token);
+      if (role) {
+        localStorage.setItem("role", role);
+      }
 
-      // 3. Tendang user masuk ke halaman Admin Layout
-      navigate("/admin");
+      // 3. Jika adalah admin atau owner, masuk ke dashboard admin
+      if (role === "admin" || role === "owner") {
+        navigate("/admin");
+        return;
+      }
+
+      // 4. Kalau role peserta atau role lain, arahkan ke beranda guest
+      navigate("/");
     } catch (err) {
       // Menangkap pesan error dari validasi Laravel atau pesan kustom kita kemarin
       setError(err.response?.data?.message || "Email atau password salah.");

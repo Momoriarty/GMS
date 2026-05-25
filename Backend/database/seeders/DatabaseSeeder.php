@@ -15,9 +15,8 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Removed hardcoded test user to avoid dummy data in production seeds.
+        // Use factories or explicit dev-only seeders when needed.
+        // Example: User::factory(10)->create();
     }
 }

@@ -6,8 +6,8 @@ import Forgot from "./view/auth/Forgot";
 import { Route, Routes } from "react-router-dom";
 import Home from "./view/guest/Home";
 import ProtectedRoute from "./ProtectedRoute"; // 1. Perbaikan: Import komponen proteksi tadi
-import Navbar from "./view/guest/layout/navbar";
-import Footer from "./view/guest/layout/footer";
+import GuestProfile from "./view/guest/profile";
+import Profile from "./view/admin/profile";
 
 function RouteApp() {
   return (
@@ -18,15 +18,17 @@ function RouteApp() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<Forgot />} />
 
-        {/* 2. Perbaikan: Bungkus area ADMIN dengan ProtectedRoute */}
+        {/* Admin */}
         <Route element={<ProtectedRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="" element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
         </Route>
 
         {/* Guest */}
+        <Route path="/profile" element={<GuestProfile />} />
         <Route path="/" element={<Home />} />
       </Routes>
     </>
