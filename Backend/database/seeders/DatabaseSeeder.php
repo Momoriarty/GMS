@@ -31,6 +31,23 @@ class DatabaseSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
+        User::create([
+            'name' => 'FARHAN GUSRI FADHLAH',
+            'email' => 'gusri24ti@mahasiswa.pcr.ac.id',
+            'username' => 'gusri24ti',
+            'phone_number' => null,
+            'email_verified_at' => null,
+
+            'password' => Hash::make('123456789'),
+
+            'role' => 'admin',
+            'status' => 'active',
+            'avatar' => null,
+            'remember_token' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         // 20 akun dummy
         $users = [];
 
