@@ -34,6 +34,7 @@ export default function Peserta() {
   const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
+  // ✓ Sudah pakai useEffect - fetch data users saat component mount
   useEffect(() => {
     const fetchUsers = async () => {
       try {
