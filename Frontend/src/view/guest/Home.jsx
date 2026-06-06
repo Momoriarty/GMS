@@ -1,10 +1,272 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+// ── NOTIFICATION SYSTEM ──────────────────────────────────────────────
+const notifData = [
+  {
+    icon: "⚽",
+    bg: "#ff2222",
+    title: "GOL! Garuda FC memimpin!",
+    msg: "Rafi Ananda mencetak gol menit ke-38. Skor kini 2-1!",
+    color: "#ff2222",
+  },
+  {
+    icon: "🏆",
+    bg: "#ffc300",
+    title: "Slot hampir habis!",
+    msg: "Ramadhan Invitational 2025 hanya tersisa 1 slot lagi. Segera daftar!",
+    color: "#ffc300",
+  },
+  {
+    icon: "📢",
+    bg: "#4488ff",
+    title: "Jadwal diperbarui",
+    msg: "Pertandingan Rajawali vs Phantom XI dipindah ke pukul 20:30 WIB.",
+    color: "#4488ff",
+  },
+  {
+    icon: "🔥",
+    bg: "#ff7300",
+    title: "Flash Sale aktif!",
+    msg: "Hemat 20% biaya pendaftaran hari ini saja. Gunakan kode FUTSAL20.",
+    color: "#ff7300",
+  },
+  {
+    icon: "✅",
+    bg: "#44cc88",
+    title: "Tim berhasil didaftarkan",
+    msg: "Storm XI resmi terdaftar di Liga Garuda Futsal Championship 2025.",
+    color: "#44cc88",
+  },
+];
+
+const NotifToast = ({ notif, onDismiss }) => {
+  const [out, setOut] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setOut(true);
+      setTimeout(onDismiss, 350);
+    }, 5200);
+    return () => clearTimeout(t);
+  }, [onDismiss]);
+
+  return (
+    <div
+      style={{
+        background: "rgba(15,20,35,.95)",
+        border: "1px solid rgba(255,255,255,.1)",
+        backdropFilter: "blur(20px)",
+        borderRadius: 12,
+        padding: "14px 16px",
+        width: 300,
+        display: "flex",
+        gap: 12,
+        alignItems: "flex-start",
+        position: "relative",
+        overflow: "hidden",
+        transition: "opacity .3s, transform .3s",
+        opacity: out ? 0 : 1,
+        transform: out ? "translateX(20px)" : "translateX(0)",
+        animation: "slide-in .4s cubic-bezier(.34,1.56,.64,1)",
+      }}
+    >
+      <div
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: "50%",
+          background: notif.bg + "22",
+          border: `1px solid ${notif.bg}44`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 18,
+          flexShrink: 0,
+        }}
+      >
+        {notif.icon}
+      </div>
+      <div style={{ flex: 1 }}>
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: "#fff",
+            marginBottom: 3,
+          }}
+        >
+          {notif.title}
+        </div>
+        <div
+          style={{
+            fontSize: 11,
+            color: "rgba(255,255,255,.55)",
+            lineHeight: 1.5,
+          }}
+        >
+          {notif.msg}
+        </div>
+        <div
+          style={{ fontSize: 10, color: "rgba(255,255,255,.3)", marginTop: 5 }}
+        >
+          Baru saja
+        </div>
+      </div>
+      <span
+        onClick={() => {
+          setOut(true);
+          setTimeout(onDismiss, 350);
+        }}
+        style={{
+          fontSize: 18,
+          color: "rgba(255,255,255,.3)",
+          cursor: "pointer",
+          lineHeight: 1,
+          flexShrink: 0,
+          paddingLeft: 4,
+        }}
+      >
+        ×
+      </span>
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          height: 3,
+          borderRadius: "0 0 0 12px",
+          background: notif.color,
+          animation: "drain 5s linear forwards",
+        }}
+      />
+    </div>
+  );
+};
+
+const NotifContainer = () => {
+  const [toasts, setToasts] = useState([]);
+  const indexRef = useRef(0);
+
+  const push = () => {
+    setToasts((prev) => {
+      if (prev.length >= 3) return prev;
+      const notif = notifData[indexRef.current % notifData.length];
+      indexRef.current++;
+      return [...prev, { id: Date.now(), notif }];
+    });
+  };
+
+  useEffect(() => {
+    const t1 = setTimeout(push, 2000);
+    const iv = setInterval(push, 7000);
+    return () => {
+      clearTimeout(t1);
+      clearInterval(iv);
+    };
+  }, []);
+
+  const dismiss = (id) => setToasts((prev) => prev.filter((t) => t.id !== id));
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 100,
+        right: 24,
+        zIndex: 999,
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+      }}
+    >
+      {toasts.map(({ id, notif }) => (
+        <NotifToast key={id} notif={notif} onDismiss={() => dismiss(id)} />
+      ))}
+    </div>
+  );
+};
+
+// ── LIVE TICKER ──────────────────────────────────────────────────────
+const tickerItems = [
+  "⚡ Garuda FC vs Elang United — BABAK 2 — LIVE — SKOR: 2 - 1",
+  "🏆 Pendaftaran Liga Ramadhan dibuka hingga 30 Juli 2025",
+  "🔥 Flash Sale Slot: Hemat 20% untuk tim yang daftar hari ini",
+  "📍 Jadwal besok: 3 pertandingan di GOR Zidane pukul 15.00 - 21.00 WIB",
+  "🥅 Top Skor Liga Garuda: Rafi Ananda — 7 gol dari 4 pertandingan",
+];
+
+const Ticker = () => (
+  <div
+    style={{
+      background: "linear-gradient(90deg,#ff4800,#ff7300,#ff4800)",
+      backgroundSize: "200% 100%",
+      padding: "8px 0",
+      overflow: "hidden",
+      position: "relative",
+      zIndex: 20,
+      animation: "ticker-bg 3s linear infinite",
+    }}
+  >
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        whiteSpace: "nowrap",
+        animation: "scroll-left 28s linear infinite",
+      }}
+    >
+      {[...tickerItems, ...tickerItems].map((item, i) => (
+        <React.Fragment key={i}>
+          {i === 0 || i === tickerItems.length ? (
+            <span
+              style={{
+                background: "#fff",
+                color: "#ff4800",
+                fontSize: 10,
+                fontWeight: 900,
+                letterSpacing: ".15em",
+                padding: "2px 8px",
+                borderRadius: 3,
+                marginRight: 16,
+                flexShrink: 0,
+              }}
+            >
+              ● LIVE
+            </span>
+          ) : (
+            <span
+              style={{
+                display: "inline-block",
+                width: 8,
+                height: 8,
+                background: "#fff",
+                borderRadius: "50%",
+                margin: "0 18px",
+                opacity: 0.8,
+              }}
+            />
+          )}
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: ".05em",
+              color: "#fff",
+            }}
+          >
+            {item}
+          </span>
+        </React.Fragment>
+      ))}
+    </div>
+  </div>
+);
 
 // ── ANIMATED COUNTER ─────────────────────────────────────────────────
 const AnimatedCounter = ({ target, suffix = "" }) => {
   const [val, setVal] = useState(0);
   useEffect(() => {
-    if (target === 0) return;
     let cur = 0;
     const step = Math.ceil(target / 40);
     const iv = setInterval(() => {
@@ -22,34 +284,60 @@ const AnimatedCounter = ({ target, suffix = "" }) => {
   );
 };
 
+// ── LIVE TIMER ────────────────────────────────────────────────────────
+const LiveTimer = () => {
+  const [secs, setSecs] = useState(38 * 60 + 24);
+  useEffect(() => {
+    const iv = setInterval(() => setSecs((s) => s + 1), 1000);
+    return () => clearInterval(iv);
+  }, []);
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return (
+    <>
+      {m}:{String(s).padStart(2, "0")} ⏱
+    </>
+  );
+};
+
 // ── EVENT CARDS DATA ──────────────────────────────────────────────────
-// Mengisi mock data agar card muncul di layar
 const events = [
   {
-    title: "Glow In The Dark Futsal League 2026",
-    venue: "Tiga Naga Futsal, Pekanbaru",
-    tag: "LIGA UTAMA",
-    start: "12 Juni 2026",
-    prize: "Rp 15.000.000",
-    filled: 12,
-    total: 16,
-    slotLabel: "Sisa 4 Slot!",
-    slotColor: "#ff4800",
-    blink: true,
-    img: "https://images.unsplash.com/photo-1577223625856-74552272e293?q=80&w=600&auto=format&fit=crop",
+    tag: "⚽ Futsal",
+    title: "Liga Garuda Futsal Championship 2025",
+    venue: "GOR Zidane Futsal, Pekanbaru",
+    start: "20 Jul 2025",
+    prize: "Rp 5 Juta",
+    filled: 20,
+    total: 25,
+    slotColor: "#ff4444",
+    slotLabel: "⚠ Sisa 5 Slot",
+    img: "https://cdn0-production-images-kly.akamaized.net/I0hOVhWXhAKwlC0jCPgPGY4hDkg=/800x450/smart/filters:quality(75):strip_icc()/kly-media-production/medias/5489476/original/037355100_1769872866-1.jpg",
   },
   {
-    title: "Pekanbaru Student Futsal Championship",
-    venue: "Gajah Mada Futsal, Pekanbaru",
-    tag: "PELAJAR / U-19",
-    start: "20 Juni 2026",
-    prize: "Rp 7.500.000",
-    filled: 24,
-    total: 24,
-    slotLabel: "Slot Penuh",
-    slotColor: "rgba(255,255,255,.3)",
-    blink: false,
-    img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=600&auto=format&fit=crop",
+    tag: "🏆 Open",
+    title: "Fun Futsal Cup — Pelajar Pekanbaru 2025",
+    venue: "Arena Mega Sport, Pekanbaru",
+    start: "5 Ags 2025",
+    prize: "Rp 2 Juta",
+    filled: 8,
+    total: 20,
+    slotColor: "#44cc88",
+    slotLabel: "✓ 12 Slot Tersisa",
+    img: "https://cdn0-production-images-kly.akamaized.net/I0hOVhWXhAKwlC0jCPgPGY4hDkg=/800x450/smart/filters:quality(75):strip_icc()/kly-media-production/medias/5489476/original/037355100_1769872866-1.jpg",
+  },
+  {
+    tag: "🔥 Spesial",
+    title: "Ramadhan Futsal Invitational 2025",
+    venue: "GOR Mandiri, Pekanbaru",
+    start: "30 Jul 2025",
+    prize: "Rp 3.5 Juta",
+    filled: 19,
+    total: 20,
+    slotColor: "#ff8800",
+    slotLabel: "🔥 Sisa 1 Slot!",
+    blink: true,
+    img: "https://cdn0-production-images-kly.akamaized.net/I0hOVhWXhAKwlC0jCPgPGY4hDkg=/800x450/smart/filters:quality(75):strip_icc()/kly-media-production/medias/5489476/original/037355100_1769872866-1.jpg",
   },
 ];
 
@@ -266,36 +554,46 @@ const EventCard = ({ event }) => {
 // ── LEADERBOARD ───────────────────────────────────────────────────────
 const leaderboard = [
   {
-    rank: "01",
-    name: "Riau Garuda FC",
-    detail: "Kec. Tampan",
-    wins: "12 M",
-    pts: "36",
+    rank: 1,
+    name: "Garuda FC",
+    detail: "Main 4 · Menang 3 · Kalah 1",
+    wins: "3M",
+    pts: 9,
   },
   {
-    rank: "02",
-    name: "Lancang Kuning Squad",
-    detail: "Kec. Marpoyan Damai",
-    wins: "10 M",
-    pts: "31",
+    rank: 2,
+    name: "Rajawali United",
+    detail: "Main 4 · Menang 3 · Kalah 1",
+    wins: "3M",
+    pts: 9,
   },
   {
-    rank: "03",
-    name: "Tuah Madani United",
-    detail: "Kec. Tuah Madani",
-    wins: "9 M",
-    pts: "28",
+    rank: 3,
+    name: "Titan FC",
+    detail: "Main 4 · Menang 2 · Seri 1 · Kalah 1",
+    wins: "2M",
+    pts: 7,
+  },
+  {
+    rank: 4,
+    name: "Elang United",
+    detail: "Main 4 · Menang 2 · Kalah 2",
+    wins: "2M",
+    pts: 6,
+  },
+  {
+    rank: 5,
+    name: "Phantom XI",
+    detail: "Main 3 · Menang 1 · Kalah 2",
+    wins: "1M",
+    pts: 3,
   },
 ];
-
-const rankColors = {
-  "01": "#ffc300", // Gold
-  "02": "#b5b5b5", // Silver
-  "03": "#c97e3a", // Bronze
-};
+const rankColors = { 1: "#ffc300", 2: "#aaaaaa", 3: "#cd7f32" };
 
 // ── MAIN HOME COMPONENT ───────────────────────────────────────────────
 const Home = () => {
+  const navigate = useNavigate();
   return (
     <div
       style={{
@@ -350,6 +648,12 @@ const Home = () => {
         }}
       />
 
+      {/* Notification toasts */}
+      <NotifContainer />
+
+      {/* Live Ticker */}
+      <Ticker />
+
       {/* Navbar */}
       <nav
         style={{
@@ -393,6 +697,7 @@ const Home = () => {
           )}
         </div>
         <button
+          onClick={() => navigate("/login")}
           style={{
             background: "#ff4800",
             color: "#fff",
@@ -405,7 +710,7 @@ const Home = () => {
             letterSpacing: ".06em",
           }}
         >
-          DAFTAR TIM
+          LOGIN
         </button>
       </nav>
 
@@ -517,8 +822,7 @@ const Home = () => {
             PELAJARI SELENGKAPNYA →
           </button>
         </div>
-
-        {/* Stats (Diisi dengan nilai target agar Counter berjalan secara dinamis) */}
+        {/* Stats */}
         <div
           style={{
             display: "flex",
@@ -530,15 +834,15 @@ const Home = () => {
           }}
         >
           {[
-            { id: "teams", target: 48, label: "Tim Terdaftar" },
-            { id: "events", target: 5, label: "Event Aktif" },
+            { id: "teams", target: 87, label: "Tim Terdaftar" },
+            { id: "events", target: 3, label: "Event Aktif" },
             {
               id: "matches",
-              target: 120,
+              target: 124,
               label: "Pertandingan Selesai",
               orange: true,
             },
-            { id: "venues", target: 8, label: "Venue Partner" },
+            { id: "venues", target: 5, label: "Venue Partner" },
           ].map((s, i, arr) => (
             <div
               key={s.id}
@@ -614,7 +918,7 @@ const Home = () => {
               animation: "pulse 1.2s infinite",
             }}
           />
-          Pertandingan Terkini
+          Sedang Berlangsung
         </div>
         <div
           style={{
@@ -624,39 +928,210 @@ const Home = () => {
             marginBottom: 28,
           }}
         >
-          STATUS PERTANDINGAN
+          LIVE PERTANDINGAN
         </div>
 
         <div
           style={{
-            background: "rgba(15,20,35,.85)",
-            border: "1px solid rgba(255,255,255,.12)",
+            background:
+              "linear-gradient(135deg, rgba(255,72,0,.12) 0%, rgba(15,20,35,.9) 50%), rgba(15,20,35,.85)",
+            border: "1px solid rgba(255,72,0,.25)",
             borderRadius: 16,
             padding: 28,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            minHeight: 260,
-            textAlign: "center",
-            color: "rgba(255,255,255,.65)",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 20,
+            position: "relative",
+            overflow: "hidden",
+            marginBottom: 28,
+            boxShadow: "0 0 40px rgba(255,72,0,.08)",
           }}
         >
-          <div>
-            <p
+          <div
+            style={{
+              content: "",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 2,
+              background: "linear-gradient(90deg,#ff4800,#ff9500,#ff4800)",
+              backgroundSize: "200% 100%",
+              animation: "ticker-bg 2s linear infinite",
+            }}
+          />
+
+          <div style={{ textAlign: "center" }}>
+            <div
               style={{
-                fontSize: 16,
-                fontWeight: 700,
-                marginBottom: 12,
-                color: "#fff",
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: 22,
+                letterSpacing: ".06em",
               }}
             >
-              Tidak ada data pertandingan yang tersedia saat ini.
-            </p>
-            <p style={{ fontSize: 13, lineHeight: 1.7 }}>
-              Informasi live match akan otomatis muncul ketika ada jadwal atau
-              skor terbaru.
-            </p>
+              GARUDA FC
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: "rgba(255,255,255,.4)",
+                marginTop: 3,
+              }}
+            >
+              Grup A
+            </div>
           </div>
+
+          <div style={{ textAlign: "center" }}>
+            <div style={{ marginBottom: 8 }}>
+              <span
+                style={{
+                  background: "#ff2222",
+                  color: "#fff",
+                  fontSize: 10,
+                  fontWeight: 800,
+                  padding: "4px 10px",
+                  borderRadius: 5,
+                  letterSpacing: ".12em",
+                  animation: "blink 1s infinite",
+                }}
+              >
+                ● LIVE
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <span
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: 56,
+                  letterSpacing: ".05em",
+                  lineHeight: 1,
+                  color: "#ff4800",
+                }}
+              >
+                2
+              </span>
+              <span style={{ color: "rgba(255,255,255,.25)", fontSize: 28 }}>
+                —
+              </span>
+              <span
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: 56,
+                  letterSpacing: ".05em",
+                  lineHeight: 1,
+                }}
+              >
+                1
+              </span>
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                color: "rgba(255,255,255,.5)",
+                marginTop: 4,
+              }}
+            >
+              <LiveTimer />
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: "rgba(255,255,255,.3)",
+                marginTop: 8,
+              }}
+            >
+              📍 GOR Zidane Futsal, Pekanbaru
+            </div>
+          </div>
+
+          <div style={{ textAlign: "right" }}>
+            <div
+              style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: 22,
+                letterSpacing: ".06em",
+              }}
+            >
+              ELANG UNITED
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: "rgba(255,255,255,.4)",
+                marginTop: 3,
+              }}
+            >
+              Grup A
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          {[
+            {
+              time: "Berikutnya · 20:00 WIB",
+              home: "RAJAWALI FC",
+              away: "PHANTOM XI",
+            },
+            { time: "Besok · 15:30 WIB", home: "TITAN FC", away: "STORM XI" },
+          ].map((m) => (
+            <div
+              key={m.time}
+              style={{
+                flex: 1,
+                minWidth: 220,
+                background: "rgba(13,18,32,.7)",
+                border: "1px solid rgba(255,255,255,.07)",
+                borderRadius: 12,
+                padding: 16,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 10,
+                  color: "rgba(255,255,255,.3)",
+                  fontWeight: 700,
+                  letterSpacing: ".12em",
+                  textTransform: "uppercase",
+                  marginBottom: 10,
+                }}
+              >
+                {m.time}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'Bebas Neue', sans-serif",
+                    fontSize: 18,
+                    letterSpacing: ".06em",
+                  }}
+                >
+                  {m.home}
+                </span>
+                <span style={{ fontSize: 12, color: "rgba(255,255,255,.3)" }}>
+                  VS
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'Bebas Neue', sans-serif",
+                    fontSize: 18,
+                    letterSpacing: ".06em",
+                  }}
+                >
+                  {m.away}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -726,34 +1201,17 @@ const Home = () => {
             LIHAT SEMUA →
           </button>
         </div>
-
-        {/* Perbaikan Syntax Dilakukan Di Sini */}
-        {events.length ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))",
-              gap: 20,
-            }}
-          >
-            {events.map((ev) => (
-              <EventCard key={ev.title} event={ev} />
-            ))}
-          </div>
-        ) : (
-          <div
-            style={{
-              padding: 40,
-              borderRadius: 18,
-              background: "rgba(255,255,255,.02)",
-              border: "1px solid rgba(255,255,255,.08)",
-              textAlign: "center",
-              color: "rgba(255,255,255,.6)",
-            }}
-          >
-            Tidak ada event aktif untuk ditampilkan saat ini.
-          </div>
-        )}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))",
+            gap: 20,
+          }}
+        >
+          {events.map((ev) => (
+            <EventCard key={ev.title} event={ev} />
+          ))}
+        </div>
       </section>
 
       <div
@@ -819,78 +1277,66 @@ const Home = () => {
               <span>PTS</span>
             </div>
           </div>
-          {leaderboard.length ? (
-            leaderboard.map((row, i) => (
-              <div
-                key={row.name}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "14px 24px",
-                  borderBottom:
-                    i < leaderboard.length - 1
-                      ? "1px solid rgba(255,255,255,.04)"
-                      : "none",
-                  cursor: "pointer",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'Bebas Neue', sans-serif",
-                    fontSize: 18,
-                    letterSpacing: ".05em",
-                    width: 32,
-                    color: rankColors[row.rank] || "rgba(255,255,255,.3)",
-                  }}
-                >
-                  {row.rank}
-                </div>
-                <div style={{ flex: 1, marginLeft: 12 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
-                    {row.name}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 10,
-                      color: "rgba(255,255,255,.35)",
-                      marginTop: 2,
-                    }}
-                  >
-                    {row.detail}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 700,
-                    color: "#44cc88",
-                    marginRight: 28,
-                  }}
-                >
-                  {row.wins}
-                </div>
-                <div
-                  style={{
-                    fontFamily: "'Bebas Neue', sans-serif",
-                    fontSize: 20,
-                    letterSpacing: ".05em",
-                  }}
-                >
-                  {row.pts}
-                </div>
-              </div>
-            ))
-          ) : (
+          {leaderboard.map((row, i) => (
             <div
+              key={row.name}
               style={{
-                padding: 40,
-                textAlign: "center",
-                color: "rgba(255,255,255,.6)",
+                display: "flex",
+                alignItems: "center",
+                padding: "14px 24px",
+                borderBottom:
+                  i < leaderboard.length - 1
+                    ? "1px solid rgba(255,255,255,.04)"
+                    : "none",
+                cursor: "pointer",
               }}
             >
-              Data leaderboard belum tersedia saat ini.
+              <div
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: 18,
+                  letterSpacing: ".05em",
+                  width: 32,
+                  color: rankColors[row.rank] || "rgba(255,255,255,.3)",
+                }}
+              >
+                {row.rank}
+              </div>
+              <div style={{ flex: 1, marginLeft: 12 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
+                  {row.name}
+                </div>
+                <div
+                  style={{
+                    fontSize: 10,
+                    color: "rgba(255,255,255,.35)",
+                    marginTop: 2,
+                  }}
+                >
+                  {row.detail}
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "#44cc88",
+                  marginRight: 28,
+                }}
+              >
+                {row.wins}
+              </div>
+              <div
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: 20,
+                  letterSpacing: ".05em",
+                }}
+              >
+                {row.pts}
+              </div>
             </div>
-          )}
+          ))}
         </div>
       </section>
 
@@ -906,7 +1352,7 @@ const Home = () => {
           fontSize: 11,
         }}
       >
-        <span>© 2026 Fun Futsal Pekanbaru · Platform Resmi</span>
+        <span>© 2025 Fun Futsal Pekanbaru · Platform Resmi</span>
         <span>Dibuat dengan ❤ untuk komunitas futsal Riau</span>
       </div>
     </div>
