@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tim extends Model
 {
@@ -19,27 +21,27 @@ class Tim extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function jadwalPertandinanAsTim1()
+    public function jadwalPertandinanAsTim1(): HasMany
     {
         return $this->hasMany(JadwalPertandingan::class, 'tim_1_id');
     }
 
-    public function jadwalPertandinanAsTim2()
+    public function jadwalPertandinanAsTim2(): HasMany
     {
         return $this->hasMany(JadwalPertandingan::class, 'tim_2_id');
     }
 
-    public function klasemen()
+    public function klasemen(): HasMany
     {
-        return $this->hasMany(Klasemen::class);
+        return $this->hasMany(Klasemen::class, 'tim_id');
     }
 
-    public function hasilPemenang()
+    public function hasilPemenang(): HasMany
     {
         return $this->hasMany(HasilPertandingan::class, 'tim_pemenang_id');
     }

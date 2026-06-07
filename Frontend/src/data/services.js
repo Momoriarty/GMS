@@ -48,6 +48,7 @@ export const klasemenApi = {
 export const notifikasiApi = {
   getAll: (filters) => api.get('/notifikasi', { params: filters }),
   getById: (id) => api.get(`/notifikasi/${id}`),
+  create: (data) => api.post('/notifikasi', data),
   send: (data) => api.post('/notifikasi', data),
   markAsRead: (id) => api.post(`/notifikasi/${id}/read`),
   delete: (id) => api.delete(`/notifikasi/${id}`),
@@ -58,6 +59,15 @@ export const auditLogApi = {
   getAll: (filters) => api.get('/audit-log', { params: filters }),
   getById: (id) => api.get(`/audit-log/${id}`),
   create: (data) => api.post('/audit-log', data),
+};
+
+// Tim
+export const timApi = {
+  getAll: () => api.get('/tim'),
+  getById: (id) => api.get(`/tim/${id}`),
+  create: (data) => api.post('/tim', data),
+  update: (id, data) => api.put(`/tim/${id}`, data),
+  delete: (id) => api.delete(`/tim/${id}`),
 };
 
 // Users

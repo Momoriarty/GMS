@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\HasilPertandingan;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class HasilPertandinganController extends Controller
 {
@@ -30,7 +32,7 @@ class HasilPertandinganController extends Controller
     /**
      * Get single hasil
      */
-    public function show($id)
+    public function show(int $id)
     {
         $hasil = HasilPertandingan::with(['jadwal', 'timPemenang'])->find($id);
         
@@ -59,7 +61,7 @@ class HasilPertandinganController extends Controller
             'tim_pemenang_id' => 'nullable|exists:tim,id',
         ]);
 
-        $validated['input_by'] = auth()->id();
+        $validated['input_by'] = Auth::id();
 
         $hasil = HasilPertandingan::create($validated);
 
@@ -73,7 +75,7 @@ class HasilPertandinganController extends Controller
     /**
      * Update hasil
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $hasil = HasilPertandingan::find($id);
         
@@ -102,7 +104,7 @@ class HasilPertandinganController extends Controller
     /**
      * Delete hasil
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $hasil = HasilPertandingan::find($id);
         

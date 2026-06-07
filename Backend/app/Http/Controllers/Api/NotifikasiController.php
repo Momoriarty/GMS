@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class NotifikasiController extends Controller
 {
@@ -13,7 +15,7 @@ class NotifikasiController extends Controller
      */
     public function index(Request $request)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         $query = Notifikasi::where('user_id', $userId)
             ->orderBy('created_at', 'desc');
@@ -33,11 +35,11 @@ class NotifikasiController extends Controller
     /**
      * Get single notifikasi
      */
-    public function show($id)
+    public function show(int $id)
     {
         $notifikasi = Notifikasi::find($id);
         
-        if (!$notifikasi || $notifikasi->user_id !== auth()->id()) {
+        if (!$notifikasi || $notifikasi->user_id !== Auth::id()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Notifikasi tidak ditemukan'
@@ -80,11 +82,11 @@ class NotifikasiController extends Controller
     /**
      * Mark notifikasi as read
      */
-    public function markAsRead($id)
+    public function markAsRead(int $id)
     {
         $notifikasi = Notifikasi::find($id);
         
-        if (!$notifikasi || $notifikasi->user_id !== auth()->id()) {
+        if (!$notifikasi || $notifikasi->user_id !== Auth::id()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Notifikasi tidak ditemukan'
@@ -104,7 +106,7 @@ class NotifikasiController extends Controller
     /**
      * Delete notifikasi
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $notifikasi = Notifikasi::find($id);
         

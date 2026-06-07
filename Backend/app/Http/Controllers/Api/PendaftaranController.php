@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Pendaftaran;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class PendaftaranController extends Controller
 {
@@ -38,7 +40,7 @@ class PendaftaranController extends Controller
     /**
      * Get single pendaftaran
      */
-    public function show($id)
+    public function show(int $id)
     {
         $pendaftaran = Pendaftaran::with(['user', 'event', 'verifiedBy'])->find($id);
         
@@ -80,7 +82,7 @@ class PendaftaranController extends Controller
     /**
      * Verify pendaftaran (terima/tolak)
      */
-    public function verify(Request $request, $id)
+    public function verify(Request $request, int $id)
     {
         $pendaftaran = Pendaftaran::find($id);
         
@@ -96,7 +98,7 @@ class PendaftaranController extends Controller
         ]);
 
         $pendaftaran->status = $validated['status'];
-        $pendaftaran->verified_by = auth()->id();
+        $pendaftaran->verified_by = Auth::id();
         $pendaftaran->save();
 
         return response()->json([
@@ -109,7 +111,7 @@ class PendaftaranController extends Controller
     /**
      * Delete pendaftaran
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $pendaftaran = Pendaftaran::find($id);
         

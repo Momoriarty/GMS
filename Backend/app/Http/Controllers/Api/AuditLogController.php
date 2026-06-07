@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuditLogController extends Controller
 {
@@ -46,7 +47,7 @@ class AuditLogController extends Controller
     /**
      * Get single audit log
      */
-    public function show($id)
+    public function show(int $id)
     {
         $log = AuditLog::with('user')->find($id);
         

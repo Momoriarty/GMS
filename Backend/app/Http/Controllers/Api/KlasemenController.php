@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Klasemen;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 class KlasemenController extends Controller
 {
@@ -30,7 +31,7 @@ class KlasemenController extends Controller
     /**
      * Get single klasemen entry
      */
-    public function show($id)
+    public function show(int $id)
     {
         $klasemen = Klasemen::with(['event', 'tim'])->find($id);
         
@@ -76,7 +77,7 @@ class KlasemenController extends Controller
     /**
      * Update klasemen
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $klasemen = Klasemen::find($id);
         

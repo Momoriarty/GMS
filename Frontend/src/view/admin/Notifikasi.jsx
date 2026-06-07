@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { notifikasiApi, userApi } from "@/data/services";
 
 export default function Notifikasi() {
   const [notifikasi, setNotifikasi] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     user_id: "",
@@ -10,6 +13,37 @@ export default function Notifikasi() {
     pesan: "",
     tipe: "umum",
   });
+
+  useEffect(() => {
+    loadNotifikasi();
+    loadUsers();
+  }, []);
+
+  const loadNotifikasi = async () => {
+    setLoading(true);
+    try {
+      const response = await notifikasiApi.getAll();
+      if (response.data.success) {
+        setNotifikasi(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error loading notifikasi:", error);
+      alert("Gagal memuat notifikasi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const response = await userApi.getAll();
+      if (response.data.success) {
+        setUsers(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error loading users:", error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -19,10 +53,37 @@ export default function Notifikasi() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Call API to send notification
-    console.log("Submit notifikasi:", formData);
+    try {
+      const response = await notifikasiApi.create(formData);
+      if (response.data.success) {
+        alert("Notifikasi berhasil dikirim");
+        loadNotifikasi();
+        resetForm();
+      }
+    } catch (error) {
+      console.error("Error sending notifikasi:", error);
+      alert("Gagal mengirim notifikasi");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (confirm("Yakin ingin menghapus notifikasi ini?")) {
+      try {
+        const response = await notifikasiApi.delete(id);
+        if (response.data.success) {
+          alert("Notifikasi berhasil dihapus");
+          loadNotifikasi();
+        }
+      } catch (error) {
+        console.error("Error deleting notifikasi:", error);
+        alert("Gagal menghapus notifikasi");
+      }
+    }
+  };
+
+  const resetForm = () => {
     setShowForm(false);
     setFormData({
       user_id: "",
@@ -32,13 +93,19 @@ export default function Notifikasi() {
     });
   };
 
+  if (loading && notifikasi.length === 0) {
+    return <div className="text-center py-8 text-white">Loading...</div>;
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-white">Notifikasi</h1>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            setShowForm(!showForm);
+          }}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
         >
           <Plus size={20} />
@@ -63,6 +130,9 @@ export default function Notifikasi() {
                   required
                 >
                   <option value="">Pilih Penerima</option>
+                  {users.map(u => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -119,7 +189,7 @@ export default function Notifikasi() {
               </button>
               <button
                 type="button"
-                onClick={() => setShowForm(false)}
+                onClick={resetForm}
                 className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded transition"
               >
                 Batal
@@ -151,10 +221,13 @@ export default function Notifikasi() {
                   </div>
                   <p className="text-slate-400 text-sm mb-2">{n.pesan}</p>
                   <p className="text-xs text-slate-500">
-                    Ke: {n.nama_penerima} • {n.waktu}
+                    Ke: {n.user?.name} • {new Date(n.created_at).toLocaleString("id-ID")}
                   </p>
                 </div>
-                <button className="p-1 hover:bg-slate-700 rounded transition text-red-400">
+                <button
+                  onClick={() => handleDelete(n.id)}
+                  className="p-1 hover:bg-slate-700 rounded transition text-red-400"
+                >
                   <Trash2 size={18} />
                 </button>
               </div>

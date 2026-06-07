@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class EventController extends Controller
 {
-    /**
-     * Get all events
-     */
     public function index()
     {
         $events = Event::all();
@@ -20,10 +19,7 @@ class EventController extends Controller
         ]);
     }
 
-    /**
-     * Get single event
-     */
-    public function show($id)
+    public function show(int $id)
     {
         $event = Event::find($id);
         
@@ -40,9 +36,6 @@ class EventController extends Controller
         ]);
     }
 
-    /**
-     * Create new event
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -56,7 +49,7 @@ class EventController extends Controller
             'status' => 'required|in:draft,aktif,selesai',
         ]);
 
-        $validated['created_by'] = auth()->id();
+        $validated['created_by'] = Auth::id(); 
 
         $event = Event::create($validated);
 
@@ -67,10 +60,7 @@ class EventController extends Controller
         ], Response::HTTP_CREATED);
     }
 
-    /**
-     * Update event
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $event = Event::find($id);
         
@@ -101,10 +91,7 @@ class EventController extends Controller
         ]);
     }
 
-    /**
-     * Delete event
-     */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $event = Event::find($id);
         

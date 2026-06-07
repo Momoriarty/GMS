@@ -1,8 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { klasemenApi, eventApi } from "@/data/services";
 
 export default function Klasemen() {
   const [klasemen, setKlasemen] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState("");
+
+  useEffect(() => {
+    loadKlasemen();
+    loadEvents();
+  }, []);
+
+  const loadKlasemen = async () => {
+    setLoading(true);
+    try {
+      const params = selectedEvent ? { event_id: selectedEvent } : {};
+      const response = await klasemenApi.getAll(params);
+      if (response.data.success) {
+        setKlasemen(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error loading klasemen:", error);
+      alert("Gagal memuat klasemen");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadEvents = async () => {
+    try {
+      const response = await eventApi.getAll();
+      if (response.data.success) {
+        setEvents(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error loading events:", error);
+    }
+  };
+
+  const handleEventChange = (eventId) => {
+    setSelectedEvent(eventId);
+    if (eventId) {
+      klasemenApi.getAll({ event_id: eventId }).then(res => {
+        if (res.data.success) setKlasemen(res.data.data);
+      });
+    } else {
+      loadKlasemen();
+    }
+  };
+
+  if (loading && klasemen.length === 0) {
+    return <div className="text-center py-8 text-white">Loading...</div>;
+  }
 
   return (
     <div className="space-y-4">
@@ -19,10 +69,13 @@ export default function Klasemen() {
         </label>
         <select
           value={selectedEvent}
-          onChange={(e) => setSelectedEvent(e.target.value)}
+          onChange={(e) => handleEventChange(e.target.value)}
           className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
         >
           <option value="">-- Semua Event --</option>
+          {events.map(e => (
+            <option key={e.id} value={e.id}>{e.nama_event}</option>
+          ))}
         </select>
       </div>
 
@@ -72,7 +125,7 @@ export default function Klasemen() {
                       {index + 1}
                     </span>
                   </td>
-                  <td className="px-6 py-3 text-white font-medium">{k.nama_tim}</td>
+                  <td className="px-6 py-3 text-white font-medium">{k.tim?.nama_tim}</td>
                   <td className="px-6 py-3 text-center text-slate-300">{k.main}</td>
                   <td className="px-6 py-3 text-center text-green-400 font-medium">
                     {k.menang}

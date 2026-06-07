@@ -7,6 +7,7 @@ export default function Events() {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [viewingEvent, setViewingEvent] = useState(null);
   const [formData, setFormData] = useState({
     nama_event: "",
     deskripsi: "",
@@ -106,6 +107,10 @@ export default function Events() {
         alert("Gagal menghapus event");
       }
     }
+  };
+
+  const handleView = (event) => {
+    setViewingEvent(event);
   };
 
   const resetForm = () => {
@@ -283,6 +288,99 @@ export default function Events() {
         </div>
       )}
 
+      {/* Detail Modal */}
+      {viewingEvent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 max-w-2xl w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-white">Detail Event</h2>
+              <button
+                onClick={() => setViewingEvent(null)}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-slate-400">Nama Event</p>
+                  <p className="text-white font-medium">{viewingEvent.nama_event}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-400">Status</p>
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium inline-block ${
+                      viewingEvent.status === "aktif"
+                        ? "bg-green-500/20 text-green-400"
+                        : viewingEvent.status === "selesai"
+                        ? "bg-slate-500/20 text-slate-300"
+                        : "bg-yellow-500/20 text-yellow-400"
+                    }`}
+                  >
+                    {viewingEvent.status}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm text-slate-400">Deskripsi</p>
+                <p className="text-white">{viewingEvent.deskripsi}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-slate-400">Tanggal Mulai</p>
+                  <p className="text-white">
+                    {new Date(viewingEvent.tanggal_mulai).toLocaleDateString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-400">Tanggal Selesai</p>
+                  <p className="text-white">
+                    {new Date(viewingEvent.tanggal_selesai).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm text-slate-400">Lokasi</p>
+                <p className="text-white">{viewingEvent.lokasi}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-slate-400">Kuota Tim</p>
+                  <p className="text-white">{viewingEvent.kuota_tim}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-400">Biaya Pendaftaran</p>
+                  <p className="text-white">Rp {viewingEvent.biaya_pendaftaran?.toLocaleString("id-ID")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <button
+                  onClick={() => {
+                    handleEdit(viewingEvent);
+                    setViewingEvent(null);
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => setViewingEvent(null)}
+                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded transition"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
         <table className="w-full">
@@ -335,7 +433,10 @@ export default function Events() {
                     </span>
                   </td>
                   <td className="px-6 py-3 flex gap-2">
-                    <button className="p-1 hover:bg-slate-700 rounded transition text-blue-400">
+                    <button
+                      onClick={() => handleView(event)}
+                      className="p-1 hover:bg-slate-700 rounded transition text-blue-400"
+                    >
                       <Eye size={18} />
                     </button>
                     <button

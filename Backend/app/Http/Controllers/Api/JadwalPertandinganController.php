@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\JadwalPertandingan;
-use App\Models\Event;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 class JadwalPertandinganController extends Controller
 {
@@ -35,7 +35,7 @@ class JadwalPertandinganController extends Controller
     /**
      * Get single jadwal
      */
-    public function show($id)
+    public function show(int $id)
     {
         $jadwal = JadwalPertandingan::with(['event', 'tim1', 'tim2'])->find($id);
         
@@ -78,7 +78,7 @@ class JadwalPertandinganController extends Controller
     /**
      * Update jadwal
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $jadwal = JadwalPertandingan::find($id);
         
@@ -109,7 +109,7 @@ class JadwalPertandinganController extends Controller
     /**
      * Delete jadwal
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $jadwal = JadwalPertandingan::find($id);
         

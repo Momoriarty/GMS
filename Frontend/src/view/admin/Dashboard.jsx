@@ -301,8 +301,8 @@ function AdminDashboard() {
                   className="transition-colors"
                   style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.background =
-                      "rgba(255,255,255,0.03)")
+                  (e.currentTarget.style.background =
+                    "rgba(255,255,255,0.03)")
                   }
                   onMouseLeave={(e) =>
                     (e.currentTarget.style.background = "transparent")
@@ -354,15 +354,15 @@ function AdminDashboard() {
                       style={
                         p.kategori === "Futsal"
                           ? {
-                              background: "rgba(245,158,11,0.12)",
-                              color: "#f59e0b",
-                              border: "1px solid rgba(245,158,11,0.2)",
-                            }
+                            background: "rgba(245,158,11,0.12)",
+                            color: "#f59e0b",
+                            border: "1px solid rgba(245,158,11,0.2)",
+                          }
                           : {
-                              background: "rgba(96,165,250,0.12)",
-                              color: "#60a5fa",
-                              border: "1px solid rgba(96,165,250,0.2)",
-                            }
+                            background: "rgba(96,165,250,0.12)",
+                            color: "#60a5fa",
+                            border: "1px solid rgba(96,165,250,0.2)",
+                          }
                       }
                     >
                       {p.kategori}
@@ -485,9 +485,9 @@ function AdminDashboard() {
                   n === 1
                     ? { background: "#f59e0b", color: "#0d1117" }
                     : {
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        color: "rgba(255,255,255,0.3)",
-                      }
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "rgba(255,255,255,0.3)",
+                    }
                 }
               >
                 {n}

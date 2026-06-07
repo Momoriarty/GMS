@@ -1,9 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { auditLogApi, userApi } from "@/data/services";
 
 export default function AuditLog() {
   const [logs, setLogs] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedAction, setSelectedAction] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    loadLogs();
+    loadUsers();
+  }, []);
+
+  const loadLogs = async (page = 1) => {
+    setLoading(true);
+    try {
+      const params = {
+        per_page: 10,
+      };
+      if (selectedUser) params.user_id = selectedUser;
+      if (selectedAction) params.aksi = selectedAction;
+
+      const response = await auditLogApi.getAll(params);
+      if (response.data.success) {
+        setLogs(response.data.data);
+        setTotalPages(response.data.last_page || 1);
+        setCurrentPage(response.data.current_page || 1);
+      }
+    } catch (error) {
+      console.error("Error loading logs:", error);
+      alert("Gagal memuat log audit");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const response = await userApi.getAll();
+      if (response.data.success) {
+        setUsers(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error loading users:", error);
+    }
+  };
+
+  const handleFilterChange = () => {
+    setCurrentPage(1);
+    loadLogs(1);
+  };
 
   const getActionColor = (action) => {
     switch (action) {
@@ -33,6 +82,10 @@ export default function AuditLog() {
     return labels[action] || action;
   };
 
+  if (loading && logs.length === 0) {
+    return <div className="text-center py-8 text-white">Loading...</div>;
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -49,10 +102,16 @@ export default function AuditLog() {
           </label>
           <select
             value={selectedUser}
-            onChange={(e) => setSelectedUser(e.target.value)}
+            onChange={(e) => {
+              setSelectedUser(e.target.value);
+              setTimeout(handleFilterChange, 100);
+            }}
             className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
           >
             <option value="">-- Semua Pengguna --</option>
+            {users.map(u => (
+              <option key={u.id} value={u.id}>{u.name}</option>
+            ))}
           </select>
         </div>
         <div>
@@ -61,7 +120,10 @@ export default function AuditLog() {
           </label>
           <select
             value={selectedAction}
-            onChange={(e) => setSelectedAction(e.target.value)}
+            onChange={(e) => {
+              setSelectedAction(e.target.value);
+              setTimeout(handleFilterChange, 100);
+            }}
             className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
           >
             <option value="">-- Semua Aksi --</option>
@@ -103,8 +165,10 @@ export default function AuditLog() {
             ) : (
               logs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-700/50 transition">
-                  <td className="px-6 py-3 text-slate-300 text-sm">{log.tanggal}</td>
-                  <td className="px-6 py-3 text-white">{log.nama_pengguna}</td>
+                  <td className="px-6 py-3 text-slate-300 text-sm">
+                    {new Date(log.tanggal).toLocaleString("id-ID")}
+                  </td>
+                  <td className="px-6 py-3 text-white">{log.user?.name}</td>
                   <td className="px-6 py-3 text-slate-300 font-mono text-sm">
                     {log.tabel}
                   </td>
@@ -122,13 +186,31 @@ export default function AuditLog() {
 
       {/* Pagination */}
       <div className="flex justify-center gap-2">
-        <button className="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-white text-sm">
+        <button
+          onClick={() => {
+            if (currentPage > 1) {
+              setCurrentPage(currentPage - 1);
+              loadLogs(currentPage - 1);
+            }
+          }}
+          disabled={currentPage === 1}
+          className="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white text-sm"
+        >
           Sebelumnya
         </button>
-        <button className="px-3 py-2 rounded bg-blue-600 text-white text-sm">
-          1
-        </button>
-        <button className="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-white text-sm">
+        <span className="px-4 py-2 text-white">
+          {currentPage} / {totalPages}
+        </span>
+        <button
+          onClick={() => {
+            if (currentPage < totalPages) {
+              setCurrentPage(currentPage + 1);
+              loadLogs(currentPage + 1);
+            }
+          }}
+          disabled={currentPage === totalPages}
+          className="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white text-sm"
+        >
           Selanjutnya
         </button>
       </div>

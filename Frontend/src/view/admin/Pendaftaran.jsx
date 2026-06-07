@@ -1,14 +1,60 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, Check, X } from "lucide-react";
+import { pendaftaranApi } from "@/data/services";
 
 export default function Pendaftaran() {
   const [pendaftaran, setPendaftaran] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedDoc, setSelectedDoc] = useState(null);
 
-  const handleVerify = (id, status) => {
-    // TODO: Call API to verify pendaftaran
-    console.log("Verify pendaftaran", id, "with status:", status);
+  useEffect(() => {
+    loadPendaftaran();
+  }, []);
+
+  const loadPendaftaran = async () => {
+    setLoading(true);
+    try {
+      const params = selectedStatus ? { status: selectedStatus } : {};
+      const response = await pendaftaranApi.getAll(params);
+      if (response.data.success) {
+        setPendaftaran(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error loading pendaftaran:", error);
+      alert("Gagal memuat data pendaftaran");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleVerify = async (id, status) => {
+    try {
+      const response = await pendaftaranApi.verify(id, status);
+      if (response.data.success) {
+        alert(`Pendaftaran ${status === "diterima" ? "diterima" : "ditolak"}`);
+        loadPendaftaran();
+      }
+    } catch (error) {
+      console.error("Error verifying pendaftaran:", error);
+      alert("Gagal memverifikasi pendaftaran");
+    }
+  };
+
+  const filterPendaftaran = (status) => {
+    setSelectedStatus(status);
+    if (status) {
+      pendaftaranApi.getAll({ status }).then(res => {
+        if (res.data.success) setPendaftaran(res.data.data);
+      });
+    } else {
+      loadPendaftaran();
+    }
+  };
+
+  if (loading && pendaftaran.length === 0) {
+    return <div className="text-center py-8 text-white">Loading...</div>;
+  }
 
   return (
     <div className="space-y-4">
@@ -20,16 +66,36 @@ export default function Pendaftaran() {
 
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-4">
-        <button className="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium">
+        <button
+          onClick={() => filterPendaftaran("")}
+          className={`px-4 py-2 rounded-lg font-medium transition ${
+            selectedStatus === "" ? "bg-blue-600 text-white" : "bg-slate-700 hover:bg-slate-600 text-slate-300"
+          }`}
+        >
           Semua
         </button>
-        <button className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300">
+        <button
+          onClick={() => filterPendaftaran("menunggu")}
+          className={`px-4 py-2 rounded-lg font-medium transition ${
+            selectedStatus === "menunggu" ? "bg-blue-600 text-white" : "bg-slate-700 hover:bg-slate-600 text-slate-300"
+          }`}
+        >
           Menunggu
         </button>
-        <button className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300">
+        <button
+          onClick={() => filterPendaftaran("diterima")}
+          className={`px-4 py-2 rounded-lg font-medium transition ${
+            selectedStatus === "diterima" ? "bg-blue-600 text-white" : "bg-slate-700 hover:bg-slate-600 text-slate-300"
+          }`}
+        >
           Diterima
         </button>
-        <button className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300">
+        <button
+          onClick={() => filterPendaftaran("ditolak")}
+          className={`px-4 py-2 rounded-lg font-medium transition ${
+            selectedStatus === "ditolak" ? "bg-blue-600 text-white" : "bg-slate-700 hover:bg-slate-600 text-slate-300"
+          }`}
+        >
           Ditolak
         </button>
       </div>
@@ -69,11 +135,13 @@ export default function Pendaftaran() {
             ) : (
               pendaftaran.map((p) => (
                 <tr key={p.id} className="hover:bg-slate-700/50 transition">
-                  <td className="px-6 py-3 text-white font-medium">{p.nama_tim}</td>
-                  <td className="px-6 py-3 text-slate-300">{p.event}</td>
-                  <td className="px-6 py-3 text-slate-300">{p.tanggal_daftar}</td>
+                  <td className="px-6 py-3 text-white font-medium">{p.tim?.nama_tim}</td>
+                  <td className="px-6 py-3 text-slate-300">{p.event?.nama_event}</td>
+                  <td className="px-6 py-3 text-slate-300">
+                    {new Date(p.tanggal_daftar).toLocaleDateString("id-ID")}
+                  </td>
                   <td className="px-6 py-3">
-                    {p.dokumen ? (
+                    {p.dokumen_pendukung ? (
                       <button className="text-blue-400 hover:text-blue-300 flex items-center gap-1">
                         <Eye size={16} />
                         Lihat

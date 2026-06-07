@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HasilPertandingan extends Model
 {
@@ -21,17 +22,17 @@ class HasilPertandingan extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function jadwal()
+    public function jadwal(): BelongsTo
     {
-        return $this->belongsTo(JadwalPertandingan::class);
+        return $this->belongsTo(JadwalPertandingan::class, 'jadwal_id');
     }
 
-    public function timPemenang()
+    public function timPemenang(): BelongsTo
     {
         return $this->belongsTo(Tim::class, 'tim_pemenang_id');
     }
 
-    public function inputBy()
+    public function inputBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'input_by');
     }

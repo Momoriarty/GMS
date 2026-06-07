@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class JadwalPertandingan extends Model
 {
@@ -23,23 +25,23 @@ class JadwalPertandingan extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function event()
+    public function event(): BelongsTo
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class, 'event_id');
     }
 
-    public function tim1()
+    public function tim1(): BelongsTo
     {
         return $this->belongsTo(Tim::class, 'tim_1_id');
     }
 
-    public function tim2()
+    public function tim2(): BelongsTo
     {
         return $this->belongsTo(Tim::class, 'tim_2_id');
     }
 
-    public function hasil()
+    public function hasil(): HasOne
     {
-        return $this->hasOne(HasilPertandingan::class);
+        return $this->hasOne(HasilPertandingan::class, 'jadwal_id');
     }
 }

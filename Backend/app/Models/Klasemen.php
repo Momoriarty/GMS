@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Klasemen extends Model
 {
@@ -25,13 +26,13 @@ class Klasemen extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function event()
+    public function event(): BelongsTo
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class, 'event_id');
     }
 
-    public function tim()
+    public function tim(): BelongsTo
     {
-        return $this->belongsTo(Tim::class);
+        return $this->belongsTo(Tim::class, 'tim_id');
     }
 }
