@@ -6,6 +6,13 @@ import {
   User,
   LogOut,
   Package,
+  Trophy,
+  Calendar,
+  CheckCircle,
+  ClipboardList,
+  BarChart3,
+  Bell,
+  FileText,
 } from "lucide-react";
 
 function NavItem({ item }) {
@@ -64,18 +71,48 @@ export default function Sidebar() {
         href: "/admin/dashboard",
       },
       {
+        label: "Event",
+        icon: Trophy,
+        href: "/admin/events",
+      },
+      {
+        label: "Jadwal",
+        icon: Calendar,
+        href: "/admin/jadwal-pertandingan",
+      },
+      {
+        label: "Hasil",
+        icon: CheckCircle,
+        href: "/admin/hasil-pertandingan",
+      },
+      {
+        label: "Pendaftaran",
+        icon: ClipboardList,
+        href: "/admin/pendaftaran",
+      },
+      {
+        label: "Klasemen",
+        icon: BarChart3,
+        href: "/admin/klasemen",
+      },
+      {
+        label: "Notifikasi",
+        icon: Bell,
+        href: "/admin/notifikasi",
+      },
+      {
         label: "Pengguna",
         icon: Users,
         href: "/admin/pengguna",
       },
-      {
-        label: "Product",
-        icon: Package,
-        href: "/admin/product",
-      },
     ]);
 
     setMenuSistem([
+      {
+        label: "Audit Log",
+        icon: FileText,
+        href: "/admin/audit-log",
+      },
       {
         label: "Profil",
         icon: User,

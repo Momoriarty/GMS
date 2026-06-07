@@ -1,0 +1,130 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Models\JadwalPertandingan;
+use App\Models\Event;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+
+class JadwalPertandinganController extends Controller
+{
+    /**
+     * Get all jadwal
+     */
+    public function index(Request $request)
+    {
+        $query = JadwalPertandingan::with(['event', 'tim1', 'tim2']);
+
+        if ($request->event_id) {
+            $query->where('event_id', $request->event_id);
+        }
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        $jadwal = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $jadwal
+        ]);
+    }
+
+    /**
+     * Get single jadwal
+     */
+    public function show($id)
+    {
+        $jadwal = JadwalPertandingan::with(['event', 'tim1', 'tim2'])->find($id);
+        
+        if (!$jadwal) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Jadwal tidak ditemukan'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $jadwal
+        ]);
+    }
+
+    /**
+     * Create new jadwal
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'tim_1_id' => 'required|exists:tim,id',
+            'tim_2_id' => 'required|exists:tim,id|different:tim_1_id',
+            'waktu_pertandingan' => 'required|date_format:Y-m-d H:i:s',
+            'lokasi_lapangan' => 'required|string|max:255',
+            'status' => 'required|in:terjadwal,berlangsung,selesai',
+        ]);
+
+        $jadwal = JadwalPertandingan::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jadwal berhasil dibuat',
+            'data' => $jadwal
+        ], Response::HTTP_CREATED);
+    }
+
+    /**
+     * Update jadwal
+     */
+    public function update(Request $request, $id)
+    {
+        $jadwal = JadwalPertandingan::find($id);
+        
+        if (!$jadwal) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Jadwal tidak ditemukan'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $validated = $request->validate([
+            'tim_1_id' => 'exists:tim,id',
+            'tim_2_id' => 'exists:tim,id',
+            'waktu_pertandingan' => 'date_format:Y-m-d H:i:s',
+            'lokasi_lapangan' => 'string|max:255',
+            'status' => 'in:terjadwal,berlangsung,selesai',
+        ]);
+
+        $jadwal->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jadwal berhasil diperbarui',
+            'data' => $jadwal
+        ]);
+    }
+
+    /**
+     * Delete jadwal
+     */
+    public function destroy($id)
+    {
+        $jadwal = JadwalPertandingan::find($id);
+        
+        if (!$jadwal) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Jadwal tidak ditemukan'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $jadwal->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jadwal berhasil dihapus'
+        ]);
+    }
+}

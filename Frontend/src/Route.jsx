@@ -1,16 +1,31 @@
-import AdminLayout from "./view/admin/AdminLayout";
-import AdminDashboard from "./view/admin/Dashboard";
-import Login from "./view/auth/login";
+import { Route, Routes, Navigate } from "react-router-dom";
+
+// Auth
+import Login from "./view/auth/Login";
 import Register from "./view/auth/Register";
 import Forgot from "./view/auth/Forgot";
-import { Route, Routes } from "react-router-dom";
+
+// Guest
 import Home from "./view/guest/Home";
-import ProtectedRoute from "./ProtectedRoute"; 
-import GuestProfile from "./view/guest/profile";
+import GuestProfile from "./view/guest/Profile";
+
+// Admin
+import AdminLayout from "./view/admin/AdminLayout";
+import AdminDashboard from "./view/admin/Dashboard";
 import Profile from "./view/admin/Profile";
 import Pengguna from "./view/admin/Pengguna";
 import Products from "./view/admin/Product";
-import ProductDetail from "./view/admin/ProductDetail"; 
+import ProductDetail from "./view/admin/ProductDetail";
+import Events from "./view/admin/Events";
+import JadwalPertandingan from "./view/admin/JadwalPertandingan";
+import HasilPertandingan from "./view/admin/HasilPertandingan";
+import Pendaftaran from "./view/admin/Pendaftaran";
+import Klasemen from "./view/admin/Klasemen";
+import Notifikasi from "./view/admin/Notifikasi";
+import AuditLog from "./view/admin/AuditLog";
+
+// Route Guard
+import ProtectedRoute from "./ProtectedRoute";
 
 function RouteApp() {
   return (
@@ -24,21 +39,23 @@ function RouteApp() {
         {/* Admin Group */}
         <Route element={<ProtectedRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
-            <Route path="" element={<AdminDashboard />} />
+            <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="profile" element={<Profile />} />
             <Route path="Pengguna" element={<Pengguna />} />
-            {/* PERBAIKAN: Memasukkan route product ke sini agar tampil di dalam dashboard admin */}
-            <Route path="product" element={<Products />} />
+            <Route path="events" element={<Events />} />
+            <Route path="jadwal-pertandingan" element={<JadwalPertandingan />} />
+            <Route path="hasil-pertandingan" element={<HasilPertandingan />} />
+            <Route path="pendaftaran" element={<Pendaftaran />} />
+            <Route path="klasemen" element={<Klasemen />} />
+            <Route path="notifikasi" element={<Notifikasi />} />
+            <Route path="audit-log" element={<AuditLog />} />
           </Route>
         </Route>
 
         {/* Guest */}
         <Route path="/profile" element={<GuestProfile />} />
         <Route path="/" element={<Home />} />
-        
-        {/* detail product */}
-        <Route path="product/:id" element={<ProductDetail />} />
       </Routes>
     </>
   );
