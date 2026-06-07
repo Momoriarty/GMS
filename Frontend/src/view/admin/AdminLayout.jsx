@@ -1,27 +1,36 @@
 import { Outlet } from "react-router-dom";
-import Sidebar from "./layout/navbar"; // Pastikan komponen ini menggunakan bg-slate-900 / gelap
-import Navbar from "./layout/sidebar"; // Pastikan komponen ini menggunakan bg-slate-900 / gelap
+
+// Pastikan path-nya sesuai dengan struktur folder Anda
+import Sidebar from "./layout/sidebar";
+import Navbar from "./layout/navbar";
 import Footer from "./layout/footer";
 
 export default function AdminLayout() {
   return (
-    // Kita pastikan seluruh layar paling dasar berwarna abu-abu gelap pekat
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+    <div
+      className="min-h-screen flex transition-colors duration-300 text-slate-100"
+      style={{ background: "#0d1117" }} // Latar belakang utama sedikit lebih gelap dari sidebar
+    >
       {/* Sidebar tetap di kiri */}
       <Sidebar />
 
-      {/* Bungkus area konten kanan agar background gelapnya merata dari atas sampai bawah */}
-      <div className="flex-1 min-h-screen flex flex-col bg-slate-900 ml-[220px]">
-        {/* Navbar sekarang berada di dalam struktur kanan */}
+      {/* Area konten kanan */}
+      <div className="flex-1 min-h-screen flex flex-col ml-[220px]">
+
+        {/* Navbar tanpa prop themeToggle karena sudah permanen gelap */}
         <Navbar />
 
         {/* Konten Utama */}
         <main className="flex-1 p-6 mt-[68px] flex flex-col">
+
           <div className="flex-1">
             <Outlet />
           </div>
-          <Footer />
+
         </main>
+
+        <Footer />
+
       </div>
     </div>
   );

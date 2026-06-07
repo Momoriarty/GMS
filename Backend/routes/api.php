@@ -5,18 +5,18 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 
-// Route Publik (Bisa diakses tanpa login)
+// Publik
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/users', [UserController::class, 'index']);
+Route::post('/login',    [AuthController::class, 'login']);
 
-// Route Terproteksi (Harus membawa Token untuk masuk)
+// Terproteksi
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::get('/user', function (Request $request) {
-        return $request->user(); // Mengambil data user yang sedang login
-    });
+    Route::get('/user', fn(Request $request) => $request->user());
 
+    // Users — wajib login
+    Route::get('/users',         [UserController::class, 'index']);
+    Route::put('/users/{id}',    [UserController::class, 'update']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
 });
-
