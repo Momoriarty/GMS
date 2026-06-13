@@ -3,7 +3,7 @@
 namespace App\Models;
 
 // 1. Pastikan baris import HasApiTokens ini ada
-use Laravel\Sanctum\HasApiTokens; 
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
