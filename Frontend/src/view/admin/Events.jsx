@@ -1,464 +1,120 @@
-import { useState, useEffect } from "react";
-import { Plus, Edit2, Trash2, Eye } from "lucide-react";
-import { eventApi } from "@/data/services";
+import DataTable from "../DataTable";
+import { Users, Calendar } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-export default function Events() {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [viewingEvent, setViewingEvent] = useState(null);
-  const [formData, setFormData] = useState({
-    nama_event: "",
-    deskripsi: "",
-    tanggal_mulai: "",
-    tanggal_selesai: "",
-    lokasi: "",
-    kuota_tim: "",
-    biaya_pendaftaran: "",
-    status: "draft",
-  });
+const STATUS_COLORS = {
+  draft: {
+    bg: "rgba(255,193,7,0.15)",
+    color: "#b8860b",
+    dot: true,
+  },
+  aktif: {
+    bg: "rgba(99,153,34,0.12)",
+    color: "#3b6d11",
+    dot: true,
+  },
+  selesai: {
+    bg: "rgba(54,162,235,0.12)",
+    color: "#1d4ed8",
+    dot: true,
+  },
+};
 
-  // Fetch events on component mount
-  useEffect(() => {
-    loadEvents();
-  }, []);
+const eventFields = [
+  {
+    key: "nama_event",
+    label: "Nama Event",
+    type: "text",
+    required: true,
+  },
+  {
+    key: "deskripsi",
+    label: "Deskripsi",
+    type: "textarea",
+  },
+  {
+    key: "tanggal_mulai",
+    label: "Tanggal Mulai",
+    type: "date",
+    required: true,
+  },
+  {
+    key: "tanggal_selesai",
+    label: "Tanggal Selesai",
+    type: "date",
+    required: true,
+  },
+  {
+    key: "lokasi",
+    label: "Lokasi",
+    type: "text",
+    required: true,
+  },
+  {
+    key: "kuota_tim",
+    label: "Kuota Tim",
+    type: "number",
+    required: true,
+  },
+  {
+    key: "biaya_pendaftaran",
+    label: "Biaya Pendaftaran",
+    type: "number",
+    required: true,
+  },
+  {
+    key: "status",
+    label: "Status",
+    options: ["draft", "aktif", "selesai"],
+  },
+];
 
-  const loadEvents = async () => {
-    setLoading(true);
-    try {
-      const response = await eventApi.getAll();
-      if (response.data.success) {
-        setEvents(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error loading events:", error);
-      alert("Gagal memuat events");
-    } finally {
-      setLoading(false);
-    }
-  };
+const columns = [
+  { key: "nama_event", label: "Nama Event" },
+  { key: "lokasi", label: "Lokasi" },
+  { key: "tanggal_mulai", label: "Tanggal Mulai" },
+  { key: "tanggal_selesai", label: "Tanggal Selesai" },
+  { key: "kuota_tim", label: "Kuota Tim" },
+  {
+    key: "biaya_pendaftaran",
+    label: "Biaya Pendaftaran",
+  },
+  {
+    key: "status",
+    label: "Status",
+    type: "badge",
+    colorMap: STATUS_COLORS,
+  },
+];
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (editingId) {
-      // Update event
-      try {
-        const response = await eventApi.update(editingId, formData);
-        if (response.data.success) {
-          alert("Event berhasil diperbarui");
-          loadEvents();
-          resetForm();
-        }
-      } catch (error) {
-        console.error("Error updating event:", error);
-        alert("Gagal memperbarui event");
-      }
-    } else {
-      // Create event
-      try {
-        const response = await eventApi.create(formData);
-        if (response.data.success) {
-          alert("Event berhasil dibuat");
-          loadEvents();
-          resetForm();
-        }
-      } catch (error) {
-        console.error("Error creating event:", error);
-        alert("Gagal membuat event");
-      }
-    }
-  };
-
-  const handleEdit = (event) => {
-    setEditingId(event.id);
-    setFormData({
-      nama_event: event.nama_event,
-      deskripsi: event.deskripsi,
-      tanggal_mulai: event.tanggal_mulai?.split('T')[0] || "",
-      tanggal_selesai: event.tanggal_selesai?.split('T')[0] || "",
-      lokasi: event.lokasi,
-      kuota_tim: event.kuota_tim,
-      biaya_pendaftaran: event.biaya_pendaftaran,
-      status: event.status,
-    });
-    setShowForm(true);
-  };
-
-  const handleDelete = async (id) => {
-    if (confirm("Yakin ingin menghapus event ini?")) {
-      try {
-        const response = await eventApi.delete(id);
-        if (response.data.success) {
-          alert("Event berhasil dihapus");
-          loadEvents();
-        }
-      } catch (error) {
-        console.error("Error deleting event:", error);
-        alert("Gagal menghapus event");
-      }
-    }
-  };
-
-  const handleView = (event) => {
-    setViewingEvent(event);
-  };
-
-  const resetForm = () => {
-    setShowForm(false);
-    setEditingId(null);
-    setFormData({
-      nama_event: "",
-      deskripsi: "",
-      tanggal_mulai: "",
-      tanggal_selesai: "",
-      lokasi: "",
-      kuota_tim: "",
-      biaya_pendaftaran: "",
-      status: "draft",
-    });
-  };
-
-  if (loading && events.length === 0) {
-    return <div className="text-center py-8 text-white">Loading...</div>;
-  }
+export default function Event() {
+  const navigate = useNavigate();
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Manajemen Event</h1>
-        <button
-          onClick={() => {
-            setEditingId(null);
-            setShowForm(!showForm);
-          }}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-        >
-          <Plus size={20} />
-          Tambah Event
-        </button>
-      </div>
-
-      {/* Form */}
-      {showForm && (
-        <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Nama Event
-                </label>
-                <input
-                  type="text"
-                  name="nama_event"
-                  value={formData.nama_event}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Status
-                </label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-                >
-                  <option value="draft">Draft</option>
-                  <option value="aktif">Aktif</option>
-                  <option value="selesai">Selesai</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">
-                Deskripsi
-              </label>
-              <textarea
-                name="deskripsi"
-                value={formData.deskripsi}
-                onChange={handleInputChange}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500 h-24"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Tanggal Mulai
-                </label>
-                <input
-                  type="date"
-                  name="tanggal_mulai"
-                  value={formData.tanggal_mulai}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Tanggal Selesai
-                </label>
-                <input
-                  type="date"
-                  name="tanggal_selesai"
-                  value={formData.tanggal_selesai}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">
-                Lokasi
-              </label>
-              <input
-                type="text"
-                name="lokasi"
-                value={formData.lokasi}
-                onChange={handleInputChange}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Kuota Tim
-                </label>
-                <input
-                  type="number"
-                  name="kuota_tim"
-                  value={formData.kuota_tim}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Biaya Pendaftaran
-                </label>
-                <input
-                  type="number"
-                  name="biaya_pendaftaran"
-                  value={formData.biaya_pendaftaran}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-4">
-              <button
-                type="submit"
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition"
-              >
-                {editingId ? "Update" : "Simpan"}
-              </button>
-              <button
-                type="button"
-                onClick={resetForm}
-                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded transition"
-              >
-                Batal
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Detail Modal */}
-      {viewingEvent && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 max-w-2xl w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-white">Detail Event</h2>
-              <button
-                onClick={() => setViewingEvent(null)}
-                className="text-slate-400 hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-slate-400">Nama Event</p>
-                  <p className="text-white font-medium">{viewingEvent.nama_event}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-400">Status</p>
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium inline-block ${
-                      viewingEvent.status === "aktif"
-                        ? "bg-green-500/20 text-green-400"
-                        : viewingEvent.status === "selesai"
-                        ? "bg-slate-500/20 text-slate-300"
-                        : "bg-yellow-500/20 text-yellow-400"
-                    }`}
-                  >
-                    {viewingEvent.status}
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm text-slate-400">Deskripsi</p>
-                <p className="text-white">{viewingEvent.deskripsi}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-slate-400">Tanggal Mulai</p>
-                  <p className="text-white">
-                    {new Date(viewingEvent.tanggal_mulai).toLocaleDateString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-400">Tanggal Selesai</p>
-                  <p className="text-white">
-                    {new Date(viewingEvent.tanggal_selesai).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm text-slate-400">Lokasi</p>
-                <p className="text-white">{viewingEvent.lokasi}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-slate-400">Kuota Tim</p>
-                  <p className="text-white">{viewingEvent.kuota_tim}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-400">Biaya Pendaftaran</p>
-                  <p className="text-white">Rp {viewingEvent.biaya_pendaftaran?.toLocaleString("id-ID")}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-4">
-                <button
-                  onClick={() => {
-                    handleEdit(viewingEvent);
-                    setViewingEvent(null);
-                  }}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => setViewingEvent(null)}
-                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded transition"
-                >
-                  Tutup
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Table */}
-      <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-700">
-              <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                Nama Event
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                Tanggal
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                Lokasi
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                Aksi
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-700">
-            {events.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-slate-400">
-                  Tidak ada data event
-                </td>
-              </tr>
-            ) : (
-              events.map((event) => (
-                <tr key={event.id} className="hover:bg-slate-700/50 transition">
-                  <td className="px-6 py-3 text-white">{event.nama_event}</td>
-                  <td className="px-6 py-3 text-slate-300">
-                    {new Date(event.tanggal_mulai).toLocaleDateString()} s/d{" "}
-                    {new Date(event.tanggal_selesai).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-3 text-slate-300">{event.lokasi}</td>
-                  <td className="px-6 py-3">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        event.status === "aktif"
-                          ? "bg-green-500/20 text-green-400"
-                          : event.status === "selesai"
-                          ? "bg-slate-500/20 text-slate-300"
-                          : "bg-yellow-500/20 text-yellow-400"
-                      }`}
-                    >
-                      {event.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 flex gap-2">
-                    <button
-                      onClick={() => handleView(event)}
-                      className="p-1 hover:bg-slate-700 rounded transition text-blue-400"
-                    >
-                      <Eye size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(event)}
-                      className="p-1 hover:bg-slate-700 rounded transition text-yellow-400"
-                    >
-                      <Edit2 size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(event.id)}
-                      className="p-1 hover:bg-slate-700 rounded transition text-red-400"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <DataTable
+      endpoint="http://127.0.0.1:8000/api/events"
+      title="Daftar Event"
+      searchFields={["nama_event", "lokasi"]}
+      filterFields={["status"]}
+      columns={columns}
+      editable
+      
+      creatable
+      deleteLabelKey="nama_event"
+      deleteSubKey="lokasi"
+      editFields={eventFields}
+      createFields={eventFields}
+      actions={[
+        {
+          icon: <Calendar size={14} />,
+          tooltip: "Klasemen",
+          label: "Klasemen",
+          color: "#3b82f6",
+          onClick: (row) => {
+            navigate(`/admin/events/${row.id}/klasemen`);
+          },
+        },
+      ]}
+    />
   );
 }
-
