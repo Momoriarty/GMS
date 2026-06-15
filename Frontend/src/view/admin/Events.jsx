@@ -4,18 +4,18 @@ import { useNavigate } from "react-router-dom";
 
 const STATUS_COLORS = {
   draft: {
-    bg: "rgba(255,193,7,0.15)",
-    color: "#b8860b",
+    bg: "bg-warning/10",         // Adaptif bawaan tailwind/daisyui
+    color: "text-warning-content dark:text-warning", 
     dot: true,
   },
   aktif: {
-    bg: "rgba(99,153,34,0.12)",
-    color: "#3b6d11",
+    bg: "bg-success/10",
+    color: "text-success-content dark:text-success",
     dot: true,
   },
   selesai: {
-    bg: "rgba(54,162,235,0.12)",
-    color: "#1d4ed8",
+    bg: "bg-info/10",
+    color: "text-info-content dark:text-info",
     dot: true,
   },
 };

@@ -6,7 +6,7 @@ import { Bell, Calendar, ChevronDown, Settings, User, HelpCircle, LogOut } from 
 export default function Navbar({
     title = "Dashboard Overview",
     subtitle = "Selamat datang kembali, Admin Garuda",
-    themeToggle,   // ← Prop untuk toggle tema (bisa tetap ada jika sisa aplikasi butuh)
+    themeToggle,   
 }) {
     const [notifOpen, setNotifOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
@@ -18,7 +18,7 @@ export default function Navbar({
         weekday: "long", day: "numeric", month: "long", year: "numeric",
     });
 
-    const notifications = []; // Bisa diisi dengan data notifikasi
+    const notifications = []; 
 
     const profileMenuItems = [
         { label: "Profil Saya", icon: User },
@@ -27,7 +27,6 @@ export default function Navbar({
     ];
 
     const closeAll = () => { setNotifOpen(false); setProfileOpen(false); };
-
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -37,7 +36,6 @@ export default function Navbar({
                 setLoadingUser(false);
                 return;
             }
-
             try {
                 const response = await axios.get("http://localhost:8000/api/user", {
                     headers: { Authorization: `Bearer ${token}` },
@@ -49,7 +47,6 @@ export default function Navbar({
                 setLoadingUser(false);
             }
         };
-
         fetchUser();
     }, []);
 
@@ -61,101 +58,111 @@ export default function Navbar({
 
     return (
         <>
-            {/* Overlay untuk menutup dropdown */}
+            {/* Overlay penutup dropdown */}
             {(notifOpen || profileOpen) && (
                 <div className="fixed inset-0 z-40" onClick={closeAll} />
             )}
 
-            <header
-                className="fixed top-0 left-[220px] right-0 h-[68px] flex items-center justify-between px-7 z-50 backdrop-blur-md transition-colors duration-300"
-                style={{
-                    background: "rgba(22, 27, 39, 0.95)", // Menggunakan #161b27 dengan sedikit transparansi untuk efek blur
-                    borderBottom: "1px solid rgba(255,255,255,0.05)"
-                }}
-            >
-                {/* Left Section */}
+            {/* HEADER UTAMA: Menggunakan warna adaptif daisyUI (bg-base-100/80 dan text-base-content) */}
+            <header className="fixed top-0 left-[220px] right-0 h-[68px] flex items-center justify-between px-7 z-50 backdrop-blur-md bg-base-100/80 border-b border-base-content/5 text-base-content transition-all duration-300">
+                
+                {/* SISI KIRI: Judul Dinamis */}
                 <div>
-                    <h1 className="text-[15px] font-bold leading-tight text-white">
+                    <h1 className="text-[15px] font-bold leading-tight text-base-content">
                         {title}
                     </h1>
-                    <p className="text-[11px] mt-0.5 font-medium text-white/50">
+                    <p className="text-[11px] mt-0.5 font-medium text-base-content/50">
                         {subtitle}
                     </p>
                 </div>
 
-                {/* Bagian Tengah (Untuk toggle tema) */}
                 {themeToggle}
 
-                {/* Right Section */}
+                {/* SISI KANAN: Kontrol & Identitas */}
                 <div className="flex items-center gap-2.5">
 
-                    {/* Date */}
-                    <div
-                        className="flex items-center gap-2 px-4 py-2 text-[12px] font-medium rounded-xl border transition-colors text-white/55"
-                        style={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.1)" }}
-                    >
-                        <Calendar size={13} className="text-white/40" />
+                    {/* SAKELAR SWAP TEMA (DAISYUI SWAP CONTROLLER) */}
+                    {/* SAKELAR TEMA MODEL TOGEL KAPSUL (LOGIKA & WARNA FIX) */}
+<label className="toggle text-base-content border-none bg-white checked:bg-black [--tglbg:theme(colors.black)] checked:[--tglbg:theme(colors.white)] scale-90 md:scale-100 transition-all duration-200">
+  
+  {/* Input Theme Controller (Akan bernilai ON saat ke kanan/tema terang) */}
+  <input 
+    type="checkbox" 
+    value="silk" 
+    className="theme-controller" 
+  />
+
+  {/* IKON BULAN (Muncul di Kiri saat OFF / Mode Gelap) */}
+  <svg 
+    aria-label="moon" 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24"
+  >
+    <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+    </g>
+  </svg>
+
+  {/* IKON MATAHARI (Muncul di Kanan saat ON / Mode Terang) */}
+  <svg 
+    aria-label="sun" 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24"
+  >
+    <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2"></path>
+      <path d="M12 20v2"></path>
+      <path d="m4.93 4.93 1.41 1.41"></path>
+      <path d="m17.66 17.66 1.41 1.41"></path>
+      <path d="M2 12h2"></path>
+      <path d="M20 12h2"></path>
+      <path d="m6.34 17.66-1.41 1.41"></path>
+      <path d="m19.07 4.93-1.41 1.41"></path>
+    </g>
+  </svg>
+
+</label>
+
+                    {/* KOMPONEN TANGGAL */}
+                    <div className="flex items-center gap-2 px-4 py-2 text-[12px] font-semibold rounded-xl bg-base-200 border border-base-content/5 text-base-content/70 transition-all duration-300">
+                        <Calendar size={13} className="text-base-content/40" />
                         {formattedDate}
                     </div>
 
-                    {/* Notification Bell */}
+                    {/* NOTIFIKASI BELL */}
                     <div className="relative z-50">
                         <button
                             onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}
-                            className="relative w-10 h-10 rounded-xl flex items-center justify-center transition-all border text-white/60 hover:bg-white/10"
-                            style={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.1)" }}
+                            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-base-200 hover:bg-base-300 border-none text-base-content/70"
                         >
                             <Bell size={16} strokeWidth={1.8} />
                             {notifications.length > 0 && (
-                                <span className="absolute -top-1 -right-1 w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[9px] font-extrabold flex items-center justify-center border-2 border-[#161b27]">
+                                <span className="absolute -top-1 -right-1 w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[9px] font-extrabold flex items-center justify-center border-2 border-base-100">
                                     {notifications.filter((n) => n.unread).length}
                                 </span>
                             )}
                         </button>
 
-                        {/* Notification Dropdown */}
+                        {/* NOTIFIKASI DROPDOWN */}
                         {notifOpen && (
-                            <div
-                                className="absolute top-14 right-0 w-[320px] rounded-2xl overflow-hidden mt-1 shadow-[0_20px_60px_rgba(0,0,0,0.6)] border"
-                                style={{ background: "#161b27", borderColor: "rgba(255,255,255,0.1)" }}
-                            >
-                                <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/10">
+                            <div className="absolute top-14 right-0 w-[320px] rounded-2xl overflow-hidden mt-1 shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-base-200 border border-base-content/10 transition-colors duration-300">
+                                <div className="flex items-center justify-between px-4 py-3.5 border-b border-base-content/10">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-bold text-[13px] text-white">Notifikasi</span>
+                                        <span className="font-bold text-[13px] text-base-content">Notifikasi</span>
                                         <span className="bg-red-500 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">3</span>
                                     </div>
-                                    <button className="text-[11px] font-semibold text-[#f59e0b] hover:text-amber-400">
+                                    <button className="text-[11px] font-bold text-amber-500 hover:text-amber-600">
                                         Tandai semua dibaca
                                     </button>
                                 </div>
 
-                                {notifications.length > 0 ? (
-                                    notifications.map((n, i) => (
-                                        <div key={i}
-                                            className={`flex items-start gap-3 px-4 py-3.5 cursor-pointer transition-colors border-b border-white/5 hover:bg-white/5
-                                            ${n.unread ? "bg-[#f59e0b]/10" : "bg-transparent"}`}
-                                        >
-                                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0 
-                                                ${n.unread ? "bg-[#f59e0b]/20 text-[#f59e0b]" : "bg-white/10 text-white/60"}`}>
-                                                {n.icon}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className={`text-[12px] leading-snug ${n.unread ? "font-semibold text-white" : "font-normal text-white/50"}`}>
-                                                    {n.text}
-                                                </p>
-                                                <p className="text-[10px] mt-1 font-medium text-white/30">{n.time}</p>
-                                            </div>
-                                            {n.unread && <div className="w-2 h-2 rounded-full mt-1 shrink-0 bg-[#f59e0b]" />}
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="px-4 py-4 text-[12px] text-white/55">
-                                        Tidak ada notifikasi terbaru.
-                                    </div>
-                                )}
+                                <div className="px-4 py-6 text-center text-[12px] text-base-content/50">
+                                    Tidak ada notifikasi terbaru.
+                                </div>
 
-                                <div className="px-4 py-3 bg-white/5">
-                                    <button className="w-full text-center text-[12px] font-semibold text-white/40 hover:text-white/70">
+                                <div className="px-4 py-3 bg-base-300/40 border-t border-base-content/5">
+                                    <button className="w-full text-center text-[11px] font-bold text-base-content/50 hover:text-base-content/80">
                                         Lihat semua notifikasi →
                                     </button>
                                 </div>
@@ -163,71 +170,59 @@ export default function Navbar({
                         )}
                     </div>
 
-                    {/* Profile */}
+                    {/* PROFIL DROPDOWN */}
                     <div className="relative z-50">
                         <button
                             onClick={() => { setProfileOpen(!profileOpen); setNotifOpen(false); }}
-                            className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl transition-all border hover:bg-white/10"
-                            style={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.1)" }}
+                            className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl transition-all bg-base-200 hover:bg-base-300 border-none text-base-content"
                         >
-                            <div
-                                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#0d1117] text-[11px] font-extrabold shrink-0"
-                                style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}
-                            >
+                            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[11px] font-extrabold shrink-0 bg-gradient-to-br from-amber-500 to-amber-600 shadow-md shadow-amber-500/10">
                                 {user?.name ? user.name.split(" ").map((part) => part[0]).slice(0, 2).join("") : "AD"}
                             </div>
-                            <div className="text-left hidden md:block">
-                                <p className="text-[12px] font-bold leading-none text-white">{user?.name || "Admin"}</p>
-                                <p className="text-[10px] mt-0.5 font-medium text-white/40">{user?.role || "Administrator"}</p>
+                            <div className="text-left hidden md:block leading-tight">
+                                <p className="text-[12px] font-bold text-base-content">{user?.name || "Admin"}</p>
+                                <p className="text-[10px] font-medium text-base-content/40">{user?.role || "Administrator"}</p>
                             </div>
-                            <ChevronDown size={12} className={`ml-0.5 transition-transform duration-200 text-white/40 ${profileOpen ? "rotate-180" : ""}`} />
+                            <ChevronDown size={12} className={`ml-0.5 transition-transform duration-200 text-base-content/40 ${profileOpen ? "rotate-180" : ""}`} />
                         </button>
 
-                        {/* Profile Dropdown */}
                         {profileOpen && (
-                            <div
-                                className="absolute top-14 right-0 w-48 rounded-2xl overflow-hidden mt-1 shadow-[0_20px_60px_rgba(0,0,0,0.6)] border"
-                                style={{ background: "#161b27", borderColor: "rgba(255,255,255,0.1)" }}
-                            >
-
-                                {/* Profile header */}
-                                <div className="px-4 py-3.5 flex items-center gap-2.5 border-b bg-[#f59e0b]/10 border-[#f59e0b]/10">
-                                    <div
-                                        className="w-9 h-9 rounded-xl flex items-center justify-center text-[#0d1117] text-xs font-extrabold shrink-0"
-                                        style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}
-                                    >
+                            <div className="absolute top-14 right-0 w-48 rounded-2xl overflow-hidden mt-1 shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-base-200 border border-base-content/10 transition-colors duration-300">
+                                <div className="px-4 py-3.5 flex items-center gap-2.5 border-b bg-amber-500/5 border-base-content/5">
+                                    <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-extrabold shrink-0 bg-gradient-to-br from-amber-500 to-amber-600">
                                         {user?.name ? user.name.split(" ").map((part) => part[0]).slice(0, 2).join("") : "AD"}
                                     </div>
-                                    <div>
-                                        <p className="font-bold text-[13px] leading-none text-white">{user?.name || "Admin"}</p>
-                                        <p className="text-[10px] mt-0.5 font-medium text-[#f59e0b]">{user?.role || "Super Admin"}</p>
+                                    <div className="leading-tight">
+                                        <p className="font-bold text-[12px] text-base-content">{user?.name || "Admin"}</p>
+                                        <p className="text-[10px] font-bold text-amber-500">{user?.role || "Super Admin"}</p>
                                     </div>
                                 </div>
 
-                                <div className="py-1.5">
+                                <div className="py-1">
                                     {profileMenuItems.map(({ label, icon: Icon }, i) => (
                                         <button
                                             key={i}
-                                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-left transition-colors text-white/65 hover:bg-white/5 hover:text-white"
+                                            className="w-full flex items-center gap-2.5 px-4 py-2 text-[12px] font-semibold text-left transition-colors text-base-content/70 hover:bg-base-300/50 hover:text-base-content"
                                         >
-                                            <Icon size={14} strokeWidth={1.8} className="text-white/40" />
+                                            <Icon size={14} className="text-base-content/40" />
                                             {label}
                                         </button>
                                     ))}
                                 </div>
 
-                                <div className="py-1.5 border-t border-white/10">
+                                <div className="py-1 border-t border-base-content/5">
                                     <button
                                         onClick={handleLogout}
-                                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-bold text-left transition-colors text-red-400 hover:bg-red-500/10"
+                                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-bold text-left transition-colors text-red-500 hover:bg-red-500/10"
                                     >
-                                        <LogOut size={14} strokeWidth={1.8} />
+                                        <LogOut size={14} />
                                         Logout
                                     </button>
                                 </div>
                             </div>
                         )}
                     </div>
+
                 </div>
             </header>
         </>

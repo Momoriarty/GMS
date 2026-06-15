@@ -53,17 +53,13 @@ function AdminDashboard() {
   const max = 220;
 
   return (
-    <div className="space-y-5 p-1">
+    <div className="space-y-5 p-1 text-base-content">
       {/* Stat Cards */}
       <div className="grid grid-cols-4 gap-4">
         {stats.map((s, i) => (
           <div
             key={i}
-            className="rounded-2xl p-5 relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-default"
-            style={{
-              background: "#1c2333",
-              border: "1px solid rgba(255,255,255,0.06)",
-            }}
+            className="rounded-2xl p-5 relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-default bg-base-200 border border-base-content/5"
           >
             <div
               className="absolute -right-6 -top-6 w-24 h-24 rounded-full blur-2xl opacity-20 group-hover:opacity-35 transition-opacity duration-300"
@@ -84,13 +80,10 @@ function AdminDashboard() {
                   {s.sub}
                 </span>
               </div>
-              <p className="text-[32px] font-extrabold text-white leading-none tracking-tight">
+              <p className="text-[32px] font-extrabold text-base-content leading-none tracking-tight">
                 {s.value}
               </p>
-              <p
-                className="text-[10px] font-bold uppercase tracking-[2px] mt-1.5"
-                style={{ color: "rgba(255,255,255,0.3)" }}
-              >
+              <p className="text-[10px] font-bold uppercase tracking-[2px] mt-1.5 text-base-content/40">
                 {s.label}
               </p>
             </div>
@@ -99,50 +92,26 @@ function AdminDashboard() {
       </div>
 
       {/* Chart */}
-      <div
-        className="rounded-2xl p-6"
-        style={{
-          background: "#1c2333",
-          border: "1px solid rgba(255,255,255,0.06)",
-        }}
-      >
+      <div className="rounded-2xl p-6 bg-base-200 border border-base-content/5">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h2 className="font-bold text-white text-[15px]">
+            <h2 className="font-bold text-base-content text-[15px]">
               Statistik Peserta per Event
             </h2>
-            <p
-              className="text-xs mt-1"
-              style={{ color: "rgba(255,255,255,0.3)" }}
-            >
+            <p className="text-xs mt-1 text-base-content/40">
               5 event terakhir yang diselenggarakan
             </p>
           </div>
-          <div
-            className="flex items-center gap-4 text-xs px-4 py-2.5 rounded-xl"
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.07)",
-            }}
-          >
-            <span
-              className="flex items-center gap-2 font-medium"
-              style={{ color: "rgba(255,255,255,0.6)" }}
-            >
+          <div className="flex items-center gap-4 text-xs px-4 py-2.5 rounded-xl bg-base-300/50 border border-base-content/5">
+            <span className="flex items-center gap-2 font-medium text-base-content/70">
               <span
                 className="w-3 h-3 rounded"
                 style={{ background: "#f59e0b" }}
               />{" "}
               Futsal
             </span>
-            <div
-              className="w-px h-4"
-              style={{ background: "rgba(255,255,255,0.1)" }}
-            />
-            <span
-              className="flex items-center gap-2 font-medium"
-              style={{ color: "rgba(255,255,255,0.6)" }}
-            >
+            <div className="w-px h-4 bg-base-content/10" />
+            <span className="flex items-center gap-2 font-medium text-base-content/70">
               <span className="w-3 h-3 rounded bg-blue-400" /> SSB
             </span>
           </div>
@@ -153,10 +122,9 @@ function AdminDashboard() {
           style={{ height: "200px" }}
         >
           {chartData && chartData.length ? (
-            // Menambahkan .map() untuk melakukan perulangan array dengan benar
             chartData.map((d, i) => {
-              const val = d.futsal || d.ssb || 0; // fallback ke 0 jika keduanya kosong
-              const h = max > 0 ? (val / max) * 100 : 0; // proteksi terhadap division by zero
+              const val = d.futsal || d.ssb || 0;
+              const h = max > 0 ? (val / max) * 100 : 0;
               const isFutsal = d.futsal > 0;
 
               return (
@@ -187,20 +155,14 @@ function AdminDashboard() {
                       }}
                     />
                   </div>
-                  <p
-                    className="text-[10px] text-center leading-snug"
-                    style={{ color: "rgba(255,255,255,0.25)" }}
-                  >
+                  <p className="text-[10px] text-center leading-snug text-base-content/30">
                     {d.label}
                   </p>
                 </div>
               );
             })
           ) : (
-            <div
-              className="text-center text-sm text-slate-400"
-              style={{ color: "rgba(255,255,255,0.55)" }}
-            >
+            <div className="text-center text-sm text-base-content/50">
               Statistik peserta belum tersedia.
             </div>
           )}
@@ -208,46 +170,26 @@ function AdminDashboard() {
       </div>
 
       {/* Pendaftaran Terbaru */}
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{
-          background: "#1c2333",
-          border: "1px solid rgba(255,255,255,0.06)",
-        }}
-      >
+      <div className="rounded-2xl overflow-hidden bg-base-200 border border-base-content/5">
         {/* Header */}
-        <div
-          className="flex items-center justify-between px-6 py-5"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-        >
+        <div className="flex items-center justify-between px-6 py-5 border-b border-base-content/5">
           <div>
-            <h2 className="font-bold text-white text-[15px]">
+            <h2 className="font-bold text-base-content text-[15px]">
               Pendaftaran Terbaru
             </h2>
-            <p
-              className="text-xs mt-0.5"
-              style={{ color: "rgba(255,255,255,0.3)" }}
-            >
+            <p className="text-xs mt-0.5 text-base-content/40">
               Daftar pendaftaran yang masuk baru-baru ini
             </p>
           </div>
           <div className="flex items-center gap-2">
             <div className="relative">
-              <span
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-xs"
-                style={{ color: "rgba(255,255,255,0.2)" }}
-              >
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs opacity-40">
                 🔍
               </span>
               <input
                 type="text"
                 placeholder="Cari pendaftaran..."
-                className="pl-8 pr-4 py-2 text-[12px] rounded-xl outline-none w-44"
-                style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.7)",
-                }}
+                className="pl-8 pr-4 py-2 text-[12px] rounded-xl outline-none w-44 bg-base-300/50 border border-base-content/10 text-base-content placeholder-base-content/30 focus:border-warning/50 transition-all"
               />
             </div>
             <button
@@ -276,16 +218,12 @@ function AdminDashboard() {
         {/* Table */}
         <table className="w-full text-sm">
           <thead>
-            <tr style={{ background: "rgba(255,255,255,0.025)" }}>
+            <tr className="bg-base-300/30">
               {["Nama", "Tim", "Event", "Kategori", "Status", "Aksi"].map(
                 (h) => (
                   <th
                     key={h}
-                    className="text-left py-3 px-5 text-[10px] font-extrabold uppercase tracking-widest"
-                    style={{
-                      color: "rgba(255,255,255,0.2)",
-                      borderBottom: "1px solid rgba(255,255,255,0.05)",
-                    }}
+                    className="text-left py-3 px-5 text-[10px] font-extrabold uppercase tracking-widest text-base-content/40 border-b border-base-content/5"
                   >
                     {h}
                   </th>
@@ -298,15 +236,7 @@ function AdminDashboard() {
               pendaftaran.map((p, i) => (
                 <tr
                   key={i}
-                  className="transition-colors"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-                  onMouseEnter={(e) =>
-                  (e.currentTarget.style.background =
-                    "rgba(255,255,255,0.03)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = "transparent")
-                  }
+                  className="border-b border-base-content/5 hover:bg-base-300/20 transition-colors"
                 >
                   <td className="py-3.5 px-5">
                     <div className="flex items-center gap-3">
@@ -320,31 +250,22 @@ function AdminDashboard() {
                           .join("")}
                       </div>
                       <div>
-                        <p className="font-semibold text-[13px] text-white leading-tight">
+                        <p className="font-semibold text-[13px] text-base-content leading-tight">
                           {p.nama}
                         </p>
-                        <p
-                          className="text-[11px] mt-0.5"
-                          style={{ color: "rgba(255,255,255,0.3)" }}
-                        >
+                        <p className="text-[11px] mt-0.5 text-base-content/40">
                           {p.email}
                         </p>
                       </div>
                     </div>
                   </td>
                   <td className="py-3.5 px-5">
-                    <span
-                      className="text-[13px] font-medium"
-                      style={{ color: "rgba(255,255,255,0.55)" }}
-                    >
+                    <span className="text-[13px] font-medium text-base-content/70">
                       {p.tim}
                     </span>
                   </td>
                   <td className="py-3.5 px-5 max-w-[190px]">
-                    <span
-                      className="text-[12px] leading-snug line-clamp-2"
-                      style={{ color: "rgba(255,255,255,0.4)" }}
-                    >
+                    <span className="text-[12px] leading-snug line-clamp-2 text-base-content/60">
                       {p.event}
                     </span>
                   </td>
@@ -354,15 +275,15 @@ function AdminDashboard() {
                       style={
                         p.kategori === "Futsal"
                           ? {
-                            background: "rgba(245,158,11,0.12)",
-                            color: "#f59e0b",
-                            border: "1px solid rgba(245,158,11,0.2)",
-                          }
+                              background: "rgba(245,158,11,0.12)",
+                              color: "#f59e0b",
+                              border: "1px solid rgba(245,158,11,0.2)",
+                            }
                           : {
-                            background: "rgba(96,165,250,0.12)",
-                            color: "#60a5fa",
-                            border: "1px solid rgba(96,165,250,0.2)",
-                          }
+                              background: "rgba(96,165,250,0.12)",
+                              color: "#60a5fa",
+                              border: "1px solid rgba(96,165,250,0.2)",
+                            }
                       }
                     >
                       {p.kategori}
@@ -420,14 +341,7 @@ function AdminDashboard() {
                         </button>
                       </div>
                     ) : (
-                      <button
-                        className="px-3 py-1.5 text-[11px] font-bold rounded-lg active:scale-95 transition-all"
-                        style={{
-                          background: "rgba(255,255,255,0.06)",
-                          color: "rgba(255,255,255,0.45)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                        }}
-                      >
+                      <button className="px-3 py-1.5 text-[11px] font-bold rounded-lg active:scale-95 transition-all bg-base-300 text-base-content/70 border border-base-content/10 hover:bg-base-300/80">
                         Detail →
                       </button>
                     )}
@@ -438,8 +352,7 @@ function AdminDashboard() {
               <tr>
                 <td
                   colSpan={6}
-                  className="py-10 text-center text-sm text-slate-400"
-                  style={{ color: "rgba(255,255,255,0.55)" }}
+                  className="py-10 text-center text-sm text-base-content/40"
                 >
                   Tidak ada pendaftaran terbaru.
                 </td>
@@ -449,57 +362,30 @@ function AdminDashboard() {
         </table>
 
         {/* Pagination */}
-        <div
-          className="flex items-center justify-between px-6 py-4"
-          style={{
-            borderTop: "1px solid rgba(255,255,255,0.05)",
-            background: "rgba(255,255,255,0.015)",
-          }}
-        >
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+        <div className="flex items-center justify-between px-6 py-4 border-t border-base-content/5 bg-base-300/10">
+          <p className="text-xs text-base-content/40">
             Menampilkan{" "}
-            <span style={{ color: "rgba(255,255,255,0.55)", fontWeight: 600 }}>
-              6
-            </span>{" "}
-            dari{" "}
-            <span style={{ color: "rgba(255,255,255,0.55)", fontWeight: 600 }}>
-              15
-            </span>{" "}
+            <span className="text-base-content/70 font-semibold">6</span> dari{" "}
+            <span className="text-base-content/70 font-semibold">15</span>{" "}
             pendaftaran
           </p>
           <div className="flex items-center gap-1">
-            <button
-              className="w-8 h-8 rounded-lg text-sm flex items-center justify-center"
-              style={{
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "rgba(255,255,255,0.25)",
-              }}
-            >
+            <button className="w-8 h-8 rounded-lg text-sm flex items-center justify-center border border-base-content/10 text-base-content/40">
               ‹
             </button>
             {[1, 2, 3].map((n) => (
               <button
                 key={n}
-                className="w-8 h-8 rounded-lg text-[12px] font-bold flex items-center justify-center transition-all"
-                style={
+                className={`w-8 h-8 rounded-lg text-[12px] font-bold flex items-center justify-center transition-all ${
                   n === 1
-                    ? { background: "#f59e0b", color: "#0d1117" }
-                    : {
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      color: "rgba(255,255,255,0.3)",
-                    }
-                }
+                    ? "bg-warning text-warning-content shadow-sm"
+                    : "border border-base-content/10 text-base-content/40"
+                }`}
               >
                 {n}
               </button>
             ))}
-            <button
-              className="w-8 h-8 rounded-lg text-sm flex items-center justify-center"
-              style={{
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "rgba(255,255,255,0.25)",
-              }}
-            >
+            <button className="w-8 h-8 rounded-lg text-sm flex items-center justify-center border border-base-content/10 text-base-content/40">
               ›
             </button>
           </div>

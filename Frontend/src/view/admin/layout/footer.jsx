@@ -2,13 +2,13 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="w-full bg-[#161b27] border-t border-white/5 px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-      <span className="text-white/40 text-center sm:text-left tracking-wide">
+    <footer className="w-full bg-base-300 border-t border-base-content/5 px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-base-content">
+      <span className="text-base-content/50 text-center sm:text-left tracking-wide">
         © {year}{" "}
-        <span className="font-bold text-white">Garuda Melayu</span> —{" "}
+        <span className="font-bold text-base-content">Garuda Melayu</span> —{" "}
         Futsal & SSB. All rights reserved.
       </span>
-      <span className="font-medium text-white/25 bg-white/5 px-3 py-1 rounded-full border border-white/5 hover:text-white/50 transition-colors cursor-default">
+      <span className="font-medium text-base-content/40 bg-base-content/5 px-3 py-1 rounded-full border border-base-content/10 hover:text-base-content/70 transition-colors cursor-default">
         v1.0.0
       </span>
     </footer>

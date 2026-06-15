@@ -1,2 +1,8 @@
 @import "tailwindcss";
+
+@plugin "daisyui" {
+  /* Daftarkan 'dim' sebagai tema pertama (default) dan 'silk' sebagai tema kedua */
+  themes: dim, silk; 
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
