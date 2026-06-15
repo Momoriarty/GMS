@@ -20,7 +20,12 @@ export default function Peserta() {
         { key: "name", label: "Nama", type: "avatar", subKey: "username" },
         { key: "email", label: "Email" },
         { key: "role", label: "Role", type: "badge" },
-        { key: "status", label: "Status", type: "badge", colorMap: STATUS_COLORS },
+        {
+          key: "status",
+          label: "Status",
+          type: "badge",
+          colorMap: STATUS_COLORS,
+        },
       ]}
       editFields={[
         { key: "name", label: "Nama", type: "text" },
@@ -34,11 +39,15 @@ export default function Peserta() {
         { key: "name", label: "Nama", type: "text", required: true },
         { key: "email", label: "Email", type: "email", required: true },
         { key: "username", label: "Username", type: "text", required: true },
-        { key: "password", label: "Password", type: "password", required: true },
+        {
+          key: "password",
+          label: "Password",
+          type: "password",
+          required: true,
+        },
         { key: "role", label: "Role", options: ["admin", "user", "mentor"] },
         { key: "status", label: "Status", options: ["active", "inactive"] },
       ]}
-
     />
   );
 }
