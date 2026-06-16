@@ -55,7 +55,7 @@ function RouteApp() {
           <Route path="events">
             <Route index element={<Events />} />
 
-            <Route path=":eventId/klasemen" element={<Klasemen />} />
+            <Route path=":id/klasemen" element={<Klasemen />} />
           </Route>
         </Route>
       </Route>

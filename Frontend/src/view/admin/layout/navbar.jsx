@@ -85,7 +85,7 @@ export default function Navbar({
 
                     {/* THEME TOGGLE */}
                     <label className="toggle text-base-content border-none bg-white checked:bg-black [--tglbg:theme(colors.black)] checked:[--tglbg:theme(colors.white)] scale-90 md:scale-100 transition-all duration-200">
-                        <input type="checkbox" value="silk" className="theme-controller" />
+                        <input type="checkbox" value="unfriendlyghost" className="theme-controller" />
                         <svg aria-label="moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                             <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
                                 <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>

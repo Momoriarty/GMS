@@ -9,69 +9,36 @@ use Symfony\Component\HttpFoundation\Response;
 
 class KlasemenController extends Controller
 {
-    /**
-     * Get klasemen (dengan filter event)
-     */
     public function index(Request $request)
     {
-        $query = Klasemen::with(['event', 'tim'])->orderBy('poin', 'desc');
+        $query = Klasemen::with('tim')
+            ->orderByDesc('poin')
+            ->orderByRaw('(gol_masuk - gol_kemasukan) DESC')
+            ->orderByDesc('gol_masuk');
 
         if ($request->event_id) {
             $query->where('event_id', $request->event_id);
         }
 
-        $klasemen = $query->get();
+        $klasemen = $query->get()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'nama_tim' => $item->tim?->nama_tim,
+                'main' => $item->main,
+                'menang' => $item->menang,
+                'seri' => $item->seri,
+                'kalah' => $item->kalah,
+                'gol_masuk' => $item->gol_masuk,
+                'gol_kemasukan' => $item->gol_kemasukan,
+                'selisih_gol' => $item->gol_masuk - $item->gol_kemasukan,
+                'poin' => $item->poin,
+            ];
+        });
 
         return response()->json([
             'success' => true,
             'data' => $klasemen
         ]);
-    }
-
-    /**
-     * Get single klasemen entry
-     */
-    public function show(int $id)
-    {
-        $klasemen = Klasemen::with(['event', 'tim'])->find($id);
-        
-        if (!$klasemen) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Klasemen tidak ditemukan'
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => $klasemen
-        ]);
-    }
-
-    /**
-     * Create klasemen entry
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'event_id' => 'required|exists:events,id',
-            'tim_id' => 'required|exists:tim,id',
-            'main' => 'required|integer|min:0',
-            'menang' => 'required|integer|min:0',
-            'seri' => 'required|integer|min:0',
-            'kalah' => 'required|integer|min:0',
-            'poin' => 'required|integer|min:0',
-            'gol_masuk' => 'required|integer|min:0',
-            'gol_kemasukan' => 'required|integer|min:0',
-        ]);
-
-        $klasemen = Klasemen::create($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Klasemen berhasil dibuat',
-            'data' => $klasemen
-        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -80,7 +47,7 @@ class KlasemenController extends Controller
     public function update(Request $request, int $id)
     {
         $klasemen = Klasemen::find($id);
-        
+
         if (!$klasemen) {
             return response()->json([
                 'success' => false,

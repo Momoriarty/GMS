@@ -1,90 +1,36 @@
 import DataTable from "../DataTable";
-import { Users, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const STATUS_COLORS = {
-  draft: {
-    bg: "bg-warning/10",         // Adaptif bawaan tailwind/daisyui
-    color: "text-warning-content dark:text-warning", 
-    dot: true,
-  },
-  aktif: {
-    bg: "bg-success/10",
-    color: "text-success-content dark:text-success",
-    dot: true,
-  },
-  selesai: {
-    bg: "bg-info/10",
-    color: "text-info-content dark:text-info",
-    dot: true,
-  },
+  draft:   { cls: "badge-warning", dot: true },
+  aktif:   { cls: "badge-success", dot: true },
+  selesai: { cls: "badge-info",    dot: true },
 };
 
 const eventFields = [
-  {
-    key: "nama_event",
-    label: "Nama Event",
-    type: "text",
-    required: true,
-  },
-  {
-    key: "deskripsi",
-    label: "Deskripsi",
-    type: "textarea",
-  },
-  {
-    key: "tanggal_mulai",
-    label: "Tanggal Mulai",
-    type: "date",
-    required: true,
-  },
-  {
-    key: "tanggal_selesai",
-    label: "Tanggal Selesai",
-    type: "date",
-    required: true,
-  },
-  {
-    key: "lokasi",
-    label: "Lokasi",
-    type: "text",
-    required: true,
-  },
-  {
-    key: "kuota_tim",
-    label: "Kuota Tim",
-    type: "number",
-    required: true,
-  },
-  {
-    key: "biaya_pendaftaran",
-    label: "Biaya Pendaftaran",
-    type: "number",
-    required: true,
-  },
-  {
-    key: "status",
-    label: "Status",
-    options: ["draft", "aktif", "selesai"],
-  },
+  { key: "nama_event",        label: "Nama Event",             type: "text",     placeholder: "Contoh: Turnamen Futsal Garuda Cup 2025", required: true },
+  { key: "deskripsi",         label: "Deskripsi",              type: "textarea", placeholder: "Deskripsi singkat tentang event ini…" },
+  { key: "lokasi",            label: "Lokasi",                 type: "text",     placeholder: "Contoh: GOR Garuda, Pekanbaru", required: true },
+  { key: "tanggal_mulai",     label: "Tanggal Mulai",          type: "date",     required: true },
+  { key: "tanggal_selesai",   label: "Tanggal Selesai",        type: "date",     required: true },
+  { key: "kuota_tim",         label: "Kuota Tim",              type: "number",   placeholder: "Contoh: 16", hint: "Jumlah maksimal tim", required: true },
+  { key: "biaya_pendaftaran", label: "Biaya Pendaftaran (Rp)", type: "number",   placeholder: "Contoh: 500000", hint: "Nominal rupiah tanpa titik/koma", required: true },
+  { key: "status",            label: "Status",                 options: [
+    { value: "draft", label: "Draft" },
+    { value: "aktif", label: "Aktif" },
+    { value: "selesai", label: "Selesai" },
+  ]},
 ];
 
 const columns = [
-  { key: "nama_event", label: "Nama Event" },
-  { key: "lokasi", label: "Lokasi" },
-  { key: "tanggal_mulai", label: "Tanggal Mulai" },
-  { key: "tanggal_selesai", label: "Tanggal Selesai" },
-  { key: "kuota_tim", label: "Kuota Tim" },
-  {
-    key: "biaya_pendaftaran",
-    label: "Biaya Pendaftaran",
-  },
-  {
-    key: "status",
-    label: "Status",
-    type: "badge",
-    colorMap: STATUS_COLORS,
-  },
+  { key: "nama_event",        label: "Nama Event"        },
+  { key: "lokasi",            label: "Lokasi"            },
+  { key: "tanggal_mulai",     label: "Tgl Mulai",        type: "date"     },
+  { key: "tanggal_selesai",   label: "Tgl Selesai",      type: "date"     },
+  { key: "kuota_tim",         label: "Kuota",            type: "number"   },
+  { key: "biaya_pendaftaran", label: "Biaya Daftar",     type: "currency" },
+  { key: "status",            label: "Status",           type: "badge", colorMap: STATUS_COLORS },
 ];
 
 export default function Event() {
@@ -94,25 +40,25 @@ export default function Event() {
     <DataTable
       endpoint="http://127.0.0.1:8000/api/events"
       title="Daftar Event"
+      dataKey="data"
+      perPage={10}
       searchFields={["nama_event", "lokasi"]}
       filterFields={["status"]}
       columns={columns}
       editable
-      
-      creatable
+      editFields={eventFields}
+      deletable
       deleteLabelKey="nama_event"
       deleteSubKey="lokasi"
-      editFields={eventFields}
+      creatable
       createFields={eventFields}
       actions={[
         {
-          icon: <Calendar size={14} />,
-          tooltip: "Klasemen",
+          icon: <Calendar size={13} />,
           label: "Klasemen",
-          color: "#3b82f6",
-          onClick: (row) => {
-            navigate(`/admin/events/${row.id}/klasemen`);
-          },
+          tooltip: "Lihat Klasemen",
+          color: "oklch(var(--in))",
+          onClick: (row) => navigate(`/admin/events/${row.id}/klasemen`),
         },
       ]}
     />
