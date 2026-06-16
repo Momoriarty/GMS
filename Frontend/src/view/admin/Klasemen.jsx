@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import DataTable from "../DataTable";
+import { Calendar } from "lucide-react";
+
+const API_BASE = "http://127.0.0.1:8000/api";
 
 const klasemenFields = [
   {
@@ -12,98 +15,85 @@ const klasemenFields = [
 ];
 
 const columns = [
-  {
-    key: "nama_tim",
-    label: "Tim",
-  },
-  {
-    key: "main",
-    label: "M",
-  },
-  {
-    key: "menang",
-    label: "W",
-  },
-  {
-    key: "seri",
-    label: "D",
-  },
-  {
-    key: "kalah",
-    label: "L",
-  },
-  {
-    key: "gol_masuk",
-    label: "GM",
-  },
-  {
-    key: "gol_kemasukan",
-    label: "GK",
-  },
-  {
-    key: "selisih_gol",
-    label: "SG",
-  },
-  {
-    key: "poin",
-    label: "Pts",
-  },
+  { key: "nama_tim", label: "Tim" },
+  { key: "main", label: "M" },
+  { key: "menang", label: "W" },
+  { key: "seri", label: "D" },
+  { key: "kalah", label: "L" },
+  { key: "gol_masuk", label: "GM" },
+  { key: "gol_kemasukan", label: "GK" },
+  { key: "selisih_gol", label: "SG" },
+  { key: "poin", label: "Pts" },
 ];
 
 export default function Klasemen() {
   const { id } = useParams();
+  const navigate = useNavigate(); // ✅ FIX UTAMA
+
   const [namaEvent, setNamaEvent] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
+
     const fetchEvent = async () => {
+      setLoading(true);
+
       try {
         const token = localStorage.getItem("token");
 
-        const response = await fetch(
-          `http://127.0.0.1:8000/api/events/${id}`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await fetch(`${API_BASE}/events/${id}`, {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-        if (!response.ok) {
-          console.error(
-            "Gagal mengambil event:",
-            response.status,
-            response.statusText
-          );
-          return;
+        if (!res.ok) {
+          throw new Error(`HTTP Error ${res.status}`);
         }
 
-        const result = await response.json();
+        const json = await res.json();
 
-        setNamaEvent(
-          result.data?.nama_event ||
-            result.nama_event ||
-            result.data?.event?.nama_event ||
-            "Event"
-        );
-      } catch (error) {
-        console.error("Gagal mengambil data event:", error);
+        const eventName =
+          json?.data?.nama_event ??
+          json?.data?.event?.nama_event ??
+          json?.nama_event ??
+          "Event";
+
+        setNamaEvent(eventName);
+      } catch (err) {
+        console.error("Gagal ambil event:", err);
+        setNamaEvent("Event");
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (id) {
-      fetchEvent();
-    }
+    fetchEvent();
   }, [id]);
 
   return (
     <DataTable
-      endpoint={`http://127.0.0.1:8000/api/klasemen?event_id=${id}`}
-      title={`Data Klasemen${namaEvent ? ` - ${namaEvent}` : ""}`}
-      searchFields={["tim_id"]}
+      endpoint={`${API_BASE}/klasemen?event_id=${id}`}
+      title={
+        loading
+          ? "Data Klasemen..."
+          : `Data Klasemen - ${namaEvent}`
+      }
+      searchFields={["tim_id", "nama_tim"]}
       columns={columns}
       createFields={klasemenFields}
+      actions={[
+        {
+          icon: <Calendar size={13} />,
+          label: "Jadwal",
+          tooltip: "Lihat Jadwal Tim",
+          color: "oklch(var(--su))",
+          onClick: (row) =>
+            navigate(`/admin/events/${id}/tim/${row.id}/jadwal`)
+        },
+      ]}
     />
   );
 }

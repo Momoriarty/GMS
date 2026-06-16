@@ -42,8 +42,6 @@ function RouteApp() {
 
           <Route path="pengguna" element={<Pengguna />} />
 
-          <Route path="jadwal-pertandingan" element={<JadwalPertandingan />} />
-
           <Route path="hasil-pertandingan" element={<HasilPertandingan />} />
 
           <Route path="pendaftaran" element={<Pendaftaran />} />
@@ -56,7 +54,15 @@ function RouteApp() {
             <Route index element={<Events />} />
 
             <Route path=":id/klasemen" element={<Klasemen />} />
+            <Route path=":id/jadwal" element={<JadwalPertandingan />} />
+
+            <Route
+              path=":id/tim/:timId/jadwal"
+              element={<JadwalPertandingan />}
+            />
           </Route>
+
+
         </Route>
       </Route>
 

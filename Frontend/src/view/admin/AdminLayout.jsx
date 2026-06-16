@@ -20,11 +20,12 @@ export default function AdminLayout() {
 
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="flex-1 min-h-screen flex flex-col lg:ml-[220px]">
+      {/* Konten utama — min-w-0 wajib agar flex child tidak overflow sidebar */}
+      <div className="flex-1 min-w-0 min-h-screen flex flex-col lg:ml-[220px]">
         <Navbar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
-        <main className="flex-1 p-4 md:p-6 mt-[68px] flex flex-col">
-          <div className="flex-1">
+        <main className="flex-1 min-w-0 p-4 md:p-6 mt-[68px] flex flex-col overflow-x-hidden">
+          <div className="flex-1 min-w-0">
             <Outlet />
           </div>
         </main>

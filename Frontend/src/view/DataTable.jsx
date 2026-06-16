@@ -338,34 +338,116 @@ function ModalDelete({ modalId, row, labelKey = "name", subLabelKey, onSubmit, o
 
 // ─── Modal Create ──────────────────────────────────────────────────────────
 
-function ModalCreate({ modalId, createFields, onSubmit, onClose }) {
-  const init = Object.fromEntries(createFields.map((f) => {
-    if (f.options?.length > 0) return [f.key, String(f.options[0].value ?? f.options[0]).trim()];
-    return [f.key, f.default ?? ""];
-  }));
+function ModalCreate({
+  modalId,
+  createFields,
+  onSubmit,
+  onClose,
+  formColumns = 2,
+}) {
+  const init = Object.fromEntries(
+    createFields.map((f) => {
+      if (f.options?.length > 0) {
+        return [
+          f.key,
+          String(f.options[0].value ?? f.options[0]).trim(),
+        ];
+      }
+      return [f.key, f.default ?? ""];
+    })
+  );
+
   const [form, setForm] = useState(init);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const set = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
+
+  const set = (k) => (e) =>
+    setForm((p) => ({
+      ...p,
+      [k]: e.target.value,
+    }));
 
   const save = async () => {
-    setLoading(true); setError("");
-    try { await onSubmit(form); document.getElementById(modalId)?.close(); onClose(); setForm(init); }
-    catch (err) { setError(err.response?.data?.message || "Gagal menyimpan."); }
-    finally { setLoading(false); }
+    setLoading(true);
+    setError("");
+
+    try {
+      await onSubmit(form);
+
+      document.getElementById(modalId)?.close();
+
+      onClose();
+      setForm(init);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Gagal menyimpan."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <dialog id={modalId} className="modal modal-bottom sm:modal-middle">
-      <div className="modal-box p-0 overflow-hidden">
-        <ModalHeader title="Tambah Data" icon={<Plus size={14} />} />
-        <div className="px-5 py-4 flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
-          {error && <div role="alert" className="alert alert-error py-2 text-xs"><X size={13} />{error}</div>}
-          {createFields.map((f) => <FormField key={f.key} f={f} value={form[f.key]} onChange={set(f.key)} />)}
+    <dialog
+      id={modalId}
+      className="modal modal-bottom sm:modal-middle"
+    >
+      <div className="modal-box p-0 overflow-hidden max-w-4xl">
+        <ModalHeader
+          title="Tambah Data"
+          icon={<Plus size={14} />}
+        />
+
+        <div
+          className={`px-5 py-4 grid gap-3 max-h-[60vh] overflow-y-auto ${formColumns === 3
+              ? "grid-cols-3"
+              : formColumns === 2
+                ? "grid-cols-2"
+                : "grid-cols-1"
+            }`}
+        >
+          {error && (
+            <div
+              role="alert"
+              className={`alert alert-error py-2 text-xs ${formColumns > 1 ? "col-span-full" : ""
+                }`}
+            >
+              <X size={13} />
+              {error}
+            </div>
+          )}
+
+          {createFields.map((f) => (
+            <div
+              key={f.key}
+              className={
+                f.colSpan === 3
+                  ? "col-span-3"
+                  : f.colSpan === 2
+                    ? "col-span-2"
+                    : ""
+              }
+            >
+              <FormField
+                f={f}
+                value={form[f.key]}
+                onChange={set(f.key)}
+              />
+            </div>
+          ))}
         </div>
-        <ModalFooter onConfirm={save} loading={loading} label="Simpan" />
+
+        <ModalFooter
+          onConfirm={save}
+          loading={loading}
+          label="Simpan"
+        />
       </div>
-      <form method="dialog" className="modal-backdrop"><button onClick={onClose}>close</button></form>
+
+      <form method="dialog" className="modal-backdrop">
+        <button onClick={onClose}>close</button>
+      </form>
     </dialog>
   );
 }
@@ -540,13 +622,13 @@ export default function DataTable({
   const renderCell = (row, col) => {
     if (col.render) return col.render(row);
     switch (col.type) {
-      case "avatar":   return <CellAvatar row={row} col={col} />;
-      case "badge":    return <CellBadge row={row} col={col} />;
-      case "date":     return <CellDate row={row} col={col} />;
+      case "avatar": return <CellAvatar row={row} col={col} />;
+      case "badge": return <CellBadge row={row} col={col} />;
+      case "date": return <CellDate row={row} col={col} />;
       case "datetime": return <CellDateTime row={row} col={col} />;
       case "currency": return <CellCurrency row={row} col={col} />;
-      case "number":   return <CellNumber row={row} col={col} />;
-      default:         return <CellText row={row} col={col} />;
+      case "number": return <CellNumber row={row} col={col} />;
+      default: return <CellText row={row} col={col} />;
     }
   };
 
@@ -563,7 +645,7 @@ export default function DataTable({
 
       <ModalEdit modalId={MODAL_EDIT} row={activeRow} editFields={editFields} onSubmit={handleEdit} onClose={() => setActiveRow(null)} />
       <ModalDelete modalId={MODAL_DEL} row={activeRow} labelKey={deleteLabelKey || columns[0]?.key || "name"} subLabelKey={deleteSubKey} onSubmit={handleDelete} onClose={() => setActiveRow(null)} />
-      <ModalCreate modalId={MODAL_CREATE} createFields={createFields} onSubmit={handleCreate} onClose={() => {}} />
+      <ModalCreate modalId={MODAL_CREATE} createFields={createFields} onSubmit={handleCreate} onClose={() => { }} />
 
       <div className="card bg-base-100 border border-base-content/10 shadow-sm w-full min-w-0 overflow-hidden">
 
@@ -621,23 +703,31 @@ export default function DataTable({
           )}
         </div>
 
-        {/* Table — scroll horizontal jika konten melebihi lebar container */}
+        {/* Table — scroll horizontal hanya jika benar-benar tidak muat */}
         <div className="overflow-x-auto dt-scroll w-full">
-          <table className="table table-sm w-full" style={{ minWidth: "max-content" }}>
+          <table className="table table-sm w-full">
             <thead>
               <tr className="bg-base-200/40">
-                <th className="w-10 text-[10px] font-semibold uppercase tracking-widest text-base-content/30">#</th>
+                <th className="w-8 text-[10px] font-semibold uppercase tracking-widest text-base-content/30 shrink-0">#</th>
                 {columns.map((col) => (
                   <th key={col.key}
                     onClick={() => !col.noSort && handleSort(col.key)}
-                    className={`text-[10px] font-semibold uppercase tracking-widest text-base-content/40 whitespace-nowrap select-none
-                      ${!col.noSort && sortable ? "cursor-pointer hover:text-base-content/70 transition-colors" : ""}`}>
+                    style={col.width ? { width: col.width } : undefined}
+                    className={[
+                      "text-[10px] font-semibold uppercase tracking-widest text-base-content/40 select-none",
+                      // kolom angka/tanggal/badge → nowrap; teks panjang → bisa wrap
+                      ["date", "datetime", "currency", "number", "badge"].includes(col.type)
+                        ? "whitespace-nowrap"
+                        : "max-w-[180px]",
+                      !col.noSort && sortable ? "cursor-pointer hover:text-base-content/70 transition-colors" : "",
+                      col.className || "",
+                    ].join(" ")}>
                     {col.label}
                     {!col.noSort && sortable && <SortIcon colKey={col.key} sortKey={sortKey} sortDir={sortDir} />}
                   </th>
                 ))}
                 {showActions && (
-                  <th className="text-[10px] font-semibold uppercase tracking-widest text-base-content/40 sticky right-0 bg-base-200 z-10 shadow-[-8px_0_12px_-4px_oklch(var(--b2)/0.5)]">
+                  <th className="text-[10px] font-semibold uppercase tracking-widest text-base-content/40 whitespace-nowrap w-fit">
                     Aksi
                   </th>
                 )}
@@ -666,27 +756,37 @@ export default function DataTable({
               ) : (
                 pageData.map((row, i) => (
                   <tr key={row.id ?? i} className="hover transition-colors border-b border-base-content/[0.04] last:border-0 group">
-                    <td className="text-xs text-base-content/30 tabular-nums w-10">
+                    <td className="text-xs text-base-content/30 tabular-nums w-8 shrink-0">
                       {(safePage - 1) * perPage + i + 1}
                     </td>
                     {columns.map((col) => (
-                      <td key={col.key} className={col.className || ""}>
+                      <td key={col.key}
+                        style={col.width ? { width: col.width } : undefined}
+                        className={[
+                          ["date", "datetime", "currency", "number", "badge"].includes(col.type)
+                            ? "whitespace-nowrap"
+                            : "break-words",
+                          col.className || "",
+                        ].join(" ")}>
                         {renderCell(row, col)}
                       </td>
                     ))}
                     {showActions && (
-                      <td className="sticky right-0 bg-base-100 group-hover:bg-base-200/60 z-10 shadow-[-8px_0_12px_-4px_oklch(var(--b2)/0.4)] transition-colors">
-                        <div className="flex items-center gap-1 flex-nowrap">
+                      <td className="whitespace-nowrap">
+                        {/* Desktop: label + icon | Mobile: icon only */}
+                        <div className="flex items-center gap-0.5">
                           {editable && (
                             <button onClick={() => { setActiveRow(row); openModal(MODAL_EDIT); }}
-                              className="btn btn-xs btn-ghost gap-1 text-base-content/60 hover:text-base-content">
-                              <Edit2 size={11} /> Edit
+                              className="btn btn-xs btn-ghost text-base-content/60 hover:text-base-content gap-1">
+                              <Edit2 size={11} />
+                              <span className="hidden sm:inline">Edit</span>
                             </button>
                           )}
                           {deletable && (
                             <button onClick={() => { setActiveRow(row); openModal(MODAL_DEL); }}
-                              className="btn btn-xs btn-ghost gap-1 text-error/70 hover:text-error hover:bg-error/10">
-                              <Trash2 size={11} /> Hapus
+                              className="btn btn-xs btn-ghost text-error/60 hover:text-error hover:bg-error/10 gap-1">
+                              <Trash2 size={11} />
+                              <span className="hidden sm:inline">Hapus</span>
                             </button>
                           )}
                           {actions.map((action, index) => (
@@ -694,7 +794,8 @@ export default function DataTable({
                               <button onClick={() => action.onClick(row)}
                                 className="btn btn-xs btn-ghost gap-1"
                                 style={{ color: action.color || undefined }}>
-                                {action.icon}{action.label}
+                                {action.icon}
+                                <span className="hidden sm:inline">{action.label}</span>
                               </button>
                             </div>
                           ))}
