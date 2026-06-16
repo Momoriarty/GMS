@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Bell, Calendar, ChevronDown, Settings, User, HelpCircle, LogOut } from "lucide-react";
+import { Bell, Calendar, ChevronDown, Settings, User, HelpCircle, LogOut, Menu } from "lucide-react";
 
 export default function Navbar({
     title = "Dashboard Overview",
     subtitle = "Selamat datang kembali, Admin Garuda",
-    themeToggle,   
+    themeToggle,
+    onMenuToggle,
 }) {
     const [notifOpen, setNotifOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
@@ -18,7 +19,7 @@ export default function Navbar({
         weekday: "long", day: "numeric", month: "long", year: "numeric",
     });
 
-    const notifications = []; 
+    const notifications = [];
 
     const profileMenuItems = [
         { label: "Profil Saya", icon: User },
@@ -58,79 +59,60 @@ export default function Navbar({
 
     return (
         <>
-            {/* Overlay penutup dropdown */}
             {(notifOpen || profileOpen) && (
                 <div className="fixed inset-0 z-40" onClick={closeAll} />
             )}
 
-            {/* HEADER UTAMA: Menggunakan warna adaptif daisyUI (bg-base-100/80 dan text-base-content) */}
-            <header className="fixed top-0 left-[220px] right-0 h-[68px] flex items-center justify-between px-7 z-50 backdrop-blur-md bg-base-100/80 border-b border-base-content/5 text-base-content transition-all duration-300">
-                
-                {/* SISI KIRI: Judul Dinamis */}
-                <div>
-                    <h1 className="text-[15px] font-bold leading-tight text-base-content">
-                        {title}
-                    </h1>
-                    <p className="text-[11px] mt-0.5 font-medium text-base-content/50">
-                        {subtitle}
-                    </p>
+            <header className="fixed top-0 left-0 lg:left-[220px] right-0 h-[68px] flex items-center justify-between px-4 md:px-7 z-50 backdrop-blur-md bg-base-100/80 border-b border-base-content/5 text-base-content transition-all duration-300">
+
+                {/* KIRI */}
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={onMenuToggle}
+                        className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-base-200 text-base-content/70"
+                    >
+                        <Menu size={18} />
+                    </button>
+
+                    <div>
+                        <h1 className="text-[15px] font-bold leading-tight text-base-content">{title}</h1>
+                        <p className="text-[11px] mt-0.5 font-medium text-base-content/50 hidden sm:block">{subtitle}</p>
+                    </div>
                 </div>
 
-                {themeToggle}
-
-                {/* SISI KANAN: Kontrol & Identitas */}
+                {/* KANAN */}
                 <div className="flex items-center gap-2.5">
 
-                    {/* SAKELAR SWAP TEMA (DAISYUI SWAP CONTROLLER) */}
-                    {/* SAKELAR TEMA MODEL TOGEL KAPSUL (LOGIKA & WARNA FIX) */}
-<label className="toggle text-base-content border-none bg-white checked:bg-black [--tglbg:theme(colors.black)] checked:[--tglbg:theme(colors.white)] scale-90 md:scale-100 transition-all duration-200">
-  
-  {/* Input Theme Controller (Akan bernilai ON saat ke kanan/tema terang) */}
-  <input 
-    type="checkbox" 
-    value="silk" 
-    className="theme-controller" 
-  />
+                    {/* THEME TOGGLE */}
+                    <label className="toggle text-base-content border-none bg-white checked:bg-black [--tglbg:theme(colors.black)] checked:[--tglbg:theme(colors.white)] scale-90 md:scale-100 transition-all duration-200">
+                        <input type="checkbox" value="silk" className="theme-controller" />
+                        <svg aria-label="moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
+                                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                            </g>
+                        </svg>
+                        <svg aria-label="sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="4"></circle>
+                                <path d="M12 2v2"></path>
+                                <path d="M12 20v2"></path>
+                                <path d="m4.93 4.93 1.41 1.41"></path>
+                                <path d="m17.66 17.66 1.41 1.41"></path>
+                                <path d="M2 12h2"></path>
+                                <path d="M20 12h2"></path>
+                                <path d="m6.34 17.66-1.41 1.41"></path>
+                                <path d="m19.07 4.93-1.41 1.41"></path>
+                            </g>
+                        </svg>
+                    </label>
 
-  {/* IKON BULAN (Muncul di Kiri saat OFF / Mode Gelap) */}
-  <svg 
-    aria-label="moon" 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24"
-  >
-    <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
-      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-    </g>
-  </svg>
-
-  {/* IKON MATAHARI (Muncul di Kanan saat ON / Mode Terang) */}
-  <svg 
-    aria-label="sun" 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24"
-  >
-    <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
-      <circle cx="12" cy="12" r="4"></circle>
-      <path d="M12 2v2"></path>
-      <path d="M12 20v2"></path>
-      <path d="m4.93 4.93 1.41 1.41"></path>
-      <path d="m17.66 17.66 1.41 1.41"></path>
-      <path d="M2 12h2"></path>
-      <path d="M20 12h2"></path>
-      <path d="m6.34 17.66-1.41 1.41"></path>
-      <path d="m19.07 4.93-1.41 1.41"></path>
-    </g>
-  </svg>
-
-</label>
-
-                    {/* KOMPONEN TANGGAL */}
-                    <div className="flex items-center gap-2 px-4 py-2 text-[12px] font-semibold rounded-xl bg-base-200 border border-base-content/5 text-base-content/70 transition-all duration-300">
+                    {/* TANGGAL */}
+                    <div className="hidden md:flex items-center gap-2 px-4 py-2 text-[12px] font-semibold rounded-xl bg-base-200 border border-base-content/5 text-base-content/70 transition-all duration-300">
                         <Calendar size={13} className="text-base-content/40" />
                         {formattedDate}
                     </div>
 
-                    {/* NOTIFIKASI BELL */}
+                    {/* NOTIFIKASI */}
                     <div className="relative z-50">
                         <button
                             onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}
@@ -144,9 +126,8 @@ export default function Navbar({
                             )}
                         </button>
 
-                        {/* NOTIFIKASI DROPDOWN */}
                         {notifOpen && (
-                            <div className="absolute top-14 right-0 w-[320px] rounded-2xl overflow-hidden mt-1 shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-base-200 border border-base-content/10 transition-colors duration-300">
+                            <div className="absolute top-14 right-0 w-[300px] md:w-[320px] rounded-2xl overflow-hidden mt-1 shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-base-200 border border-base-content/10 transition-colors duration-300">
                                 <div className="flex items-center justify-between px-4 py-3.5 border-b border-base-content/10">
                                     <div className="flex items-center gap-2">
                                         <span className="font-bold text-[13px] text-base-content">Notifikasi</span>
@@ -156,11 +137,9 @@ export default function Navbar({
                                         Tandai semua dibaca
                                     </button>
                                 </div>
-
                                 <div className="px-4 py-6 text-center text-[12px] text-base-content/50">
                                     Tidak ada notifikasi terbaru.
                                 </div>
-
                                 <div className="px-4 py-3 bg-base-300/40 border-t border-base-content/5">
                                     <button className="w-full text-center text-[11px] font-bold text-base-content/50 hover:text-base-content/80">
                                         Lihat semua notifikasi →
@@ -170,7 +149,7 @@ export default function Navbar({
                         )}
                     </div>
 
-                    {/* PROFIL DROPDOWN */}
+                    {/* PROFIL */}
                     <div className="relative z-50">
                         <button
                             onClick={() => { setProfileOpen(!profileOpen); setNotifOpen(false); }}

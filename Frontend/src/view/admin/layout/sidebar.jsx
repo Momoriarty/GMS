@@ -15,14 +15,14 @@ import {
 } from "lucide-react";
 
 function NavItem({ item }) {
+
   return (
     <NavLink
       to={item.href}
       className={({ isActive }) =>
-        `flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 relative group border ${
-          isActive
-            ? "bg-warning/10 text-warning border-warning/20"
-            : "text-base-content/70 border-transparent hover:bg-base-200 hover:text-base-content"
+        `flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 relative group border ${isActive
+          ? "bg-warning/10 text-warning border-warning/20"
+          : "text-base-content/70 border-transparent hover:bg-base-200 hover:text-base-content"
         }`
       }
     >
@@ -45,7 +45,7 @@ function NavItem({ item }) {
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
 
   const [menuUtama, setMenuUtama] = useState([]);
@@ -76,7 +76,20 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[220px] flex flex-col z-50 bg-base-300 border-r border-base-content/5 text-base-content">
+    <aside className={`
+      fixed left-0 top-0 bottom-0 w-[220px] flex flex-col z-50
+      bg-base-300 border-r border-base-content/5 text-base-content
+      transition-transform duration-300 ease-in-out
+      ${isOpen ? "translate-x-0" : "-translate-x-full"}
+      lg:translate-x-0
+    `}>
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 lg:hidden text-base-content/50 hover:text-base-content"
+      >
+        ✕
+      </button>
+
       {/* Logo */}
       <div className="px-5 pt-6 pb-5 border-b border-base-content/5">
         <div className="flex items-center gap-3">

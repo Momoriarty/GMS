@@ -1,35 +1,35 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
-
-// Pastikan path-nya sesuai dengan struktur folder Anda
 import Sidebar from "./layout/sidebar";
 import Navbar from "./layout/navbar";
 import Footer from "./layout/footer";
 
 export default function AdminLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    // KUNCI PERUBAHAN: Mengganti style="#0d1117" dan text-slate-100 dengan class semantik DaisyUI
     <div className="min-h-screen flex bg-base-300 text-base-content transition-colors duration-300">
-      
-      {/* Sidebar tetap di kiri */}
-      <Sidebar />
 
-      {/* Area konten kanan */}
-      <div className="flex-1 min-h-screen flex flex-col ml-[220px]">
+      {/* Overlay mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-        {/* Navbar otomatis mengontrol dan membaca status tema */}
-        <Navbar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        {/* Konten Utama */}
-        <main className="flex-1 p-6 mt-[68px] flex flex-col">
+      <div className="flex-1 min-h-screen flex flex-col lg:ml-[220px]">
+        <Navbar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+
+        <main className="flex-1 p-4 md:p-6 mt-[68px] flex flex-col">
           <div className="flex-1">
-            {/* Semua halaman (Event, Pengguna, Profil) akan masuk di sini */}
             <Outlet />
           </div>
         </main>
 
-        {/* Footer adaptif */}
         <Footer />
-
       </div>
     </div>
   );

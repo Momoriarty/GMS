@@ -15,171 +15,62 @@ import {
 // ─── Internal helpers ──────────────────────────────────────────────────────
 
 const COLORS = [
-  { bg: "rgba(178,219,249,0.15)", color: "#93c5fd" },
-  { bg: "rgba(250,199,117,0.15)", color: "#fcd34d" },
-  { bg: "rgba(174,179,236,0.15)", color: "#a5b4fc" },
-  { bg: "rgba(160,225,203,0.15)", color: "#6ee7b7" },
-  { bg: "rgba(240,153,123,0.15)", color: "#fca5a5" },
+  { bg: "oklch(var(--in)/0.15)", color: "oklch(var(--in))" },
+  { bg: "oklch(var(--wa)/0.15)", color: "oklch(var(--wa))" },
+  { bg: "oklch(var(--su)/0.15)", color: "oklch(var(--su))" },
+  { bg: "oklch(var(--er)/0.15)", color: "oklch(var(--er))" },
+  { bg: "oklch(var(--p)/0.15)", color: "oklch(var(--p))" },
 ];
 const avatarColor = (n = "") => COLORS[(n?.charCodeAt(0) || 0) % COLORS.length];
 const initials = (n = "") =>
-  n
-    .split(" ")
-    .map((w) => w[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase() || "--";
+  n.split(" ").map((w) => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase() || "--";
 const authHeaders = () => {
   const t = localStorage.getItem("token");
   return t ? { Authorization: `Bearer ${t}` } : {};
 };
 
-// ─── Toast notification ────────────────────────────────────────────────────
+// ─── Toast ─────────────────────────────────────────────────────────────────
 
 function Toast({ toasts }) {
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: 24,
-        right: 24,
-        zIndex: 200,
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-      }}
-    >
+    <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-2">
       {toasts.map((t) => (
         <div
           key={t.id}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "12px 16px",
-            borderRadius: 10,
-            minWidth: 220,
-            maxWidth: 320,
-            background:
-              t.type === "success"
-                ? "rgba(16, 185, 129, 0.1)"
-                : "rgba(239, 68, 68, 0.1)",
-            border: `1px solid ${t.type === "success" ? "rgba(52,211,153,0.3)" : "rgba(248,113,113,0.3)"}`,
-            boxShadow: "0 4px 24px rgba(0,0,0,0.4)",
-            animation: "slideIn 0.2s ease",
-            backdropFilter: "blur(8px)",
-          }}
+          className={`flex items-center gap-2.5 px-4 py-3 rounded-xl min-w-[200px] max-w-xs border backdrop-blur-md text-sm shadow-xl
+            ${t.type === "success"
+              ? "bg-success/10 border-success/30 text-success"
+              : "bg-error/10 border-error/30 text-error"
+            }`}
+          style={{ animation: "slideIn 0.2s ease" }}
         >
-          {t.type === "success" ? (
-            <CheckCircle2
-              size={15}
-              style={{ color: "#34d399", flexShrink: 0 }}
-            />
-          ) : (
-            <X size={15} style={{ color: "#f87171", flexShrink: 0 }} />
-          )}
-          <span
-            style={{
-              fontSize: 13,
-              color: t.type === "success" ? "#6ee7b7" : "#fca5a5",
-            }}
-          >
-            {t.message}
-          </span>
+          {t.type === "success"
+            ? <CheckCircle2 size={15} className="shrink-0" />
+            : <X size={15} className="shrink-0" />}
+          <span className="text-[13px]">{t.message}</span>
         </div>
       ))}
-      <style>{`@keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      <style>{`@keyframes slideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }`}</style>
     </div>
   );
 }
 
-// ─── Tiny shared styles ────────────────────────────────────────────────────
-
-const S = {
-  pill: {
-    fontSize: 11,
-    fontWeight: 500,
-    padding: "3px 10px",
-    borderRadius: 999,
-  },
-  inputBase: {
-    fontSize: 12,
-    padding: "7px 10px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.05)",
-    borderRadius: 8,
-    color: "rgba(255,255,255,0.7)",
-    outline: "none",
-  },
-  formInput: {
-    width: "100%",
-    padding: "8px 10px",
-    fontSize: 13,
-    boxSizing: "border-box",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: 8,
-    color: "#fff",
-    outline: "none",
-  },
-  label: {
-    display: "block",
-    fontSize: 11,
-    fontWeight: 500,
-    color: "rgba(255,255,255,0.5)",
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    marginBottom: 6,
-  },
-  btnCancel: {
-    fontSize: 13,
-    padding: "7px 14px",
-    borderRadius: 8,
-    cursor: "pointer",
-    background: "transparent",
-    border: "1px solid rgba(255,255,255,0.1)",
-    color: "rgba(255,255,255,0.6)",
-  },
-};
-
-// ─── Built-in cell renderers ───────────────────────────────────────────────
+// ─── Cell Renderers ────────────────────────────────────────────────────────
 
 function CellAvatar({ row, col }) {
   const ac = avatarColor(row[col.key]);
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div className="flex items-center gap-2.5">
       <div
-        style={{
-          width: 30,
-          height: 30,
-          borderRadius: 8,
-          flexShrink: 0,
-          background: ac.bg,
-          color: ac.color,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 11,
-          fontWeight: 600,
-        }}
+        className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-[11px] font-semibold"
+        style={{ background: ac.bg, color: ac.color }}
       >
         {initials(row[col.key])}
       </div>
       <div>
-        <div style={{ fontSize: 13, fontWeight: 500, color: "#fff" }}>
-          {row[col.key]}
-        </div>
+        <div className="text-[13px] font-medium text-base-content">{row[col.key]}</div>
         {col.subKey && (
-          <div
-            style={{
-              fontSize: 11,
-              color: "rgba(255,255,255,0.4)",
-              marginTop: 1,
-            }}
-          >
-            @{row[col.subKey] || "user"}
-          </div>
+          <div className="text-[11px] text-base-content/40 mt-0.5">@{row[col.subKey] || "user"}</div>
         )}
       </div>
     </div>
@@ -191,26 +82,15 @@ function CellBadge({ row, col }) {
   const cm = col.colorMap?.[val];
   return (
     <span
+      className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border"
       style={{
-        ...S.pill,
-        background: cm?.bg || "rgba(255,255,255,0.06)",
-        border: "1px solid rgba(255,255,255,0.05)",
-        color: cm?.color || "rgba(255,255,255,0.7)",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5,
+        background: cm?.bg || "oklch(var(--bc)/0.06)",
+        borderColor: cm?.bg || "oklch(var(--bc)/0.05)",
+        color: cm?.color || "oklch(var(--bc)/0.7)",
       }}
     >
       {cm?.dot && (
-        <span
-          style={{
-            width: 5,
-            height: 5,
-            borderRadius: "50%",
-            background: cm.color,
-            flexShrink: 0,
-          }}
-        />
+        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cm.color }} />
       )}
       {val}
     </span>
@@ -218,11 +98,7 @@ function CellBadge({ row, col }) {
 }
 
 function CellText({ row, col }) {
-  return (
-    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
-      {row[col.key] ?? "-"}
-    </span>
-  );
+  return <span className="text-[12px] text-base-content/60">{row[col.key] ?? "-"}</span>;
 }
 
 // ─── Overlay + Modal shell ─────────────────────────────────────────────────
@@ -231,29 +107,9 @@ function Overlay({ children, onClose }) {
   return (
     <div
       onClick={(e) => e.target === e.currentTarget && onClose()}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 50,
-        background: "rgba(13,17,23,0.75)",
-        backdropFilter: "blur(4px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-      }}
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
     >
-      <div
-        style={{
-          background: "#161b27",
-          border: "1px solid rgba(255,255,255,0.05)",
-          borderRadius: 14,
-          width: "100%",
-          maxWidth: 420,
-          overflow: "hidden",
-          boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
-        }}
-      >
+      <div className="bg-base-200 border border-base-content/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
         {children}
       </div>
     </div>
@@ -262,73 +118,36 @@ function Overlay({ children, onClose }) {
 
 function ModalHeader({ title, titleColor, icon, onClose }) {
   return (
-    <div
-      style={{
-        padding: "14px 20px",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div className="flex items-center justify-between px-5 py-3.5 border-b border-base-content/10">
+      <div className="flex items-center gap-2">
         {icon}
-        <span
-          style={{ fontSize: 14, fontWeight: 500, color: titleColor || "#fff" }}
-        >
+        <span className="text-[14px] font-medium" style={{ color: titleColor || undefined }}>
           {title}
         </span>
       </div>
-      <button
-        onClick={onClose}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          color: "rgba(255,255,255,0.4)",
-          display: "flex",
-        }}
-      >
+      <button onClick={onClose} className="text-base-content/40 hover:text-base-content transition-colors">
         <X size={15} />
       </button>
     </div>
   );
 }
 
-function ModalFooter({
-  onClose,
-  onConfirm,
-  loading,
-  label,
-  confirmBg,
-  confirmColor,
-}) {
+function ModalFooter({ onClose, onConfirm, loading, label, variant = "default" }) {
+  const confirmClass = variant === "danger"
+    ? "bg-error/15 text-error border border-error/30 hover:bg-error/25"
+    : "bg-base-content/10 text-base-content hover:bg-base-content/15";
   return (
-    <div
-      style={{
-        padding: "14px 20px",
-        borderTop: "1px solid rgba(255,255,255,0.05)",
-        display: "flex",
-        justifyContent: "flex-end",
-        gap: 8,
-      }}
-    >
-      <button onClick={onClose} style={S.btnCancel}>
+    <div className="flex justify-end gap-2 px-5 py-3.5 border-t border-base-content/10">
+      <button
+        onClick={onClose}
+        className="text-[13px] px-3.5 py-1.5 rounded-lg border border-base-content/10 text-base-content/60 hover:text-base-content transition-colors bg-transparent cursor-pointer"
+      >
         Batal
       </button>
       <button
         onClick={onConfirm}
         disabled={loading}
-        style={{
-          fontSize: 13,
-          padding: "7px 16px",
-          borderRadius: 8,
-          border: "none",
-          cursor: "pointer",
-          fontWeight: 500,
-          background: confirmBg,
-          color: confirmColor,
-        }}
+        className={`text-[13px] px-4 py-1.5 rounded-lg font-medium cursor-pointer transition-colors ${confirmClass}`}
       >
         {loading ? "Memproses…" : label}
       </button>
@@ -336,112 +155,68 @@ function ModalFooter({
   );
 }
 
+// ─── Form Field ────────────────────────────────────────────────────────────
+
+function FormField({ f, value, onChange }) {
+  const inputClass = "w-full px-3 py-2 text-[13px] rounded-lg bg-base-300 border border-base-content/10 text-base-content outline-none focus:border-base-content/30 transition-colors";
+  return (
+    <div>
+      <label className="block text-[11px] font-semibold uppercase tracking-widest text-base-content/40 mb-1.5">
+        {f.label}
+      </label>
+      {f.options ? (
+        <select defaultValue={String(value).trim()} onChange={onChange} className={inputClass}>
+          {f.options.map((o) => {
+            const v = String(o.value ?? o).trim();
+            return <option key={v} value={v}>{o.label ?? o}</option>;
+          })}
+        </select>
+      ) : (
+        <input
+          type={f.type || "text"}
+          value={value}
+          onChange={onChange}
+          placeholder={f.placeholder || ""}
+          className={inputClass}
+        />
+      )}
+    </div>
+  );
+}
+
 // ─── Modal Edit ────────────────────────────────────────────────────────────
 
 function ModalEdit({ row, editFields, onClose, onSubmit }) {
-  const initForm = Object.fromEntries(
-    editFields.map((f) => [f.key, String(row[f.key] ?? "").trim()]),
+  const [form, setForm] = useState(
+    Object.fromEntries(editFields.map((f) => [f.key, String(row[f.key] ?? "").trim()]))
   );
-  const [form, setForm] = useState(initForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const set = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
 
   const save = async () => {
     setLoading(true);
     setError("");
-    try {
-      await onSubmit(row.id, form);
-      onClose();
-    } catch (err) {
-      setError(err.response?.data?.message || "Gagal menyimpan.");
-    } finally {
-      setLoading(false);
-    }
+    try { await onSubmit(row.id, form); onClose(); }
+    catch (err) { setError(err.response?.data?.message || "Gagal menyimpan."); }
+    finally { setLoading(false); }
   };
 
   return (
     <Overlay onClose={onClose}>
-      <ModalHeader
-        title="Edit data"
-        icon={<Edit2 size={14} style={{ color: "rgba(255,255,255,0.6)" }} />}
-        onClose={onClose}
-      />
-      <div
-        style={{
-          padding: "18px 20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 14,
-        }}
-      >
-        {error && (
-          <div
-            style={{
-              fontSize: 12,
-              color: "#fca5a5",
-              background: "rgba(239,68,68,0.1)",
-              border: "1px solid rgba(239,68,68,0.2)",
-              borderRadius: 8,
-              padding: "8px 12px",
-            }}
-          >
-            {error}
-          </div>
-        )}
-        {editFields.map((f) => (
-          <div key={f.key}>
-            <label style={S.label}>{f.label}</label>
-            {f.options ? (
-              <select
-                key={f.key + "_" + form[f.key]}
-                defaultValue={String(form[f.key]).trim()}
-                onChange={set(f.key)}
-                style={{ ...S.formInput, color: "rgba(255,255,255,0.7)" }}
-              >
-                {f.options.map((o) => {
-                  const v = String(o.value ?? o).trim();
-                  return (
-                    <option key={v} value={v} style={{ background: "#161b27" }}>
-                      {o.label ?? o}
-                    </option>
-                  );
-                })}
-              </select>
-            ) : (
-              <input
-                type={f.type || "text"}
-                value={form[f.key]}
-                onChange={set(f.key)}
-                placeholder={f.placeholder || ""}
-                style={S.formInput}
-              />
-            )}
-          </div>
-        ))}
+      <ModalHeader title="Edit data" icon={<Edit2 size={14} className="text-base-content/60" />} onClose={onClose} />
+      <div className="px-5 py-4 flex flex-col gap-3.5">
+        {error && <div className="text-[12px] text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2">{error}</div>}
+        {editFields.map((f) => <FormField key={f.key} f={f} value={form[f.key]} onChange={set(f.key)} />)}
       </div>
-      <ModalFooter
-        onClose={onClose}
-        onConfirm={save}
-        loading={loading}
-        label="Simpan"
-        confirmBg="rgba(255,255,255,0.1)"
-        confirmColor="#fff"
-      />
+      <ModalFooter onClose={onClose} onConfirm={save} loading={loading} label="Simpan" />
     </Overlay>
   );
 }
 
 // ─── Modal Delete ──────────────────────────────────────────────────────────
 
-function ModalDelete({
-  row,
-  labelKey = "name",
-  subLabelKey,
-  onClose,
-  onSubmit,
-}) {
+function ModalDelete({ row, labelKey = "name", subLabelKey, onClose, onSubmit }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const ac = avatarColor(row[labelKey]);
@@ -449,103 +224,67 @@ function ModalDelete({
   const del = async () => {
     setLoading(true);
     setError("");
-    try {
-      await onSubmit(row.id);
-      onClose();
-    } catch (err) {
-      setError(err.response?.data?.message || "Gagal menghapus.");
-    } finally {
-      setLoading(false);
-    }
+    try { await onSubmit(row.id); onClose(); }
+    catch (err) { setError(err.response?.data?.message || "Gagal menghapus."); }
+    finally { setLoading(false); }
   };
 
   return (
     <Overlay onClose={onClose}>
-      <ModalHeader
-        title="Hapus data"
-        titleColor="#f87171"
-        icon={<Trash2 size={14} style={{ color: "#f87171" }} />}
-        onClose={onClose}
-      />
-      <div
-        style={{
-          padding: "18px 20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.05)",
-            borderRadius: 10,
-            padding: "12px 14px",
-          }}
-        >
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              flexShrink: 0,
-              background: ac.bg,
-              color: ac.color,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 12,
-              fontWeight: 600,
-            }}
-          >
+      <ModalHeader title="Hapus data" titleColor="oklch(var(--er))" icon={<Trash2 size={14} className="text-error" />} onClose={onClose} />
+      <div className="px-5 py-4 flex flex-col gap-3">
+        <div className="flex items-center gap-3 bg-base-300 border border-base-content/5 rounded-xl px-4 py-3">
+          <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center text-xs font-semibold"
+            style={{ background: ac.bg, color: ac.color }}>
             {initials(row[labelKey])}
           </div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 500, color: "#fff" }}>
-              {row[labelKey]}
-            </div>
-            {subLabelKey && (
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "rgba(255,255,255,0.5)",
-                  marginTop: 2,
-                }}
-              >
-                {row[subLabelKey]}
-              </div>
-            )}
+            <div className="text-[14px] font-medium text-base-content">{row[labelKey]}</div>
+            {subLabelKey && <div className="text-[11px] text-base-content/50 mt-0.5">{row[subLabelKey]}</div>}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <AlertTriangle
-            size={14}
-            style={{ color: "#fbbf24", flexShrink: 0, marginTop: 2 }}
-          />
-          <p
-            style={{
-              fontSize: 13,
-              color: "rgba(255,255,255,0.6)",
-              lineHeight: 1.6,
-              margin: 0,
-            }}
-          >
+        <div className="flex gap-2">
+          <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
+          <p className="text-[13px] text-base-content/60 leading-relaxed m-0">
             Tindakan ini tidak bisa dibatalkan. Data akan dihapus permanen.
           </p>
         </div>
-        {error && <div style={{ fontSize: 12, color: "#f87171" }}>{error}</div>}
+        {error && <div className="text-[12px] text-error">{error}</div>}
       </div>
-      <ModalFooter
-        onClose={onClose}
-        onConfirm={del}
-        loading={loading}
-        label="Ya, hapus"
-        confirmBg="rgba(239,68,68,0.15)"
-        confirmColor="#fca5a5"
-      />
+      <ModalFooter onClose={onClose} onConfirm={del} loading={loading} label="Ya, hapus" variant="danger" />
+    </Overlay>
+  );
+}
+
+// ─── Modal Create ──────────────────────────────────────────────────────────
+
+function ModalCreate({ createFields, onClose, onSubmit }) {
+  const [form, setForm] = useState(
+    Object.fromEntries(createFields.map((f) => {
+      if (f.options?.length > 0) return [f.key, String(f.options[0].value ?? f.options[0]).trim()];
+      return [f.key, f.default ?? ""];
+    }))
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const set = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
+
+  const save = async () => {
+    setLoading(true);
+    setError("");
+    try { await onSubmit(form); onClose(); }
+    catch (err) { setError(err.response?.data?.message || "Gagal menyimpan."); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <Overlay onClose={onClose}>
+      <ModalHeader title="Tambah data" icon={<Plus size={14} className="text-base-content/60" />} onClose={onClose} />
+      <div className="px-5 py-4 flex flex-col gap-3.5">
+        {error && <div className="text-[12px] text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2">{error}</div>}
+        {createFields.map((f) => <FormField key={f.key} f={f} value={form[f.key]} onChange={set(f.key)} />)}
+      </div>
+      <ModalFooter onClose={onClose} onConfirm={save} loading={loading} label="Simpan" />
     </Overlay>
   );
 }
@@ -556,65 +295,34 @@ function Pagination({ page, totalPages, total, perPage, onChange }) {
   if (totalPages <= 1) return null;
   const start = (page - 1) * perPage + 1;
   const end = Math.min(page * perPage, total);
-  const btn = (active) => ({
-    minWidth: 30,
-    height: 30,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: 12,
-    borderRadius: 7,
-    cursor: "pointer",
-    background: active ? "rgba(255,255,255,0.9)" : "transparent",
-    color: active ? "#161b27" : "rgba(255,255,255,0.6)",
-    border: active ? "none" : "1px solid rgba(255,255,255,0.1)",
-    fontWeight: active ? 600 : 400,
-  });
+
+  const btnBase = "min-w-[30px] h-[30px] flex items-center justify-center text-[12px] rounded-lg cursor-pointer transition-colors";
 
   return (
-    <div
-      style={{
-        padding: "12px 18px",
-        borderTop: "1px solid rgba(255,255,255,0.05)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-    >
-      <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>
-        {start}–{end} dari {total}
-      </span>
-      <div style={{ display: "flex", gap: 4 }}>
+    <div className="px-5 py-3 border-t border-base-content/5 flex items-center justify-between flex-wrap gap-2">
+      <span className="text-[12px] text-base-content/40">{start}–{end} dari {total}</span>
+      <div className="flex items-center gap-1">
         <button
           onClick={() => onChange(page - 1)}
           disabled={page === 1}
-          style={btn(false)}
+          className={`${btnBase} border border-base-content/10 text-base-content/60 hover:bg-base-content/10 disabled:opacity-30`}
         >
           <ChevronLeft size={13} />
         </button>
         {Array.from({ length: totalPages }, (_, i) => i + 1)
-          .filter(
-            (p) =>
-              totalPages <= 7 ||
-              p === 1 ||
-              p === totalPages ||
-              Math.abs(p - page) <= 1,
-          )
+          .filter((p) => totalPages <= 7 || p === 1 || p === totalPages || Math.abs(p - page) <= 1)
           .map((p, i, arr) => (
             <React.Fragment key={p}>
               {arr[i - 1] && p - arr[i - 1] > 1 && (
-                <span
-                  style={{
-                    fontSize: 12,
-                    color: "rgba(255,255,255,0.3)",
-                    padding: "0 4px",
-                    lineHeight: "30px",
-                  }}
-                >
-                  …
-                </span>
+                <span className="text-[12px] text-base-content/30 px-1">…</span>
               )}
-              <button onClick={() => onChange(p)} style={btn(p === page)}>
+              <button
+                onClick={() => onChange(p)}
+                className={`${btnBase} ${p === page
+                  ? "bg-base-content text-base-100 font-semibold"
+                  : "border border-base-content/10 text-base-content/60 hover:bg-base-content/10"
+                  }`}
+              >
                 {p}
               </button>
             </React.Fragment>
@@ -622,119 +330,12 @@ function Pagination({ page, totalPages, total, perPage, onChange }) {
         <button
           onClick={() => onChange(page + 1)}
           disabled={page === totalPages}
-          style={btn(false)}
+          className={`${btnBase} border border-base-content/10 text-base-content/60 hover:bg-base-content/10 disabled:opacity-30`}
         >
           <ChevronRight size={13} />
         </button>
       </div>
     </div>
-  );
-}
-
-// ─── Modal Create ──────────────────────────────────────────────────────────
-
-function ModalCreate({ createFields, onClose, onSubmit }) {
-  const [form, setForm] = useState(
-    Object.fromEntries(
-      createFields.map((f) => {
-        if (f.options && f.options.length > 0)
-          return [f.key, String(f.options[0].value ?? f.options[0]).trim()];
-        return [f.key, f.default ?? ""];
-      }),
-    ),
-  );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const set = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
-
-  const save = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      await onSubmit(form);
-      onClose();
-    } catch (err) {
-      setError(err.response?.data?.message || "Gagal menyimpan.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Overlay onClose={onClose}>
-      <ModalHeader
-        title="Tambah data"
-        icon={<Plus size={14} style={{ color: "rgba(255,255,255,0.6)" }} />}
-        onClose={onClose}
-      />
-      <div
-        style={{
-          padding: "18px 20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 14,
-        }}
-      >
-        {error && (
-          <div
-            style={{
-              fontSize: 12,
-              color: "#fca5a5",
-              background: "rgba(239,68,68,0.1)",
-              border: "1px solid rgba(239,68,68,0.2)",
-              borderRadius: 8,
-              padding: "8px 12px",
-            }}
-          >
-            {error}
-          </div>
-        )}
-        {createFields.map((f) => (
-          <div key={f.key}>
-            <label style={S.label}>
-              {f.label}
-              {f.required !== false && (
-                <span style={{ color: "#f87171", marginLeft: 3 }}>*</span>
-              )}
-            </label>
-            {f.options ? (
-              <select
-                key={f.key + "_" + form[f.key]}
-                defaultValue={String(form[f.key]).trim()}
-                onChange={set(f.key)}
-                style={{ ...S.formInput, color: "rgba(255,255,255,0.7)" }}
-              >
-                {f.options.map((o) => {
-                  const v = String(o.value ?? o).trim();
-                  return (
-                    <option key={v} value={v} style={{ background: "#161b27" }}>
-                      {o.label ?? o}
-                    </option>
-                  );
-                })}
-              </select>
-            ) : (
-              <input
-                type={f.type || "text"}
-                value={form[f.key]}
-                onChange={set(f.key)}
-                placeholder={f.placeholder || ""}
-                style={S.formInput}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-      <ModalFooter
-        onClose={onClose}
-        onConfirm={save}
-        loading={loading}
-        label="Simpan"
-        confirmBg="rgba(255,255,255,0.1)"
-        confirmColor="#fff"
-      />
-    </Overlay>
   );
 }
 
@@ -751,9 +352,7 @@ export default function DataTable({
   editable = false,
   editFields = [],
   deletable = false,
-
   actions = [],
-
   deleteLabelKey,
   deleteSubKey,
   onEdit,
@@ -767,7 +366,7 @@ export default function DataTable({
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState(
-    Object.fromEntries(filterFields.map((f) => [f, "all"])),
+    Object.fromEntries(filterFields.map((f) => [f, "all"]))
   );
   const [page, setPage] = useState(1);
   const [modalEdit, setModalEdit] = useState(null);
@@ -778,10 +377,7 @@ export default function DataTable({
   const showToast = useCallback((message, type = "success") => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(
-      () => setToasts((prev) => prev.filter((t) => t.id !== id)),
-      3000,
-    );
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000);
   }, []);
 
   const searchKeys = searchFields || columns.map((c) => c.key);
@@ -800,24 +396,17 @@ export default function DataTable({
   }, [endpoint]);
 
   const filterOptions = useMemo(
-    () =>
-      Object.fromEntries(
-        filterFields.map((f) => [
-          f,
-          [...new Set(rows.map((r) => r[f]).filter(Boolean))],
-        ]),
-      ),
-    [rows, filterFields],
+    () => Object.fromEntries(
+      filterFields.map((f) => [f, [...new Set(rows.map((r) => r[f]).filter(Boolean))]])
+    ),
+    [rows, filterFields]
   );
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return rows.filter((row) => {
-      const matchSearch =
-        !q || searchKeys.some((k) => row[k]?.toLowerCase?.().includes(q));
-      const matchFilters = filterFields.every(
-        (f) => filters[f] === "all" || row[f] === filters[f],
-      );
+      const matchSearch = !q || searchKeys.some((k) => row[k]?.toLowerCase?.().includes(q));
+      const matchFilters = filterFields.every((f) => filters[f] === "all" || row[f] === filters[f]);
       return matchSearch && matchFilters;
     });
   }, [rows, search, filters]);
@@ -825,8 +414,7 @@ export default function DataTable({
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const safePage = Math.min(page, totalPages);
   const pageData = filtered.slice((safePage - 1) * perPage, safePage * perPage);
-  const hasFilter =
-    search !== "" || filterFields.some((f) => filters[f] !== "all");
+  const hasFilter = search !== "" || filterFields.some((f) => filters[f] !== "all");
 
   const clearFilters = () => {
     setSearch("");
@@ -834,61 +422,41 @@ export default function DataTable({
     setFilters(Object.fromEntries(filterFields.map((f) => [f, "all"])));
   };
 
-  const handleSetFilter = (f, v) => {
-    setFilters((p) => ({ ...p, [f]: v }));
-    setPage(1);
-  };
+  const handleSetFilter = (f, v) => { setFilters((p) => ({ ...p, [f]: v })); setPage(1); };
 
-  const handleEdit = useCallback(
-    async (id, body) => {
-      if (onEdit) return onEdit(id, body);
-      await axios.put(`${endpoint}/${id}`, body, { headers: authHeaders() });
-      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...body } : r)));
-      showToast("Data berhasil diperbarui");
-    },
-    [endpoint, onEdit, showToast],
-  );
+  const handleEdit = useCallback(async (id, body) => {
+    if (onEdit) return onEdit(id, body);
+    await axios.put(`${endpoint}/${id}`, body, { headers: authHeaders() });
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...body } : r)));
+    showToast("Data berhasil diperbarui");
+  }, [endpoint, onEdit, showToast]);
 
-  const handleDelete = useCallback(
-    async (id) => {
-      if (onDelete) return onDelete(id);
-      await axios.delete(`${endpoint}/${id}`, { headers: authHeaders() });
-      setRows((prev) => prev.filter((r) => r.id !== id));
-      showToast("Data berhasil dihapus");
-    },
-    [endpoint, onDelete, showToast],
-  );
+  const handleDelete = useCallback(async (id) => {
+    if (onDelete) return onDelete(id);
+    await axios.delete(`${endpoint}/${id}`, { headers: authHeaders() });
+    setRows((prev) => prev.filter((r) => r.id !== id));
+    showToast("Data berhasil dihapus");
+  }, [endpoint, onDelete, showToast]);
 
-  const handleCreate = useCallback(
-    async (body) => {
-      if (onCreate) return onCreate(body);
-      const res = await axios.post(endpoint, body, { headers: authHeaders() });
-      const newRow = res.data?.data || res.data;
-      setRows((prev) => [newRow, ...prev]);
-      showToast("Data berhasil ditambahkan");
-    },
-    [endpoint, onCreate, showToast],
-  );
+  const handleCreate = useCallback(async (body) => {
+    if (onCreate) return onCreate(body);
+    const res = await axios.post(endpoint, body, { headers: authHeaders() });
+    const newRow = res.data?.data || res.data;
+    setRows((prev) => [newRow, ...prev]);
+    showToast("Data berhasil ditambahkan");
+  }, [endpoint, onCreate, showToast]);
 
   const showActions = editable || deletable || actions.length > 0;
 
   return (
-    <div style={{ minHeight: "100%" }}>
+    <div className="min-h-full">
       <Toast toasts={toasts} />
+
       {modalEdit && (
-        <ModalEdit
-          row={modalEdit}
-          editFields={editFields}
-          onClose={() => setModalEdit(null)}
-          onSubmit={handleEdit}
-        />
+        <ModalEdit row={modalEdit} editFields={editFields} onClose={() => setModalEdit(null)} onSubmit={handleEdit} />
       )}
       {modalCreate && (
-        <ModalCreate
-          createFields={createFields}
-          onClose={() => setModalCreate(false)}
-          onSubmit={handleCreate}
-        />
+        <ModalCreate createFields={createFields} onClose={() => setModalCreate(false)} onSubmit={handleCreate} />
       )}
       {modalDel && (
         <ModalDelete
@@ -901,67 +469,19 @@ export default function DataTable({
       )}
 
       {/* Kontainer Utama */}
-      <div
-        style={{
-          background: "#161b27",
-          border: "1px solid rgba(255,255,255,0.05)",
-          borderRadius: 14,
-          overflow: "hidden",
-        }}
-      >
+      <div className="bg-base-200 border border-base-content/5 rounded-2xl overflow-hidden">
+
         {/* Header */}
-        <div
-          style={{
-            padding: "14px 20px",
-            borderBottom: "1px solid rgba(255,255,255,0.05)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>
-            {title}
-          </span>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span
-              style={{
-                fontSize: 11,
-                color: "rgba(255,255,255,0.6)",
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.05)",
-                borderRadius: 999,
-                padding: "3px 10px",
-              }}
-            >
-              {filtered.length}
-              {hasFilter && filtered.length !== rows.length
-                ? ` dari ${rows.length}`
-                : ""}{" "}
-              data
+        <div className="px-5 py-3.5 border-b border-base-content/5 flex items-center justify-between gap-3 flex-wrap">
+          <span className="text-[14px] font-semibold text-base-content">{title}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-base-content/60 bg-base-content/5 border border-base-content/5 rounded-full px-2.5 py-1">
+              {filtered.length}{hasFilter && filtered.length !== rows.length ? ` dari ${rows.length}` : ""} data
             </span>
             {creatable && (
               <button
                 onClick={() => setModalCreate(true)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontSize: 12,
-                  fontWeight: 500,
-                  padding: "6px 12px",
-                  borderRadius: 8,
-                  cursor: "pointer",
-                  background: "rgba(255,255,255,0.1)",
-                  border: "none",
-                  color: "#fff",
-                  transition: "background 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
-                }
+                className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg bg-base-content/10 hover:bg-base-content/15 text-base-content border-none cursor-pointer transition-colors"
               >
                 <Plus size={13} /> Tambah
               </button>
@@ -971,50 +491,15 @@ export default function DataTable({
 
         {/* Filter bar */}
         {(columns.length > 0 || filterFields.length > 0) && (
-          <div
-            style={{
-              padding: "10px 20px",
-              borderBottom: "1px solid rgba(255,255,255,0.05)",
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 8,
-              alignItems: "center",
-              background: "rgba(255,255,255,0.01)",
-            }}
-          >
-            <div
-              style={{
-                position: "relative",
-                flex: 1,
-                minWidth: 160,
-                maxWidth: 280,
-              }}
-            >
-              <Search
-                size={13}
-                style={{
-                  position: "absolute",
-                  left: 10,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "rgba(255,255,255,0.4)",
-                  pointerEvents: "none",
-                }}
-              />
+          <div className="px-5 py-2.5 border-b border-base-content/5 flex flex-wrap gap-2 items-center bg-base-content/[0.01]">
+            <div className="relative flex-1 min-w-[140px] max-w-[280px]">
+              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Cari…"
                 value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                style={{
-                  ...S.inputBase,
-                  width: "100%",
-                  paddingLeft: 30,
-                  boxSizing: "border-box",
-                }}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                className="w-full pl-8 pr-3 py-1.5 text-[12px] rounded-lg bg-base-300 border border-base-content/5 text-base-content placeholder:text-base-content/30 outline-none focus:border-base-content/20 transition-colors"
               />
             </div>
             {filterFields.map((f) => (
@@ -1022,33 +507,18 @@ export default function DataTable({
                 key={f}
                 value={filters[f]}
                 onChange={(e) => handleSetFilter(f, e.target.value)}
-                style={S.inputBase}
+                className="text-[12px] px-2.5 py-1.5 rounded-lg bg-base-300 border border-base-content/5 text-base-content/70 outline-none cursor-pointer"
               >
-                <option value="all" style={{ background: "#161b27" }}>
-                  Semua {f}
-                </option>
+                <option value="all">Semua {f}</option>
                 {(filterOptions[f] || []).map((v) => (
-                  <option key={v} value={v} style={{ background: "#161b27" }}>
-                    {v}
-                  </option>
+                  <option key={v} value={v}>{v}</option>
                 ))}
               </select>
             ))}
             {hasFilter && (
               <button
                 onClick={clearFilters}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                  fontSize: 12,
-                  color: "rgba(255,255,255,0.5)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "6px 8px",
-                  borderRadius: 6,
-                }}
+                className="flex items-center gap-1 text-[12px] text-base-content/50 hover:text-base-content bg-transparent border-none cursor-pointer px-2 py-1.5 rounded-lg transition-colors"
               >
                 <X size={12} /> Reset
               </button>
@@ -1056,112 +526,37 @@ export default function DataTable({
           </div>
         )}
 
-        {/* Table */}
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        {/* Table — hanya tabel yang scroll horizontal */}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse" style={{ minWidth: 600 }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                <th
-                  style={{
-                    padding: "10px 16px",
-                    textAlign: "left",
-                    fontSize: 10,
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                    color: "rgba(255,255,255,0.4)",
-                    width: 40,
-                  }}
-                >
-                  #
-                </th>
+              <tr className="border-b border-base-content/5">
+                <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-widest text-base-content/40 w-10">#</th>
                 {columns.map((col) => (
-                  <th
-                    key={col.key}
-                    style={{
-                      padding: "10px 16px",
-                      textAlign: "left",
-                      fontSize: 10,
-                      fontWeight: 600,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                      color: "rgba(255,255,255,0.4)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                  <th key={col.key} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-widest text-base-content/40 whitespace-nowrap">
                     {col.label}
                   </th>
                 ))}
                 {showActions && (
-                  <th
-                    style={{
-                      padding: "10px 16px",
-                      textAlign: "left",
-                      fontSize: 10,
-                      fontWeight: 600,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                      color: "rgba(255,255,255,0.4)",
-                    }}
-                  >
-                    Aksi
-                  </th>
+                  <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-widest text-base-content/40">Aksi</th>
                 )}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td
-                    colSpan={columns.length + 2}
-                    style={{
-                      padding: 40,
-                      textAlign: "center",
-                      color: "rgba(255,255,255,0.5)",
-                      fontSize: 13,
-                    }}
-                  >
-                    Memuat…
-                  </td>
+                  <td colSpan={columns.length + 2} className="py-10 text-center text-[13px] text-base-content/50">Memuat…</td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td
-                    colSpan={columns.length + 2}
-                    style={{
-                      padding: 40,
-                      textAlign: "center",
-                      color: "#f87171",
-                      fontSize: 13,
-                    }}
-                  >
-                    {error}
-                  </td>
+                  <td colSpan={columns.length + 2} className="py-10 text-center text-[13px] text-error">{error}</td>
                 </tr>
               ) : pageData.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={columns.length + 2}
-                    style={{
-                      padding: "48px 16px",
-                      textAlign: "center",
-                      color: "rgba(255,255,255,0.5)",
-                      fontSize: 13,
-                    }}
-                  >
+                  <td colSpan={columns.length + 2} className="py-12 text-center text-[13px] text-base-content/50">
                     Tidak ada data.{" "}
                     {hasFilter && (
-                      <button
-                        onClick={clearFilters}
-                        style={{
-                          fontSize: 12,
-                          color: "rgba(255,255,255,0.7)",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                        }}
-                      >
+                      <button onClick={clearFilters} className="text-[12px] text-base-content/70 underline bg-transparent border-none cursor-pointer">
                         Reset filter
                       </button>
                     )}
@@ -1171,104 +566,45 @@ export default function DataTable({
                 pageData.map((row, i) => (
                   <tr
                     key={row.id ?? i}
-                    style={{
-                      borderBottom: "1px solid rgba(255,255,255,0.03)",
-                      transition: "background 0.1s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background =
-                        "rgba(255,255,255,0.02)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = "transparent")
-                    }
+                    className="border-b border-base-content/[0.03] hover:bg-base-content/[0.02] transition-colors"
                   >
-                    <td
-                      style={{
-                        padding: "12px 16px",
-                        fontSize: 12,
-                        color: "rgba(255,255,255,0.5)",
-                      }}
-                    >
+                    <td className="px-4 py-3 text-[12px] text-base-content/50">
                       {(safePage - 1) * perPage + i + 1}
                     </td>
                     {columns.map((col) => (
-                      <td key={col.key} style={{ padding: "12px 16px" }}>
-                        {col.render ? (
-                          col.render(row)
-                        ) : col.type === "avatar" ? (
-                          <CellAvatar row={row} col={col} />
-                        ) : col.type === "badge" ? (
-                          <CellBadge row={row} col={col} />
-                        ) : (
-                          <CellText row={row} col={col} />
-                        )}
+                      <td key={col.key} className="px-4 py-3">
+                        {col.render ? col.render(row)
+                          : col.type === "avatar" ? <CellAvatar row={row} col={col} />
+                            : col.type === "badge" ? <CellBadge row={row} col={col} />
+                              : <CellText row={row} col={col} />}
                       </td>
                     ))}
                     {showActions && (
-                      <td style={{ padding: "12px 16px" }}>
-                        <div style={{ display: "flex", gap: 6 }}>
-                          {/* EDIT */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           {editable && (
                             <button
                               onClick={() => setModalEdit(row)}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 5,
-                                fontSize: 11,
-                                padding: "5px 10px",
-                                borderRadius: 7,
-                                cursor: "pointer",
-                                background: "rgba(255,255,255,0.03)",
-                                border: "1px solid rgba(255,255,255,0.08)",
-                                color: "rgba(255,255,255,0.7)",
-                              }}
+                              className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg cursor-pointer bg-base-content/5 border border-base-content/10 text-base-content/70 hover:bg-base-content/10 transition-colors"
                             >
-                              <Edit2 size={11} />
-                              Edit
+                              <Edit2 size={11} /> Edit
                             </button>
                           )}
-
-                          {/* HAPUS */}
                           {deletable && (
                             <button
                               onClick={() => setModalDel(row)}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 5,
-                                fontSize: 11,
-                                padding: "5px 10px",
-                                borderRadius: 7,
-                                cursor: "pointer",
-                                background: "rgba(239,68,68,0.1)",
-                                border: "1px solid rgba(239,68,68,0.2)",
-                                color: "#f87171",
-                              }}
+                              className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg cursor-pointer bg-error/10 border border-error/20 text-error hover:bg-error/20 transition-colors"
                             >
-                              <Trash2 size={11} />
-                              Hapus
+                              <Trash2 size={11} /> Hapus
                             </button>
                           )}
-
-                          {/* CUSTOM ACTION */}
                           {actions.map((action, index) => (
                             <button
                               key={index}
                               title={action.tooltip || action.label}
                               onClick={() => action.onClick(row)}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: action.icon && action.label ? 6 : 0,
-                                padding: action.label ? "5px 10px" : "6px",
-                                borderRadius: 8,
-                                cursor: "pointer",
-                                border: "1px solid rgba(255,255,255,0.08)",
-                                background: "rgba(255,255,255,0.05)",
-                                color: action.color || "#fff",
-                              }}
+                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer border border-base-content/10 bg-base-content/5 hover:bg-base-content/10 transition-colors"
+                              style={{ color: action.color || undefined }}
                             >
                               {action.icon}
                               {action.label}
