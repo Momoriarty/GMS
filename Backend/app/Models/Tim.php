@@ -13,6 +13,7 @@ class Tim extends Model
     protected $fillable = [
         'user_id',
         'nama_tim',
+        'kelompok_umur',
         'logo_tim',
     ];
 

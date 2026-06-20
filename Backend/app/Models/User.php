@@ -51,4 +51,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function tim()
+    {
+        return $this->hasOne(Tim::class, 'user_id');
+    }
+
 }

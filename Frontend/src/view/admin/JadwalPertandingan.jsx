@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import DataCard from "../DataCard";
+import GenerateJadwalRandom from "./GenerateJadwalRandom";
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
@@ -93,13 +94,44 @@ export default function JadwalPertandingan() {
   return (
     <div className="p-6 text-base-content">
 
+      {/* GENERATE JADWAL - Only show at event level, not per tim */}
+      {!timId && (
+        <div className="mb-8">
+          <GenerateJadwalRandom />
+        </div>
+      )}
+
+      {/* INFO - Generate Jadwal hanya bisa di event level */}
+      {timId && (
+        <div className="mb-8 bg-blue-50 border border-blue-300 rounded-lg p-4">
+          <p className="text-sm text-blue-700">
+            💡 Untuk generate jadwal pertandingan, silakan kembali ke halaman{" "}
+            <Link
+              to={`/admin/events/${id}/jadwal`}
+              className="font-semibold underline hover:text-blue-900"
+            >
+              Jadwal Event
+            </Link>
+          </p>
+        </div>
+      )}
+
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-xl font-bold">{title}</h1>
-          <p className="text-sm opacity-60">
-            {jadwalList.length} Total Pertandingan
-          </p>
+        <div className="flex items-center gap-4">
+          <Link
+            to={`/admin/events/${id}/klasemen`}
+            className="btn btn-ghost btn-sm"
+            title="Kembali ke Event"
+          >
+            ← Kembali
+          </Link>
+          <div>
+            <h1 className="text-xl font-bold">{title}</h1>
+            <p className="text-sm opacity-60">
+              {jadwalList.length} Total Pertandingan
+            </p>
+          </div>
         </div>
 
         <button className="btn btn-success btn-sm text-white">

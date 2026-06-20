@@ -55,8 +55,6 @@ export default function Sidebar({ isOpen, onClose }) {
     setMenuUtama([
       { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
       { label: "Event", icon: Trophy, href: "/admin/events" },
-      { label: "Jadwal", icon: Calendar, href: "/admin/jadwal-pertandingan" },
-      { label: "Hasil", icon: CheckCircle, href: "/admin/hasil-pertandingan" },
       { label: "Pendaftaran", icon: ClipboardList, href: "/admin/pendaftaran" },
       { label: "Klasemen", icon: BarChart3, href: "/admin/klasemen" },
       { label: "Notifikasi", icon: Bell, href: "/admin/notifikasi" },

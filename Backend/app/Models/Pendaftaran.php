@@ -38,4 +38,9 @@ class Pendaftaran extends Model
     {
         return $this->belongsTo(User::class, 'verified_by');
     }
+
+    public function tim()
+    {
+        return $this->hasOne(Tim::class, 'user_id');
+    }
 }

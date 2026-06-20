@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\PendaftaranController;
 use App\Http\Controllers\Api\KlasemenController;
 use App\Http\Controllers\Api\NotifikasiController;
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\JadwalPertandinganRandomController;
 
 // Publik
 Route::post('/register', [AuthController::class, 'register']);
@@ -38,8 +39,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/jadwal-pertandingan',           [JadwalPertandinganController::class, 'index']);
     Route::get('/jadwal-pertandingan/{id}',      [JadwalPertandinganController::class, 'show']);
     Route::post('/jadwal-pertandingan',          [JadwalPertandinganController::class, 'store']);
+    Route::post('/jadwal-pertandingan/bulk-save', [JadwalPertandinganController::class, 'bulkSave']);
     Route::put('/jadwal-pertandingan/{id}',      [JadwalPertandinganController::class, 'update']);
     Route::delete('/jadwal-pertandingan/{id}',   [JadwalPertandinganController::class, 'destroy']);
+
+    // Jadwal Pertandingan Random
+    Route::post('/events/{eventId}/generate-jadwal-random', [JadwalPertandinganRandomController::class, 'generate']);
+    Route::get('/events/{eventId}/jadwal-pertandingan-random', [JadwalPertandinganRandomController::class, 'getSchedule']);
+    Route::get('/events/{eventId}/jadwal-pending', [JadwalPertandinganRandomController::class, 'getPendingSchedule']);
+    Route::post('/events/{eventId}/confirm-jadwal', [JadwalPertandinganRandomController::class, 'confirmSchedule']);
+    Route::post('/events/{eventId}/cancel-jadwal', [JadwalPertandinganRandomController::class, 'cancelSchedule']);
+    Route::delete('/events/{eventId}/jadwal-pertandingan-random', [JadwalPertandinganRandomController::class, 'clearSchedule']);
+    Route::get('/events/{eventId}/jadwal-stats', [JadwalPertandinganRandomController::class, 'getStats']);
 
     // Hasil Pertandingan
     Route::get('/hasil-pertandingan',           [HasilPertandinganController::class, 'index']);

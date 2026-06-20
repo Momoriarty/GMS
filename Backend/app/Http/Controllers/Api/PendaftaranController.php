@@ -15,7 +15,7 @@ class PendaftaranController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Pendaftaran::with(['user', 'event', 'verifiedBy']);
+        $query = Pendaftaran::with(['user', 'event', 'verifiedBy', 'user.tim']);
 
         if ($request->event_id) {
             $query->where('event_id', $request->event_id);
@@ -31,9 +31,33 @@ class PendaftaranController extends Controller
 
         $pendaftaran = $query->get();
 
+        // Format response untuk include tim details
+        $formatted = $pendaftaran->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'user_id' => $item->user_id,
+                'event_id' => $item->event_id,
+                'status' => $item->status,
+                'tanggal_daftar' => $item->tanggal_daftar,
+                'user' => $item->user ? [
+                    'id' => $item->user->id,
+                    'name' => $item->user->name,
+                    'email' => $item->user->email,
+                    'tim' => $item->user->tim ? [
+                        'id' => $item->user->tim->id,
+                        'nama_tim' => $item->user->tim->nama_tim,
+                        'kelompok_umur' => $item->user->tim->kelompok_umur,
+                        'user_id' => $item->user->tim->user_id,
+                    ] : null
+                ] : null,
+                'event' => $item->event,
+                'verified_by' => $item->verifiedBy,
+            ];
+        });
+
         return response()->json([
             'success' => true,
-            'data' => $pendaftaran
+            'data' => $formatted
         ]);
     }
 

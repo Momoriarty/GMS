@@ -10,48 +10,23 @@ class PendaftaranSeeder extends Seeder
     public function run(): void
     {
         $users  = DB::table('users')->where('role', 'peserta')->pluck('id');
-        $events = DB::table('events')->pluck('id');
         $admin  = DB::table('users')->where('role', 'admin')->value('id');
 
-        $data = [
-            [
-                'user_id'           => $users[0],
-                'event_id'          => $events[0],
-                'status'            => 'diterima',
-                'dokumen_pendukung' => 'dokumen/tim1_garuda_cup.pdf',
-                'verified_by'       => $admin,
-            ],
-            [
-                'user_id'           => $users[1],
-                'event_id'          => $events[0],
-                'status'            => 'diterima',
-                'dokumen_pendukung' => 'dokumen/tim2_garuda_cup.pdf',
-                'verified_by'       => $admin,
-            ],
-            [
-                'user_id'           => $users[2],
-                'event_id'          => $events[0],
-                'status'            => 'menunggu',
-                'dokumen_pendukung' => 'dokumen/tim3_garuda_cup.pdf',
-                'verified_by'       => null,
-            ],
-            [
-                'user_id'           => $users[3],
-                'event_id'          => $events[0],
-                'status'            => 'ditolak',
-                'dokumen_pendukung' => null,
-                'verified_by'       => $admin,
-            ],
-        ];
+        $data = [];
 
-        foreach ($data as $item) {
-            DB::table('pendaftaran')->insert([
-
-                'tanggal_daftar' => now(),
-                ...$item,
-                'created_at'    => now(),
-                'updated_at'    => now(),
-            ]);
+        foreach ($users as $i => $userId) {
+            $data[] = [
+                'user_id'           => $userId,
+                'event_id'          => 1,
+                'status'            => 'diterima',
+                'dokumen_pendukung' => 'dokumen/tim' . ($i + 1) . '.pdf',
+                'verified_by'       => $admin,
+                'tanggal_daftar'    => now(),
+                'created_at'        => now(),
+                'updated_at'        => now(),
+            ];
         }
+
+        DB::table('pendaftaran')->insert($data);
     }
 }

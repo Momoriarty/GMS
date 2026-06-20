@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import DataTable from "../DataTable";
 import { Calendar } from "lucide-react";
 
@@ -74,26 +74,37 @@ export default function Klasemen() {
   }, [id]);
 
   return (
-    <DataTable
-      endpoint={`${API_BASE}/klasemen?event_id=${id}`}
-      title={
-        loading
-          ? "Data Klasemen..."
-          : `Data Klasemen - ${namaEvent}`
-      }
-      searchFields={["tim_id", "nama_tim"]}
-      columns={columns}
-      createFields={klasemenFields}
-      actions={[
-        {
-          icon: <Calendar size={13} />,
-          label: "Jadwal",
-          tooltip: "Lihat Jadwal Tim",
-          color: "oklch(var(--su))",
-          onClick: (row) =>
-            navigate(`/admin/events/${id}/tim/${row.id}/jadwal`)
-        },
-      ]}
-    />
+    <div>
+      <div className="p-6">
+        <Link
+          to={`/admin/events/`}
+          className="btn btn-ghost btn-sm"
+          title="Kembali ke Event"
+        >
+          ← Kembali
+        </Link>
+      </div>
+      <DataTable
+        endpoint={`${API_BASE}/klasemen?event_id=${id}`}
+        title={
+          loading
+            ? "Data Klasemen..."
+            : `Data Klasemen - ${namaEvent}`
+        }
+        searchFields={["tim_id", "nama_tim"]}
+        columns={columns}
+        createFields={klasemenFields}
+        actions={[
+          {
+            icon: <Calendar size={13} />,
+            label: "Jadwal",
+            tooltip: "Lihat Jadwal Tim",
+            color: "oklch(var(--su))",
+            onClick: (row) =>
+              navigate(`/admin/events/${id}/tim/${row.id}/jadwal`)
+          },
+        ]}
+      />
+    </div>
   );
 }
