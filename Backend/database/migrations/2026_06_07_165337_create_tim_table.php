@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('nama_tim');
+            $table->string('kelompok_umur');
             $table->string('logo_tim')->nullable();
             $table->timestamps();
         });
