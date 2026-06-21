@@ -1,4 +1,32 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 function AdminDashboard() {
+  const navigate = useNavigate();
+  const [auditLogs, setAuditLogs] = useState([]);
+
+  useEffect(() => {
+    const fetchAuditLogs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await axios.get(
+          "http://localhost:8000/api/dashboard/aktivitas",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        setAuditLogs(response.data);
+      } catch (error) {
+        console.error("Gagal mengambil audit log:", error);
+      }
+    };
+
+    fetchAuditLogs();
+  }, []);
   const stats = [
     {
       label: "Total Event",
@@ -19,13 +47,13 @@ function AdminDashboard() {
       border: "rgba(59,130,246,0.2)",
     },
     {
-      label: "Pending",
+      label: "pending",
       value: "0",
-      sub: "Tidak ada tugas saat ini",
-      icon: "⏳",
-      accent: "#f97316",
-      bg: "rgba(249,115,22,0.12)",
-      border: "rgba(249,115,22,0.2)",
+      sub: "Aktivitas sistem",
+      icon: "📋",
+      accent: "#8b5cf6",
+      bg: "rgba(139,92,246,0.12)",
+      border: "rgba(139,92,246,0.2)",
     },
     {
       label: "Event Aktif",
@@ -51,7 +79,7 @@ function AdminDashboard() {
 
   const chartData = [];
   const max = 220;
-
+  console.log("AUDIT LOG:", auditLogs);
   return (
     <div className="space-y-5 p-1 text-base-content">
       {/* Stat Cards */}
@@ -59,7 +87,12 @@ function AdminDashboard() {
         {stats.map((s, i) => (
           <div
             key={i}
-            className="rounded-2xl p-5 relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-default bg-base-200 border border-base-content/5"
+            onClick={() => {
+              if (s.label === "Audit Log") {
+                navigate("/admin/audit-log");
+              }
+            }}
+            className="rounded-2xl p-5 relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-pointer bg-base-200 border border-base-content/5"
           >
             <div
               className="absolute -right-6 -top-6 w-24 h-24 rounded-full blur-2xl opacity-20 group-hover:opacity-35 transition-opacity duration-300"
@@ -164,6 +197,49 @@ function AdminDashboard() {
           ) : (
             <div className="text-center text-sm text-base-content/50">
               Statistik peserta belum tersedia.
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-2xl p-6 bg-base-200 border border-base-content/5">
+        <div className="mb-4">
+          <h2 className="font-bold text-[15px]">Aktivitas Terbaru</h2>
+          <p className="text-xs text-base-content/40">
+            Riwayat aktivitas sistem terbaru
+          </p>
+        </div>
+
+        <div className="space-y-3 max-h-80 overflow-y-auto">
+          {auditLogs.length > 0 ? (
+            auditLogs.map((log) => (
+              <div
+                key={log.id}
+                className="flex items-center gap-4 p-4 rounded-xl bg-base-300/20 hover:bg-base-300/40 transition"
+              >
+                <div className="text-xl">
+                  {log.aksi === "login" && ""}
+                  {log.aksi === "logout" && ""}
+                  {log.aksi === "create" && ""}
+                  {log.aksi === "update" && ""}
+                  {log.aksi === "delete" && ""}
+                </div>
+
+                <div className="flex-1">
+                  <p className="font-medium text-sm">
+                    {log.user?.name || "User"} melakukan <b>{log.aksi}</b> pada
+                    tabel <b>{log.tabel}</b>
+                  </p>
+
+                  <p className="text-xs text-base-content/40 mt-1">
+                    {new Date(log.tanggal).toLocaleString("id-ID")}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-sm text-base-content/40 py-4">
+              Belum ada aktivitas.
             </div>
           )}
         </div>

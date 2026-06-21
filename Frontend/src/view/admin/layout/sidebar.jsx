@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
+  
   LayoutDashboard,
   Users,
   User,
@@ -66,11 +68,30 @@ export default function Sidebar({ isOpen, onClose }) {
     ]);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    navigate("/login");
-  };
+  const handleLogout = async () => {
+  alert("LOGOUT DIKLIK");
+
+  try {
+    const token = localStorage.getItem("token");
+
+    console.log("TOKEN:", token);
+
+    const response = await axios.post(
+      "http://localhost:8000/api/logout",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      }
+    );
+
+    console.log("RESPONSE:", response.data);
+  } catch (err) {
+    console.error("LOGOUT ERROR:", err.response);
+  }
+};
 
   return (
     <aside className={`

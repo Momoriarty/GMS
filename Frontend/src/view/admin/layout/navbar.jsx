@@ -51,11 +51,31 @@ export default function Navbar({
         fetchUser();
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        navigate("/login");
-    };
+    const handleLogout = async () => {
+    console.log("TOMBOL LOGOUT DIKLIK");
+
+    try {
+        const token = localStorage.getItem("token");
+
+        await axios.post(
+            "http://localhost:8000/api/logout",
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        console.log("REQUEST LOGOUT TERKIRIM");
+    } catch (err) {
+        console.error(err);
+    }
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/login");
+};
 
     return (
         <>
