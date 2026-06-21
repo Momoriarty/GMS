@@ -1,7 +1,32 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 function AdminDashboard() {
+  const navigate = useNavigate();
+  const [auditLogs, setAuditLogs] = useState([]);
 
-  const navigate = useNavigate(); 
+  useEffect(() => {
+    const fetchAuditLogs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await axios.get(
+          "http://localhost:8000/api/dashboard/aktivitas",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        setAuditLogs(response.data);
+      } catch (error) {
+        console.error("Gagal mengambil audit log:", error);
+      }
+    };
+
+    fetchAuditLogs();
+  }, []);
   const stats = [
     {
       label: "Total Event",
@@ -22,7 +47,7 @@ function AdminDashboard() {
       border: "rgba(59,130,246,0.2)",
     },
     {
-      label: "Audit Log",
+      label: "pending",
       value: "0",
       sub: "Aktivitas sistem",
       icon: "📋",
@@ -54,30 +79,7 @@ function AdminDashboard() {
 
   const chartData = [];
   const max = 220;
-
-  const auditLogs = [
-  {
-    icon: "🔑",
-    activity: "Admin login ke sistem",
-    time: "20 Jun 2026 14:30",
-  },
-  {
-    icon: "✅",
-    activity: "Tim Garuda disetujui",
-    time: "20 Jun 2026 14:15",
-  },
-  {
-    icon: "🏆",
-    activity: "Event PCR Cup dibuat",
-    time: "20 Jun 2026 13:50",
-  },
-  {
-    icon: "📝",
-    activity: "Jadwal event diperbarui",
-    time: "20 Jun 2026 13:20",
-  },
-];
-
+  console.log("AUDIT LOG:", auditLogs);
   return (
     <div className="space-y-5 p-1 text-base-content">
       {/* Stat Cards */}
@@ -200,38 +202,48 @@ function AdminDashboard() {
         </div>
       </div>
 
-<div className="rounded-2xl p-6 bg-base-200 border border-base-content/5">
-  <div className="mb-4">
-    <h2 className="font-bold text-[15px]">
-      Aktivitas Terbaru
-    </h2>
-    <p className="text-xs text-base-content/40">
-      Riwayat aktivitas sistem terbaru
-    </p>
-  </div>
-
-  <div className="space-y-3 max-h-80 overflow-y-auto">
-    {auditLogs.map((log, index) => (
-      <div
-        key={index}
-        className="flex items-center gap-4 p-4 rounded-xl bg-base-300/20 hover:bg-base-300/40 transition"
-      >
-        <div className="text-xl">
-          {log.icon}
+      <div className="rounded-2xl p-6 bg-base-200 border border-base-content/5">
+        <div className="mb-4">
+          <h2 className="font-bold text-[15px]">Aktivitas Terbaru</h2>
+          <p className="text-xs text-base-content/40">
+            Riwayat aktivitas sistem terbaru
+          </p>
         </div>
 
-        <div className="flex-1">
-          <p className="font-medium text-sm">
-            {log.activity}
-          </p>
-          <p className="text-xs text-base-content/40 mt-1">
-            {log.time}
-          </p>
+        <div className="space-y-3 max-h-80 overflow-y-auto">
+          {auditLogs.length > 0 ? (
+            auditLogs.map((log) => (
+              <div
+                key={log.id}
+                className="flex items-center gap-4 p-4 rounded-xl bg-base-300/20 hover:bg-base-300/40 transition"
+              >
+                <div className="text-xl">
+                  {log.aksi === "login" && ""}
+                  {log.aksi === "logout" && ""}
+                  {log.aksi === "create" && ""}
+                  {log.aksi === "update" && ""}
+                  {log.aksi === "delete" && ""}
+                </div>
+
+                <div className="flex-1">
+                  <p className="font-medium text-sm">
+                    {log.user?.name || "User"} melakukan <b>{log.aksi}</b> pada
+                    tabel <b>{log.tabel}</b>
+                  </p>
+
+                  <p className="text-xs text-base-content/40 mt-1">
+                    {new Date(log.tanggal).toLocaleString("id-ID")}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-sm text-base-content/40 py-4">
+              Belum ada aktivitas.
+            </div>
+          )}
         </div>
       </div>
-    ))}
-  </div>
-</div>
 
       {/* Pendaftaran Terbaru */}
       <div className="rounded-2xl overflow-hidden bg-base-200 border border-base-content/5">

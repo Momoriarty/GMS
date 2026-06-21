@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\PendaftaranController;
 use App\Http\Controllers\Api\KlasemenController;
 use App\Http\Controllers\Api\NotifikasiController;
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\DashboardController;
 
 // Publik
 Route::post('/register', [AuthController::class, 'register']);
@@ -18,6 +19,7 @@ Route::post('/login',    [AuthController::class, 'login']);
 
 // Terproteksi
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/dashboard/aktivitas', [DashboardController::class, 'aktivitasTerbaru']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::get('/user', fn(Request $request) => $request->user());

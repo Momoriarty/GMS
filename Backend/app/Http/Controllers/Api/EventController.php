@@ -7,6 +7,7 @@ use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\AuditLog;
 
 class EventController extends Controller
 {
@@ -22,7 +23,7 @@ class EventController extends Controller
     public function show(int $id)
     {
         $event = Event::find($id);
-        
+
         if (!$event) {
             return response()->json([
                 'success' => false,
@@ -49,9 +50,16 @@ class EventController extends Controller
             'status' => 'required|in:draft,aktif,selesai',
         ]);
 
-        $validated['created_by'] = Auth::id(); 
+        $validated['created_by'] = Auth::id();
 
         $event = Event::create($validated);
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'tabel' => 'events',
+            'aksi' => 'create',
+            'tanggal' => now(),
+        ]);
 
         return response()->json([
             'success' => true,
@@ -63,7 +71,7 @@ class EventController extends Controller
     public function update(Request $request, int $id)
     {
         $event = Event::find($id);
-        
+
         if (!$event) {
             return response()->json([
                 'success' => false,
@@ -84,6 +92,13 @@ class EventController extends Controller
 
         $event->update($validated);
 
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'tabel' => 'events',
+            'aksi' => 'update',
+            'tanggal' => now(),
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Event berhasil diperbarui',
@@ -94,13 +109,22 @@ class EventController extends Controller
     public function destroy(int $id)
     {
         $event = Event::find($id);
-        
+
         if (!$event) {
             return response()->json([
                 'success' => false,
                 'message' => 'Event tidak ditemukan'
             ], Response::HTTP_NOT_FOUND);
         }
+
+        $event->delete();
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'tabel' => 'events',
+            'aksi' => 'delete',
+            'tanggal' => now(),
+        ]);
 
         $event->delete();
 

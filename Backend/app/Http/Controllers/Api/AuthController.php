@@ -70,17 +70,6 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        AuditLog::create([
-            'user_id' => $request->user()->id,
-            'tabel' => 'users',
-            'aksi' => 'logout',
-            'tanggal' => now(),
-        ]);
-
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'Berhasil logout.'
-        ]);
+        dd('MASUK LOGOUT');
     }
 }
