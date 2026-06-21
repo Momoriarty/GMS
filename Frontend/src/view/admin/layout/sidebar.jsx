@@ -56,7 +56,6 @@ export default function Sidebar({ isOpen, onClose }) {
       { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
       { label: "Event", icon: Trophy, href: "/admin/events" },
       { label: "Pendaftaran", icon: ClipboardList, href: "/admin/pendaftaran" },
-      { label: "Klasemen", icon: BarChart3, href: "/admin/klasemen" },
       { label: "Notifikasi", icon: Bell, href: "/admin/notifikasi" },
       { label: "Pengguna", icon: Users, href: "/admin/pengguna" },
     ]);
