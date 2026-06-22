@@ -69,14 +69,13 @@ export default function Sidebar({ isOpen, onClose }) {
   }, []);
 
   const handleLogout = async () => {
-  alert("LOGOUT DIKLIK");
+  const token = localStorage.getItem("token");
+
+  console.log("LOGOUT CLICKED");
+  console.log("TOKEN:", token);
 
   try {
-    const token = localStorage.getItem("token");
-
-    console.log("TOKEN:", token);
-
-    const response = await axios.post(
+    await axios.post(
       "http://localhost:8000/api/logout",
       {},
       {
@@ -87,10 +86,14 @@ export default function Sidebar({ isOpen, onClose }) {
       }
     );
 
-    console.log("RESPONSE:", response.data);
+    console.log("LOGOUT SUCCESS");
   } catch (err) {
-    console.error("LOGOUT ERROR:", err.response);
+    console.error("LOGOUT ERROR:", err.response?.data || err.message);
   }
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  navigate("/login");
 };
 
   return (

@@ -46,10 +46,9 @@ export const klasemenApi = {
 
 // Notifikasi
 export const notifikasiApi = {
-  getAll: (filters) => api.get('/notifikasi', { params: filters }),
+  getAll: (filters = {}) => api.get('/notifikasi', { params: filters }),
   getById: (id) => api.get(`/notifikasi/${id}`),
   create: (data) => api.post('/notifikasi', data),
-  send: (data) => api.post('/notifikasi', data),
   markAsRead: (id) => api.post(`/notifikasi/${id}/read`),
   delete: (id) => api.delete(`/notifikasi/${id}`),
 };

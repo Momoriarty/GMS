@@ -69,7 +69,24 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request)
-    {
-        dd('MASUK LOGOUT');
+{
+    $user = $request->user();
+
+    if ($user) {
+        // hapus token yang sedang dipakai
+        $user->currentAccessToken()->delete();
     }
+
+    // audit log logout
+    AuditLog::create([
+        'user_id' => $user?->id,
+        'tabel' => 'users',
+        'aksi' => 'logout',
+        'tanggal' => now(),
+    ]);
+
+    return response()->json([
+        'message' => 'Logout berhasil'
+    ]);
+}
 }
