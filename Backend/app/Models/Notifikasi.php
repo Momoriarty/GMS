@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Notifikasi extends Model
 {
@@ -18,8 +19,6 @@ class Notifikasi extends Model
 
     protected $casts = [
         'is_read' => 'boolean',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
     ];
 
     public function user()

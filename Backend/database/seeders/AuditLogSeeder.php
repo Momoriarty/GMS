@@ -9,25 +9,62 @@ class AuditLogSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin  = DB::table('users')->where('role', 'admin')->value('id');
-        $peserta = DB::table('users')->where('role', 'peserta')->pluck('id');
+        $admin = DB::table('users')
+            ->where('role', 'admin')
+            ->value('id');
+
+        $peserta = DB::table('users')
+            ->where('role', 'peserta')
+            ->pluck('id');
 
         $logs = [
-            ['user_id' => $admin,      'tabel' => 'events',              'aksi' => 'create'],
-            ['user_id' => $admin,      'tabel' => 'events',              'aksi' => 'update'],
-            ['user_id' => $admin,      'tabel' => 'jadwal_pertandingan', 'aksi' => 'create'],
-            ['user_id' => $admin,      'tabel' => 'hasil_pertandingan',  'aksi' => 'create'],
-            ['user_id' => $admin,      'tabel' => 'pendaftaran',         'aksi' => 'update'],
-            ['user_id' => $peserta[0], 'tabel' => 'users',               'aksi' => 'login'],
-            ['user_id' => $peserta[1], 'tabel' => 'users',               'aksi' => 'login'],
-            ['user_id' => $peserta[0], 'tabel' => 'users',               'aksi' => 'logout'],
+            [
+                'user_id' => $admin,
+                'tabel' => 'events',
+                'aksi' => 'create',
+            ],
+            [
+                'user_id' => $admin,
+                'tabel' => 'events',
+                'aksi' => 'update',
+            ],
+            [
+                'user_id' => $admin,
+                'tabel' => 'jadwal_pertandingan',
+                'aksi' => 'create',
+            ],
+            [
+                'user_id' => $admin,
+                'tabel' => 'hasil_pertandingan',
+                'aksi' => 'create',
+            ],
+            [
+                'user_id' => $admin,
+                'tabel' => 'pendaftaran',
+                'aksi' => 'update',
+            ],
+            [
+                'user_id' => $peserta[0] ?? null,
+                'tabel' => 'users',
+                'aksi' => 'login',
+            ],
+            [
+                'user_id' => $peserta[1] ?? null,
+                'tabel' => 'users',
+                'aksi' => 'login',
+            ],
+            [
+                'user_id' => $peserta[0] ?? null,
+                'tabel' => 'users',
+                'aksi' => 'logout',
+            ],
         ];
 
         foreach ($logs as $item) {
-            DB::table('audit_log')->insert([
-
+            DB::table('audit_logs')->insert([
                 ...$item,
-                'tanggal' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
     }

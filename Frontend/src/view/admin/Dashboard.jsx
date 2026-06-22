@@ -19,7 +19,9 @@ function AdminDashboard() {
           },
         );
 
-        setAuditLogs(response.data);
+        console.log("RESPON AKTIVITAS:", response.data);
+
+        setAuditLogs(response.data.data || []);
       } catch (error) {
         console.error("Gagal mengambil audit log:", error);
       }
@@ -232,7 +234,7 @@ function AdminDashboard() {
                   </p>
 
                   <p className="text-xs text-base-content/40 mt-1">
-                    {new Date(log.tanggal).toLocaleString("id-ID")}
+                    {new Date(log.created_at).toLocaleString("id-ID")}
                   </p>
                 </div>
               </div>

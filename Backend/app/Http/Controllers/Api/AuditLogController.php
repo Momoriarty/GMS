@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -14,7 +13,8 @@ class AuditLogController extends Controller
      */
     public function index(Request $request)
     {
-        $query = AuditLog::with('user')->orderBy('tanggal', 'desc');
+        $query = AuditLog::with('user')
+            ->orderBy('created_at', 'desc');
 
         if ($request->user_id) {
             $query->where('user_id', $request->user_id);
@@ -28,7 +28,6 @@ class AuditLogController extends Controller
             $query->where('aksi', $request->aksi);
         }
 
-        // Pagination
         $perPage = $request->per_page ?? 50;
         $logs = $query->paginate($perPage);
 
@@ -50,7 +49,7 @@ class AuditLogController extends Controller
     public function show(int $id)
     {
         $log = AuditLog::with('user')->find($id);
-        
+
         if (!$log) {
             return response()->json([
                 'success' => false,
@@ -65,7 +64,7 @@ class AuditLogController extends Controller
     }
 
     /**
-     * Create audit log (internal usage)
+     * Create audit log
      */
     public function store(Request $request)
     {
@@ -73,9 +72,8 @@ class AuditLogController extends Controller
             'user_id' => 'required|exists:users,id',
             'tabel' => 'required|string|max:255',
             'aksi' => 'required|in:create,update,delete,login,logout',
+            'deskripsi' => 'nullable|string',
         ]);
-
-        $validated['tanggal'] = now();
 
         $log = AuditLog::create($validated);
 

@@ -4,16 +4,20 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function aktivitasTerbaru()
     {
         $logs = AuditLog::with('user')
-            ->latest('tanggal')
-            ->take(5)
+            ->orderBy('created_at', 'desc')
+            ->take(10)
             ->get();
 
-        return response()->json($logs);
+        return response()->json([
+            'success' => true,
+            'data' => $logs
+        ]);
     }
 }

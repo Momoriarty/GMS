@@ -15,7 +15,7 @@ return new class extends Migration {
                 ->constrained('users')
                 ->onDelete('set null');
 
-            $table->string('tabel')->nullable(); // nama tabel yg diubah
+            $table->string('tabel')->nullable();
             $table->enum('aksi', ['create', 'update', 'delete', 'login', 'logout']);
             $table->text('deskripsi')->nullable();
 

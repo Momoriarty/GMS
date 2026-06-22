@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -52,12 +51,12 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // AUDIT LOG LOGIN
+        // Audit Log Login
         AuditLog::create([
             'user_id' => $user->id,
             'tabel' => 'users',
             'aksi' => 'login',
-            'tanggal' => now(),
+            'deskripsi' => 'User login ke sistem',
         ]);
 
         return response()->json([
@@ -69,24 +68,25 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request)
-{
-    $user = $request->user();
+    {
+        $user = $request->user();
 
-    if ($user) {
-        // hapus token yang sedang dipakai
-        $user->currentAccessToken()->delete();
+        if ($user) {
+
+            // Audit Log Logout
+            AuditLog::create([
+                'user_id' => $user->id,
+                'tabel' => 'users',
+                'aksi' => 'logout',
+                'deskripsi' => 'User logout dari sistem',
+            ]);
+
+            // Hapus token
+            $user->currentAccessToken()?->delete();
+        }
+
+        return response()->json([
+            'message' => 'Logout berhasil'
+        ]);
     }
-
-    // audit log logout
-    AuditLog::create([
-        'user_id' => $user?->id,
-        'tabel' => 'users',
-        'aksi' => 'logout',
-        'tanggal' => now(),
-    ]);
-
-    return response()->json([
-        'message' => 'Logout berhasil'
-    ]);
-}
 }
