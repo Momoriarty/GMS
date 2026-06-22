@@ -16,7 +16,6 @@ class Klasemen extends Model
         'menang',
         'seri',
         'kalah',
-        'poin',
         'gol_masuk',
         'gol_kemasukan',
     ];
