@@ -40,6 +40,18 @@ class UserSeeder extends Seeder
             'avatar' => null,
             'remember_token' => null,
         ]);
+        User::create([
+            'name' => 'M DZAKI FAADHILAH',
+            'email' => 'dzaki24ti@mahasiswa.pcr.ac.id',
+            'username' => 'dzaki24ti',
+            'phone_number' => null,
+            'email_verified_at' => null,
+            'password' => Hash::make('123456789'),
+            'role' => 'admin',
+            'status' => 'active',
+            'avatar' => null,
+            'remember_token' => null,
+        ]);
 
         // Dummy peserta
         $users = [];
