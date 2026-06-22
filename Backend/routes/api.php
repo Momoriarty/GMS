@@ -56,7 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Hasil Pertandingan
     Route::get('/hasil-pertandingan',           [HasilPertandinganController::class, 'index']);
-    Route::get('/hasil-pertandingan/{id}',      [HasilPertandinganController::class, 'show']);
+    Route::put('/hasil-pertandingan/{id}/update',      [HasilPertandinganController::class, 'update']);
     Route::post('/hasil-pertandingan',          [HasilPertandinganController::class, 'store']);
     Route::put('/hasil-pertandingan/{id}',      [HasilPertandinganController::class, 'update']);
     Route::delete('/hasil-pertandingan/{id}',   [HasilPertandinganController::class, 'destroy']);

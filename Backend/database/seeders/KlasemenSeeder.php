@@ -20,7 +20,6 @@ class KlasemenSeeder extends Seeder
                 'menang' => 0,
                 'seri' => 0,
                 'kalah' => 0,
-                'poin' => 0,
                 'gol_masuk' => 0,
                 'gol_kemasukan' => 0,
                 'created_at' => now(),

@@ -16,7 +16,6 @@ return new class extends Migration
             $table->integer('menang')->default(0);
             $table->integer('seri')->default(0);
             $table->integer('kalah')->default(0);
-            $table->integer('poin')->default(0);
             $table->integer('gol_masuk')->default(0);
             $table->integer('gol_kemasukan')->default(0);
             $table->timestamps();
