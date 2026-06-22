@@ -23,7 +23,6 @@ const columns = [
   { key: "gol_masuk", label: "GM" },
   { key: "gol_kemasukan", label: "GK" },
   { key: "selisih_gol", label: "SG" },
-  { key: "poin", label: "Pts" },
 ];
 
 export default function Klasemen() {

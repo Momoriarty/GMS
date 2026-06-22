@@ -12,7 +12,6 @@ class KlasemenController extends Controller
     public function index(Request $request)
     {
         $query = Klasemen::with('tim')
-            ->orderByDesc('poin')
             ->orderByRaw('(gol_masuk - gol_kemasukan) DESC')
             ->orderByDesc('gol_masuk');
 
@@ -31,7 +30,6 @@ class KlasemenController extends Controller
                 'gol_masuk' => $item->gol_masuk,
                 'gol_kemasukan' => $item->gol_kemasukan,
                 'selisih_gol' => $item->gol_masuk - $item->gol_kemasukan,
-                'poin' => $item->poin,
             ];
         });
 
@@ -60,7 +58,6 @@ class KlasemenController extends Controller
             'menang' => 'integer|min:0',
             'seri' => 'integer|min:0',
             'kalah' => 'integer|min:0',
-            'poin' => 'integer|min:0',
             'gol_masuk' => 'integer|min:0',
             'gol_kemasukan' => 'integer|min:0',
         ]);

@@ -14,14 +14,15 @@ class JadwalPertandinganController extends Controller
      */
     public function index(Request $request)
     {
-        $query = JadwalPertandingan::with(['tim1', 'tim2']);
+        // 💡 Ganti 'hasilPertandingan' menjadi 'hasil' sesuai nama fungsi di Model kamu
+        $query = JadwalPertandingan::with(['tim1', 'tim2', 'hasil']);
 
         // 1. FILTER EVENT
         if ($request->event_id) {
             $query->where('event_id', $request->event_id);
         }
 
-        // 2. FILTER TIM (PENTING INI)
+        // 2. FILTER TIM
         if ($request->tim_id) {
             $query->where(function ($q) use ($request) {
                 $q->where('tim_1_id', $request->tim_id)
@@ -45,6 +46,10 @@ class JadwalPertandinganController extends Controller
                 'waktu_pertandingan' => $item->waktu_pertandingan,
                 'lokasi_lapangan' => $item->lokasi_lapangan,
                 'status' => $item->status,
+
+                // 💡 Ambil skor melalui relasi '$item->hasil'
+                'skor_tim_1' => $item->hasil->skor_tim_1 ?? null,
+                'skor_tim_2' => $item->hasil->skor_tim_2 ?? null,
             ];
         });
 
