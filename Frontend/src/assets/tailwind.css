@@ -32,8 +32,8 @@
   --color-error: oklch(59% 0.249 0.584);
   --color-error-content: oklch(97% 0.014 343.198);
   --radius-selector: 1rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 2px;
@@ -45,3 +45,58 @@
 
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* ──────────────────────────────────────────────────────────────────────
+   PERBAIKAN KONTRAS — KHUSUS DARK MODE (theme "dim")
+   Tidak mempengaruhi theme "silk" (light mode) sama sekali.
+   ────────────────────────────────────────────────────────────────────── */
+
+/* 1. Teks base-content opacity rendah → dinaikkan supaya jelas terbaca */
+[data-theme="dim"] .text-base-content\/30,
+[data-theme="dim"] .text-base-content\/40,
+[data-theme="dim"] .text-base-content\/50,
+[data-theme="dim"] .text-base-content\/60,
+[data-theme="dim"] .text-base-content\/70,
+[data-theme="dim"] .text-base-content\/80 {
+  color: var(--color-base-content);
+}
+
+/* 2. Border tipis (divider, garis tabel) → dinaikkan */
+[data-theme="dim"] .border-base-content\/10 {
+  border-color: color-mix(in oklab, var(--color-base-content) 18%, transparent);
+}
+
+/* 3. Border card luar yang sangat transparan (5%) → card "lepas" dari background halaman */
+[data-theme="dim"] .border-base-content\/5 {
+  border-color: color-mix(in oklab, var(--color-base-content) 14%, transparent);
+}
+
+/* 4. Shadow halus ke card luar bg-base-200 */
+[data-theme="dim"] .bg-base-200 {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+}
+
+/* 5. Card/baris di DALAM card luar (bg-base-300 transparan) → dinaikkan lebih kuat + border tipis
+      supaya jelas terlihat sebagai elemen terpisah, bukan menyatu dengan card luar */
+[data-theme="dim"] .bg-base-300\/10 {
+  background-color: color-mix(in oklab, var(--color-base-300) 38%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-base-content) 8%, transparent);
+}
+[data-theme="dim"] .bg-base-300\/20 {
+  background-color: color-mix(in oklab, var(--color-base-300) 55%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-base-content) 10%, transparent);
+}
+[data-theme="dim"] .bg-base-300\/30 {
+  background-color: color-mix(in oklab, var(--color-base-300) 65%, transparent);
+}
+[data-theme="dim"] .bg-base-300\/40 {
+  background-color: color-mix(in oklab, var(--color-base-300) 75%, transparent);
+}
+[data-theme="dim"] .bg-base-300\/50 {
+  background-color: color-mix(in oklab, var(--color-base-300) 85%, transparent);
+}
+
+/* Efek hover tetap kelihatan bedanya */
+[data-theme="dim"] .hover\:bg-base-300\/40:hover {
+  background-color: color-mix(in oklab, var(--color-base-300) 90%, transparent);
+}

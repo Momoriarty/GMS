@@ -1,6 +1,22 @@
 import { useState, useEffect } from "react";
 import { auditLogApi, userApi } from "@/data/services";
 
+const ACTION_COLORS = {
+  create: "badge-success",
+  update: "badge-warning",
+  delete: "badge-error",
+  login: "badge-info",
+  logout: "badge-neutral",
+};
+
+const ACTION_LABELS = {
+  create: "Buat",
+  update: "Ubah",
+  delete: "Hapus",
+  login: "Masuk",
+  logout: "Keluar",
+};
+
 export default function AuditLog() {
   const [logs, setLogs] = useState([]);
   const [users, setUsers] = useState([]);
@@ -54,50 +70,30 @@ export default function AuditLog() {
     loadLogs(1);
   };
 
-  const getActionColor = (action) => {
-    switch (action) {
-      case "create":
-        return "bg-green-500/20 text-green-400";
-      case "update":
-        return "bg-blue-500/20 text-blue-400";
-      case "delete":
-        return "bg-red-500/20 text-red-400";
-      case "login":
-        return "bg-cyan-500/20 text-cyan-400";
-      case "logout":
-        return "bg-slate-500/20 text-slate-300";
-      default:
-        return "bg-slate-500/20 text-slate-300";
-    }
-  };
-
-  const getActionLabel = (action) => {
-    const labels = {
-      create: "Buat",
-      update: "Ubah",
-      delete: "Hapus",
-      login: "Masuk",
-      logout: "Keluar",
-    };
-    return labels[action] || action;
-  };
+  const getActionColor = (action) => ACTION_COLORS[action] || "badge-ghost";
+  const getActionLabel = (action) => ACTION_LABELS[action] || action;
 
   if (loading && logs.length === 0) {
-    return <div className="text-center py-8 text-white">Loading...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 py-16">
+        <span className="loading loading-dots loading-md text-base-content/30" />
+        <p className="text-xs text-base-content/30">Memuat data…</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 p-1 text-base-content">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Log Audit</h1>
-        <p className="text-slate-400 mt-2">Riwayat aktivitas sistem</p>
+      <div>
+        <h1 className="text-2xl font-bold text-base-content">Log Audit</h1>
+        <p className="text-base-content/60 mt-1">Riwayat aktivitas sistem</p>
       </div>
 
       {/* Filters */}
-      <div className="bg-slate-800 rounded-lg p-4 border border-slate-700 grid grid-cols-2 gap-4">
+      <div className="rounded-2xl p-5 bg-base-200 border border-base-content/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className="block text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2">
             Filter Pengguna
           </label>
           <select
@@ -106,16 +102,18 @@ export default function AuditLog() {
               setSelectedUser(e.target.value);
               setTimeout(handleFilterChange, 100);
             }}
-            className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+            className="select select-bordered select-sm w-full"
           >
             <option value="">-- Semua Pengguna --</option>
-            {users.map(u => (
-              <option key={u.id} value={u.id}>{u.name}</option>
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name}
+              </option>
             ))}
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className="block text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2">
             Filter Aksi
           </label>
           <select
@@ -124,7 +122,7 @@ export default function AuditLog() {
               setSelectedAction(e.target.value);
               setTimeout(handleFilterChange, 100);
             }}
-            className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+            className="select select-bordered select-sm w-full"
           >
             <option value="">-- Semua Aksi --</option>
             <option value="create">Buat</option>
@@ -137,43 +135,53 @@ export default function AuditLog() {
       </div>
 
       {/* Table */}
-      <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
-        <table className="w-full">
+      <div className="rounded-2xl overflow-hidden bg-base-200 border border-base-content/5">
+        <table className="table table-sm w-full">
           <thead>
-            <tr className="bg-slate-700">
-              <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
+            <tr className="bg-base-300/30">
+              <th className="text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
                 Waktu
               </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
+              <th className="text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
                 Pengguna
               </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
+              <th className="text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
                 Tabel
               </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
+              <th className="text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
                 Aksi
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700">
+          <tbody>
             {logs.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-slate-400">
+                <td
+                  colSpan={4}
+                  className="py-10 text-center text-sm text-base-content/40"
+                >
                   Tidak ada log aktivitas
                 </td>
               </tr>
             ) : (
               logs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-700/50 transition">
-                  <td className="px-6 py-3 text-slate-300 text-sm">
+                <tr
+                  key={log.id}
+                  className="hover:bg-base-300/20 transition-colors border-b border-base-content/[0.04] last:border-0"
+                >
+                  <td className="text-sm text-base-content/70">
                     {new Date(log.created_at).toLocaleString("id-ID")}
                   </td>
-                  <td className="px-6 py-3 text-white">{log.user?.name}</td>
-                  <td className="px-6 py-3 text-slate-300 font-mono text-sm">
+                  <td className="text-sm font-medium text-base-content">
+                    {log.user?.name}
+                  </td>
+                  <td className="text-sm font-mono text-base-content/60">
                     {log.tabel}
                   </td>
-                  <td className="px-6 py-3">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getActionColor(log.aksi)}`}>
+                  <td>
+                    <span
+                      className={`badge badge-sm font-medium ${getActionColor(log.aksi)}`}
+                    >
                       {getActionLabel(log.aksi)}
                     </span>
                   </td>
@@ -194,11 +202,11 @@ export default function AuditLog() {
             }
           }}
           disabled={currentPage === 1}
-          className="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white text-sm"
+          className="btn btn-sm btn-ghost"
         >
           Sebelumnya
         </button>
-        <span className="px-4 py-2 text-white">
+        <span className="px-4 py-2 text-sm text-base-content/70">
           {currentPage} / {totalPages}
         </span>
         <button
@@ -209,7 +217,7 @@ export default function AuditLog() {
             }
           }}
           disabled={currentPage === totalPages}
-          className="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white text-sm"
+          className="btn btn-sm btn-ghost"
         >
           Selanjutnya
         </button>

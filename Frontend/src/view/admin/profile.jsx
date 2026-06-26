@@ -57,16 +57,19 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-slate-500 text-sm">
-        Memuat profil...
+      <div className="flex flex-col items-center justify-center gap-2 py-16">
+        <span className="loading loading-dots loading-md text-base-content/30" />
+        <p className="text-xs text-base-content/30">Memuat profil…</p>
       </div>
     );
   }
 
   if (!admin) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-red-500 text-sm">
-        Gagal memuat profil.
+      <div className="flex items-center justify-center py-16">
+        <div role="alert" className="alert alert-error max-w-sm text-sm">
+          Gagal memuat profil.
+        </div>
       </div>
     );
   }
@@ -83,21 +86,18 @@ export default function Profile() {
   const isEmailVerified = !!admin.email_verified_at;
 
   return (
-    <section className="min-h-full py-2">
+    <section className="space-y-5 p-1 text-base-content">
       {/* Page Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-1 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-1">
+          <p className="text-xs font-semibold text-base-content/40 uppercase tracking-widest mb-1">
             Profil Admin
           </p>
-          <h1 className="text-2xl font-semibold text-slate-100">
+          <h1 className="text-2xl font-semibold text-base-content">
             {admin.name}
           </h1>
         </div>
-        <button
-          type="button"
-          className="flex items-center gap-2 bg-[#1e293b] hover:bg-[#263348] border border-[#2d3f55] text-slate-300 text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-150"
-        >
+        <button type="button" className="btn btn-sm btn-neutral gap-2">
           <Settings size={15} />
           Edit Profil
         </button>
@@ -107,7 +107,7 @@ export default function Profile() {
         {/* Sidebar */}
         <div className="space-y-3">
           {/* Avatar + nama */}
-          <div className="bg-[#111827] border border-[#1e2d3d] rounded-xl p-5">
+          <div className="rounded-2xl p-5 bg-base-200 border border-base-content/5">
             <div className="flex items-center gap-4">
               {admin.avatar ? (
                 <img
@@ -116,18 +116,18 @@ export default function Profile() {
                   className="h-14 w-14 rounded-xl object-cover"
                 />
               ) : (
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#1e2d3d] text-base font-semibold text-slate-200 shrink-0">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-base-300 text-base font-semibold text-base-content shrink-0">
                   {initials}
                 </div>
               )}
               <div className="min-w-0">
-                <p className="font-semibold text-slate-100 truncate">
+                <p className="font-semibold text-base-content truncate">
                   {admin.name}
                 </p>
-                <p className="text-sm text-slate-500 mt-0.5">
+                <p className="text-sm text-base-content/50 mt-0.5">
                   @{admin.username || "user"}
                 </p>
-                <span className="inline-block mt-2 text-xs font-medium bg-[#1e2d3d] text-slate-400 px-2 py-0.5 rounded">
+                <span className="inline-block mt-2 badge badge-sm badge-neutral">
                   {admin.role}
                 </span>
               </div>
@@ -135,29 +135,31 @@ export default function Profile() {
           </div>
 
           {/* Status */}
-          <div className="bg-[#111827] border border-[#1e2d3d] rounded-xl p-5">
-            <p className="text-xs font-medium text-slate-600 uppercase tracking-widest mb-4">
+          <div className="rounded-2xl p-5 bg-base-200 border border-base-content/5">
+            <p className="text-xs font-semibold text-base-content/40 uppercase tracking-widest mb-4">
               Status
             </p>
 
             <div className="flex items-center gap-3 mb-4">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1e2d3d] text-slate-500 shrink-0">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-base-300 text-base-content/60 shrink-0">
                 <ShieldCheck size={15} />
               </span>
               <div>
-                <p className="text-sm font-medium text-slate-200">
+                <p className="text-sm font-medium text-base-content">
                   {admin.status}
                 </p>
-                <p className="text-xs text-slate-600 mt-0.5">Akun aktif</p>
+                <p className="text-xs text-base-content/40 mt-0.5">
+                  Akun aktif
+                </p>
               </div>
             </div>
 
-            <div className="border-t border-[#1e2d3d] pt-4 flex items-center gap-3">
+            <div className="border-t border-base-content/10 pt-4 flex items-center gap-3">
               <span
                 className={`flex h-8 w-8 items-center justify-center rounded-lg shrink-0 ${
                   isEmailVerified
-                    ? "bg-emerald-950/60 text-emerald-500"
-                    : "bg-red-950/60 text-red-500"
+                    ? "bg-success/15 text-success"
+                    : "bg-error/15 text-error"
                 }`}
               >
                 {isEmailVerified ? (
@@ -167,12 +169,12 @@ export default function Profile() {
                 )}
               </span>
               <div>
-                <p className="text-sm font-medium text-slate-200">
+                <p className="text-sm font-medium text-base-content">
                   {isEmailVerified
                     ? "Email terverifikasi"
                     : "Belum diverifikasi"}
                 </p>
-                <p className="text-xs text-slate-600 mt-0.5">
+                <p className="text-xs text-base-content/40 mt-0.5">
                   {isEmailVerified
                     ? formatDate(admin.email_verified_at)
                     : "Verifikasi email diperlukan"}
@@ -182,8 +184,8 @@ export default function Profile() {
           </div>
 
           {/* Info */}
-          <div className="bg-[#111827] border border-[#1e2d3d] rounded-xl p-5">
-            <p className="text-xs font-medium text-slate-600 uppercase tracking-widest mb-4">
+          <div className="rounded-2xl p-5 bg-base-200 border border-base-content/5">
+            <p className="text-xs font-semibold text-base-content/40 uppercase tracking-widest mb-4">
               Info
             </p>
             <div className="space-y-3">
@@ -209,12 +211,12 @@ export default function Profile() {
         {/* Konten utama */}
         <div className="space-y-4">
           {/* Detail kontak */}
-          <div className="bg-[#111827] border border-[#1e2d3d] rounded-xl p-5">
+          <div className="rounded-2xl p-5 bg-base-200 border border-base-content/5">
             <div className="mb-5">
-              <p className="text-xs font-medium text-slate-600 uppercase tracking-widest mb-1">
+              <p className="text-xs font-semibold text-base-content/40 uppercase tracking-widest mb-1">
                 Informasi Akun
               </p>
-              <h2 className="text-base font-semibold text-slate-100">
+              <h2 className="text-base font-semibold text-base-content">
                 Detail Kontak
               </h2>
             </div>
@@ -246,12 +248,12 @@ export default function Profile() {
           </div>
 
           {/* Riwayat akun */}
-          <div className="bg-[#111827] border border-[#1e2d3d] rounded-xl p-5">
+          <div className="rounded-2xl p-5 bg-base-200 border border-base-content/5">
             <div className="mb-5">
-              <p className="text-xs font-medium text-slate-600 uppercase tracking-widest mb-1">
+              <p className="text-xs font-semibold text-base-content/40 uppercase tracking-widest mb-1">
                 Riwayat Akun
               </p>
-              <h2 className="text-base font-semibold text-slate-100">
+              <h2 className="text-base font-semibold text-base-content">
                 Aktivitas
               </h2>
             </div>
@@ -284,25 +286,27 @@ export default function Profile() {
 function InfoRow({ icon, label, value }) {
   return (
     <div className="flex items-center justify-between text-sm">
-      <span className="flex items-center gap-2 text-slate-600">
+      <span className="flex items-center gap-2 text-base-content/50">
         {icon}
         {label}
       </span>
-      <span className="text-slate-300 font-medium">{value}</span>
+      <span className="text-base-content/80 font-medium">{value}</span>
     </div>
   );
 }
 
 function ContactField({ icon, label, value, sub }) {
   return (
-    <div className="flex items-start gap-3 bg-[#0f172a] rounded-lg px-4 py-3.5 border border-[#1e2d3d]">
-      <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-[#1e2d3d] text-slate-500 shrink-0">
+    <div className="flex items-start gap-3 bg-base-300/20 rounded-lg px-4 py-3.5 border border-base-content/5">
+      <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-base-300 text-base-content/60 shrink-0">
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="text-xs text-slate-600 mb-0.5">{label}</p>
-        <p className="text-sm font-medium text-slate-200 truncate">{value}</p>
-        {sub && <p className="text-xs text-slate-600 mt-0.5">{sub}</p>}
+        <p className="text-xs text-base-content/40 mb-0.5">{label}</p>
+        <p className="text-sm font-medium text-base-content/80 truncate">
+          {value}
+        </p>
+        {sub && <p className="text-xs text-base-content/40 mt-0.5">{sub}</p>}
       </div>
     </div>
   );
@@ -310,9 +314,9 @@ function ContactField({ icon, label, value, sub }) {
 
 function TimestampCard({ label, value }) {
   return (
-    <div className="bg-[#0f172a] rounded-lg px-4 py-3.5 border border-[#1e2d3d]">
-      <p className="text-xs text-slate-600 mb-1.5">{label}</p>
-      <p className="text-sm font-medium text-slate-200">{value}</p>
+    <div className="bg-base-300/20 rounded-lg px-4 py-3.5 border border-base-content/5">
+      <p className="text-xs text-base-content/40 mb-1.5">{label}</p>
+      <p className="text-sm font-medium text-base-content/80">{value}</p>
     </div>
   );
 }
