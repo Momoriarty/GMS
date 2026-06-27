@@ -14,19 +14,15 @@ import {
  */
 export const fmtDate = (val) => {
   if (!val) return "-";
-  const d = new Date(val);
-  if (isNaN(d)) return val;
+  const d = parseLocal(val);
+  if (!d || isNaN(d)) return val;
   return d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 };
 
-/**
- * Format tanggal + jam → "01 Jul 2025, 14:30"
- * Gunakan di column: { key: "created_at", label: "Dibuat", type: "datetime" }
- */
 export const fmtDateTime = (val) => {
   if (!val) return "-";
-  const d = new Date(val);
-  if (isNaN(d)) return val;
+  const d = parseLocal(val);
+  if (!d || isNaN(d)) return val;
   return d.toLocaleDateString("id-ID", {
     day: "2-digit", month: "short", year: "numeric",
     hour: "2-digit", minute: "2-digit",
@@ -119,11 +115,24 @@ function CellBadge({ row, col }) {
   );
 }
 
+// Tambahkan helper ini di atas CellDate
+const parseLocal = (val) => {
+  if (!val) return null;
+  // Kalau sudah ada timezone info (ada +/- atau Z), parse biasa
+  if (/Z|[+-]\d{2}:\d{2}$/.test(val)) return new Date(val);
+  // Kalau tidak ada timezone (dari Laravel tanpa cast), anggap lokal
+  return new Date(val.replace("T", " "));
+};
+
 function CellDate({ row, col }) {
   const raw = row[col.key];
+  const d = parseLocal(raw);  // ← pakai parseLocal
+  if (!d || isNaN(d)) return <span className="text-sm text-base-content/40">-</span>;
   return (
     <div className="flex flex-col">
-      <span className="text-sm text-base-content/80">{fmtDate(raw)}</span>
+      <span className="text-sm text-base-content/80">
+        {d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+      </span>
     </div>
   );
 }
@@ -131,7 +140,8 @@ function CellDate({ row, col }) {
 function CellDateTime({ row, col }) {
   const raw = row[col.key];
   if (!raw) return <span className="text-sm text-base-content/40">-</span>;
-  const d = new Date(raw);
+  const d = parseLocal(raw);  // ← pakai parseLocal
+  if (!d || isNaN(d)) return <span className="text-sm text-base-content/40">-</span>;
   return (
     <div className="flex flex-col leading-tight">
       <span className="text-sm text-base-content/80">
@@ -227,8 +237,19 @@ function ModalFooter({ onConfirm, loading, label, variant = "default" }) {
 }
 
 // ─── Form Field ────────────────────────────────────────────────────────────
-
 function FormField({ f, value, onChange }) {
+  const formatDisplay = (val) => {
+    const num = String(val).replace(/\D/g, "");
+    if (!num) return "";
+    // Manual format pakai regex, tidak pakai Intl sama sekali
+    return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
+  const handleCurrencyChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, "");
+    onChange({ target: { value: raw } });
+  };
+
   return (
     <label className="form-control w-full">
       <div className="label pb-1">
@@ -236,7 +257,7 @@ function FormField({ f, value, onChange }) {
         {f.required && <span className="label-text-alt text-error">*</span>}
       </div>
       {f.options ? (
-        <select defaultValue={String(value).trim()} onChange={onChange} className="select select-bordered select-sm w-full">
+        <select value={String(value ?? "").trim()} onChange={onChange} className="select select-bordered select-sm w-full">
           {f.options.map((o) => {
             const v = String(o.value ?? o).trim();
             return <option key={v} value={v}>{o.label ?? o}</option>;
@@ -245,6 +266,18 @@ function FormField({ f, value, onChange }) {
       ) : f.type === "textarea" ? (
         <textarea value={value} onChange={onChange} placeholder={f.placeholder || ""}
           className="textarea textarea-bordered textarea-sm w-full" rows={3} />
+      ) : f.type === "currency-input" ? (
+        <label className="input input-bordered input-sm w-full flex items-center gap-2">
+          <span className="text-base-content/40 text-xs font-medium">Rp</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={formatDisplay(value)}
+            onChange={handleCurrencyChange}
+            placeholder={f.placeholder || "0"}
+            className="grow bg-transparent"
+          />
+        </label>
       ) : (
         <input type={f.type || "text"} value={value} onChange={onChange}
           placeholder={f.placeholder || ""} className="input input-bordered input-sm w-full" />
@@ -263,7 +296,11 @@ function ModalEdit({ modalId, row, editFields, onSubmit, onClose }) {
 
   useEffect(() => {
     if (row) {
-      setForm(Object.fromEntries(editFields.map((f) => [f.key, String(row[f.key] ?? "").trim()])));
+      setForm(Object.fromEntries(editFields.map((f) => {
+        let val = String(row[f.key] ?? "").trim();
+        if (f.type === "datetime-local" && val.length > 16) val = val.slice(0, 16);
+        return [f.key, val];
+      })));
       setError("");
     }
   }, [row]);
@@ -401,10 +438,10 @@ function ModalCreate({
 
         <div
           className={`px-5 py-4 grid gap-3 max-h-[60vh] overflow-y-auto ${formColumns === 3
-              ? "grid-cols-3"
-              : formColumns === 2
-                ? "grid-cols-2"
-                : "grid-cols-1"
+            ? "grid-cols-3"
+            : formColumns === 2
+              ? "grid-cols-2"
+              : "grid-cols-1"
             }`}
         >
           {error && (
@@ -596,10 +633,20 @@ export default function DataTable({
 
   const handleEdit = useCallback(async (id, body) => {
     if (onEdit) return onEdit(id, body);
-    await axios.put(`${endpoint}/${id}`, body, { headers: authHeaders() });
-    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...body } : r)));
+
+    // Format datetime-local ke format yang Laravel terima
+    const formatted = { ...body };
+    editFields.forEach((f) => {
+      if (f.type === "datetime-local" && formatted[f.key]) {
+        formatted[f.key] = formatted[f.key].replace("T", " ") + ":00";
+        // "2025-06-26T20:00" → "2025-06-26 20:00:00"
+      }
+    });
+
+    await axios.put(`${endpoint}/${id}`, formatted, { headers: authHeaders() });
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...formatted } : r)));
     showToast("Data berhasil diperbarui");
-  }, [endpoint, onEdit, showToast]);
+  }, [endpoint, onEdit, showToast, editFields]);
 
   const handleDelete = useCallback(async (id) => {
     if (onDelete) return onDelete(id);
@@ -610,12 +657,19 @@ export default function DataTable({
 
   const handleCreate = useCallback(async (body) => {
     if (onCreate) return onCreate(body);
-    const res = await axios.post(endpoint, body, { headers: authHeaders() });
+
+    const formatted = { ...body };
+    createFields.forEach((f) => {
+      if (f.type === "datetime-local" && formatted[f.key]) {
+        formatted[f.key] = formatted[f.key].replace("T", " ") + ":00";
+      }
+    });
+
+    const res = await axios.post(endpoint, formatted, { headers: authHeaders() });
     const newRow = res.data?.data || res.data;
     setRows((prev) => [newRow, ...prev]);
     showToast("Data berhasil ditambahkan");
-  }, [endpoint, onCreate, showToast]);
-
+  }, [endpoint, onCreate, showToast, createFields]);
   const showActions = editable || deletable || actions.length > 0;
 
   // Render cell berdasarkan type

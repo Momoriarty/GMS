@@ -23,10 +23,12 @@ class Event extends Model
     ];
 
     protected $casts = [
-        'tanggal_mulai' => 'datetime',
-        'tanggal_selesai' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'tanggal_mulai' => 'datetime:Y-m-d H:i:s',   // ← tanpa Z, tanpa UTC
+        'tanggal_selesai' => 'datetime:Y-m-d H:i:s',  // ← tanpa Z, tanpa UTC
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
+        'biaya_pendaftaran' => 'integer',              // ← fix 50jt jadi 500rb
+        'kuota_tim' => 'integer',
     ];
 
     public function creator(): BelongsTo

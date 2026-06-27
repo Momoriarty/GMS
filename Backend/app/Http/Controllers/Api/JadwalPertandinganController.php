@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\JadwalPertandingan;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Carbon\Carbon;
+use App\Models\Event;
 
 class JadwalPertandinganController extends Controller
 {
@@ -14,7 +16,6 @@ class JadwalPertandinganController extends Controller
      */
     public function index(Request $request)
     {
-        // 💡 Ganti 'hasilPertandingan' menjadi 'hasil' sesuai nama fungsi di Model kamu
         $query = JadwalPertandingan::with(['tim1', 'tim2', 'hasil']);
 
         // 1. FILTER EVENT
@@ -36,18 +37,13 @@ class JadwalPertandinganController extends Controller
             return [
                 'id' => $item->id,
                 'event_id' => $item->event_id,
-
                 'tim_1_id' => $item->tim_1_id,
                 'tim_2_id' => $item->tim_2_id,
-
                 'tim_1_nama' => $item->tim1->nama_tim ?? '-',
                 'tim_2_nama' => $item->tim2->nama_tim ?? '-',
-
                 'waktu_pertandingan' => $item->waktu_pertandingan,
                 'lokasi_lapangan' => $item->lokasi_lapangan,
                 'status' => $item->status,
-
-                // 💡 Ambil skor melalui relasi '$item->hasil'
                 'skor_tim_1' => $item->hasil->skor_tim_1 ?? null,
                 'skor_tim_2' => $item->hasil->skor_tim_2 ?? null,
             ];
@@ -60,32 +56,96 @@ class JadwalPertandinganController extends Controller
     }
 
     /**
-     * Get single jadwal
+     * Ambil pertandingan yang sedang live (Real-time & Timezone Safe)
      */
-    public function show(int $id)
+    public function liveMatch()
     {
-        $jadwal = JadwalPertandingan::with(['tim1', 'tim2'])->find($id);
+        $now = Carbon::now();
 
-        if (!$jadwal) {
+        // Ambil event yang sedang berlangsung
+        $event = Event::where('status', 'aktif')->first();
+
+        if (!$event) {
             return response()->json([
-                'success' => false,
-                'message' => 'Jadwal tidak ditemukan'
-            ], Response::HTTP_NOT_FOUND);
+                'success' => true,
+                'data' => null,
+                'message' => 'Tidak ada event aktif.'
+            ]);
         }
 
+        // Cari jadwal pertandingan dalam jendela waktu 2 jam ke belakang
+        $duaJamLalu = Carbon::now()->subHours(2);
+
+        $match = JadwalPertandingan::with(['tim1', 'tim2', 'hasil'])
+            ->where('event_id', $event->id)
+            ->where('waktu_pertandingan', '<=', $now)
+            ->where('waktu_pertandingan', '>=', $duaJamLalu)
+            ->orderBy('waktu_pertandingan', 'desc') // Ambil yang paling baru dimulai
+            ->first();
+
+        if (!$match) {
+            return response()->json([
+                'success' => true,
+                'data' => null,
+                'message' => 'Tidak ada live match saat ini.'
+            ]);
+        }
+
+        // Respons JSON disesuaikan langsung dengan properti di komponen React kamu
         return response()->json([
             'success' => true,
             'data' => [
-                'id' => $jadwal->id,
-                'event_id' => $jadwal->event_id,
-                'tim_1_id' => $jadwal->tim_1_id,
-                'tim_2_id' => $jadwal->tim_2_id,
-                'tim_1_nama' => $jadwal->tim1->nama_tim ?? '-',
-                'tim_2_nama' => $jadwal->tim2->nama_tim ?? '-',
-                'waktu_pertandingan' => $jadwal->waktu_pertandingan,
-                'lokasi_lapangan' => $jadwal->lokasi_lapangan,
-                'status' => $jadwal->status,
+                'id' => $match->id,
+                'event_id' => $match->event_id,
+                'tim_1_nama' => $match->tim1->nama_tim ?? 'Tim A',
+                'tim_2_nama' => $match->tim2->nama_tim ?? 'Tim B',
+                'skor_tim_1' => $match->hasil->skor_tim_1 ?? 0,
+                'skor_tim_2' => $match->hasil->skor_tim_2 ?? 0,
+                'waktu_pertandingan' => $match->waktu_pertandingan,
+                'lokasi_lapangan' => $match->lokasi_lapangan ?? 'Lapangan Utama',
             ]
+        ]);
+    }
+
+    /**
+     * Ambil pertandingan yang akan datang (Upcoming Matches)
+     */
+    public function upcomingMatches()
+    {
+        $now = Carbon::now();
+
+        // 1. Ambil event yang sedang aktif terlebih dahulu
+        $event = Event::where('status', 'aktif')->first();
+
+        if (!$event) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+                'message' => 'Tidak ada event aktif.'
+            ]);
+        }
+
+        // 2. Ambil pertandingan yang waktunya LEBIH BESAR dari waktu sekarang
+        $upcoming = JadwalPertandingan::with(['tim1', 'tim2'])
+            ->where('event_id', $event->id)
+            ->where('waktu_pertandingan', '>', $now)
+            ->orderBy('waktu_pertandingan', 'asc') // Urutkan dari yang paling dekat dulu
+            ->take(4) // Batasi ambil 4 pertandingan saja untuk komponen beranda
+            ->get();
+
+        // 3. Format datanya agar langsung pas dengan properti array upcomingMatches di React
+        $formatted = $upcoming->map(function ($match) {
+            return [
+                'id' => $match->id,
+                'waktu' => Carbon::parse($match->waktu_pertandingan)->translatedFormat('d M Y - H:i'),
+                'tim_1_nama' => $match->tim1->nama_tim ?? 'Tim A',
+                'tim_2_nama' => $match->tim2->nama_tim ?? 'Tim B',
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $formatted
         ]);
     }
 
@@ -167,7 +227,6 @@ class JadwalPertandinganController extends Controller
 
     /**
      * Bulk save jadwal yang sudah di-generate di frontend
-     * @param Request $request - berisi jadwal_list array
      */
     public function bulkSave(Request $request)
     {
@@ -187,28 +246,23 @@ class JadwalPertandinganController extends Controller
 
             foreach ($validated['jadwal_list'] as $index => $jadwalData) {
                 try {
-                    // Validasi tambahan: tim tidak boleh sama
                     if ($jadwalData['tim_1_id'] === $jadwalData['tim_2_id']) {
                         $errors[] = "Index {$index}: Tim 1 dan Tim 2 tidak boleh sama";
                         continue;
                     }
 
-                    // Parse waktu dari format ISO 8601 atau format biasa
                     $waktuStr = $jadwalData['waktu_pertandingan'];
                     if (strpos($waktuStr, 'T') !== false) {
-                        // Format ISO 8601: 2026-07-01T08:00:00.000Z
                         $waktu = \Carbon\Carbon::parse($waktuStr);
                     } else {
-                        // Format biasa: 2026-07-01 08:00:00
                         try {
                             $waktu = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $waktuStr);
                         } catch (\Exception $e) {
-                            // Jika gagal, coba parse otomatis
                             $waktu = \Carbon\Carbon::parse($waktuStr);
                         }
                     }
 
-                    $jadwal = JadwalPertandingan::create([
+                    JadwalPertandingan::create([
                         'event_id' => $jadwalData['event_id'],
                         'tim_1_id' => $jadwalData['tim_1_id'],
                         'tim_2_id' => $jadwalData['tim_2_id'],

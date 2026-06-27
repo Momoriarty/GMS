@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -81,8 +82,8 @@ class EventController extends Controller
         $validated = $request->validate([
             'nama_event' => 'string|max:255',
             'deskripsi' => 'string',
-            'tanggal_mulai' => 'date',
-            'tanggal_selesai' => 'date',
+            'tanggal_mulai' => 'date_format:Y-m-d\TH:i,Y-m-d H:i:s,Y-m-d',
+            'tanggal_selesai' => 'date_format:Y-m-d\TH:i,Y-m-d H:i:s,Y-m-d',
             'lokasi' => 'string|max:255',
             'kuota_tim' => 'integer|min:2',
             'biaya_pendaftaran' => 'integer|min:0',

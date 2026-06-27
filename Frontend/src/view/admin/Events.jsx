@@ -15,14 +15,14 @@ const eventFields = [
     type: "text",
     placeholder: "Contoh: Turnamen Futsal Garuda Cup 2025",
     required: true,
-    colSpan: 2, // full row
+    colSpan: 2,
   },
   {
     key: "deskripsi",
     label: "Deskripsi",
     type: "textarea",
     placeholder: "Deskripsi singkat tentang event ini…",
-    colSpan: 2, // full row
+    colSpan: 2,
   },
   {
     key: "lokasi",
@@ -42,14 +42,14 @@ const eventFields = [
   },
   {
     key: "tanggal_mulai",
-    label: "Tanggal Mulai",
-    type: "date",
+    label: "Tanggal & Waktu Mulai",
+    type: "datetime-local", // ← diubah
     required: true,
   },
   {
     key: "tanggal_selesai",
-    label: "Tanggal Selesai",
-    type: "date",
+    label: "Tanggal & Waktu Selesai",
+    type: "datetime-local", // ← diubah
     required: true,
   },
   {
@@ -63,7 +63,7 @@ const eventFields = [
   {
     key: "biaya_pendaftaran",
     label: "Biaya Pendaftaran (Rp)",
-    type: "number",
+    type: "currency-input",
     placeholder: "Contoh: 500000",
     hint: "Nominal rupiah tanpa titik/koma",
     required: true,
@@ -73,8 +73,8 @@ const eventFields = [
 const columns = [
   { key: "nama_event", label: "Nama Event" },
   { key: "lokasi", label: "Lokasi" },
-  { key: "tanggal_mulai", label: "Tgl Mulai", type: "date" },
-  { key: "tanggal_selesai", label: "Tgl Selesai", type: "date" },
+  { key: "tanggal_mulai", label: "Tgl Mulai", type: "datetime" },   // ← diubah
+  { key: "tanggal_selesai", label: "Tgl Selesai", type: "datetime" }, // ← diubah
   { key: "kuota_tim", label: "Kuota", type: "number" },
   { key: "biaya_pendaftaran", label: "Biaya Daftar", type: "currency" },
   { key: "status", label: "Status", type: "badge", colorMap: STATUS_COLORS },

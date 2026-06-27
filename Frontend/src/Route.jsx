@@ -6,7 +6,8 @@ import Register from "./view/auth/Register";
 import Forgot from "./view/auth/Forgot";
 
 // Guest
-import Home from "./view/guest/Home";
+import Home from "./view/guest/home/Home";
+import GuestLayout from "./view/guest/GuestLayout";
 import GuestProfile from "./view/guest/Profile";
 
 // Admin
@@ -66,8 +67,12 @@ function RouteApp() {
         </Route>
       </Route>
 
-      <Route path="/" element={<Home />} />
-      <Route path="/profile" element={<GuestProfile />} />
+      <Route path="/" element={<GuestLayout />}>
+        <Route index element={<Home />} />
+        <Route path="/profile" element={<GuestProfile />} />
+      </Route>
+
+
 
       {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
     </Routes>
