@@ -32,10 +32,12 @@ class NotifikasiController extends Controller
         }
 
         $notifikasi = $query->get();
+        $unreadCount = Notifikasi::where('user_id', $user->id)->where('is_read', false)->count();
 
         return response()->json([
             'success' => true,
-            'data' => $notifikasi
+            'data' => $notifikasi,
+            'unread_count' => $unreadCount,
         ]);
     }
 

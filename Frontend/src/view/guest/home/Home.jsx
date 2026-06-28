@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LiveMatch from "./LiveMatch";
 import EventCard from "./EventCard";
-
+import Klasemen from "./Klasemen"; // 1. IMPORT KOMPONEN KLASEMEN DI SINI
 
 // ── MAIN HOME COMPONENT ───────────────────────────────────────────────
 const Home = () => {
@@ -131,15 +131,6 @@ const Home = () => {
         </div>
       </section>
 
-      <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent)", margin: "0 32px" }} />
-
-      <LiveMatch
-        liveMatch={liveMatch}
-        upcomingMatches={upcomingMatches}
-        recentResults={recentResults}
-      />
-      <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent)", margin: "0 32px" }} />
-
       {/* Divider */}
       <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent)", margin: "0 32px" }} />
 
@@ -171,6 +162,26 @@ const Home = () => {
           </div>
         )}
       </section>
+
+      {/* Divider */}
+      <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent)", margin: "0 32px" }} />
+
+      {/* Live & Match Schedules Section */}
+      <LiveMatch
+        liveMatch={liveMatch}
+        upcomingMatches={upcomingMatches}
+        recentResults={recentResults}
+      />
+      
+      {/* Divider */}
+      <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent)", margin: "0 32px" }} />
+
+      {/* 2. TEMPAT KLASEMEN DILETAKKAN (Dibawah Jadwal Pertandingan) */}
+      <Klasemen />
+
+      {/* Divider Akhir */}
+      <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent)", margin: "0 32px" }} />
+
     </div>
   );
 };

@@ -8,7 +8,9 @@ import Forgot from "./view/auth/Forgot";
 // Guest
 import Home from "./view/guest/home/Home";
 import GuestLayout from "./view/guest/GuestLayout";
-import GuestProfile from "./view/guest/Profile";
+import GuestProfile from "./view/guest/GuestProfile";
+import GuestEvent from "./view/guest/DetailEvent";
+
 
 // Admin
 import AdminLayout from "./view/admin/AdminLayout";
@@ -70,6 +72,7 @@ function RouteApp() {
       <Route path="/" element={<GuestLayout />}>
         <Route index element={<Home />} />
         <Route path="/profile" element={<GuestProfile />} />
+        <Route path="/events/:id" element={<GuestEvent />} />
       </Route>
 
 

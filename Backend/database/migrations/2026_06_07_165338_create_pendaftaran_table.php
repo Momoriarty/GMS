@@ -10,11 +10,9 @@ return new class extends Migration
     {
         Schema::create('pendaftaran', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
+            $table->foreignId('tim_id')->nullable()->constrained('tim')->nullOnDelete();
             $table->enum('status', ['menunggu', 'diterima', 'ditolak'])->default('menunggu');
-            $table->string('dokumen_pendukung')->nullable();
-            $table->foreignId('verified_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('tanggal_daftar')->useCurrent();
             $table->timestamps();
         });

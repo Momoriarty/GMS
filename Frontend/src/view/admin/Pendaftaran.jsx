@@ -20,19 +20,6 @@ export default function Pendaftaran() {
     { key: "event", label: "Event", render: (row) => row.event?.nama_event || "-" },
     { key: "tanggal_daftar", label: "Tanggal Daftar", type: "date" },
     {
-      key: "dokumen_pendukung",
-      label: "Dokumen",
-      render: (row) =>
-        row.dokumen_pendukung ? (
-          <button className="text-blue-400 hover:text-blue-300 flex items-center gap-1">
-            <Eye size={16} />
-            Lihat
-          </button>
-        ) : (
-          <span className="text-base-content/40">-</span>
-        ),
-    },
-    {
       key: "status",
       label: "Status",
       type: "badge",

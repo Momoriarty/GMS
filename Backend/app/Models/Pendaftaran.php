@@ -10,7 +10,7 @@ class Pendaftaran extends Model
     protected $table = 'pendaftaran';
 
     protected $fillable = [
-        'user_id',
+        'tim_id',
         'event_id',
         'status',
         'dokumen_pendukung',
@@ -24,10 +24,7 @@ class Pendaftaran extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
+    // User is accessible through $pendaftaran->tim->user
 
     public function event(): BelongsTo
     {
@@ -41,6 +38,6 @@ class Pendaftaran extends Model
 
     public function tim()
     {
-        return $this->hasOne(Tim::class, 'user_id');
+        return $this->belongsTo(Tim::class, 'tim_id');
     }
 }

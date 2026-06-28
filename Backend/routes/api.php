@@ -23,6 +23,8 @@ Route::get('/jadwal/live-match',      [HomeController::class, 'liveMatch']);
 Route::get('/jadwal/upcoming-match',  [HomeController::class, 'upcomingMatches']);
 Route::get('/jadwal/recent-results',  [HomeController::class, 'recentResults']); // ← baru
 Route::get('/home/events', [HomeController::class, 'events']);
+    Route::post('/midtrans/webhook', [PendaftaranController::class, 'webhook']);
+
 
 // ── Terproteksi ───────────────────────────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
@@ -35,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Users
     Route::get('/users',         [UserController::class, 'index']);
-    Route::put('/users/{id}',    [UserController::class, 'update']);
+    Route::put('/user/update', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
     // Events
@@ -64,6 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pendaftaran',              [PendaftaranController::class, 'index']);
     Route::get('/pendaftaran/{id}',         [PendaftaranController::class, 'show']);
     Route::post('/pendaftaran',             [PendaftaranController::class, 'store']);
+    Route::post('/pendaftaran/{id}/pay',    [PendaftaranController::class, 'pay']);
     Route::post('/pendaftaran/{id}/verify', [PendaftaranController::class, 'verify']);
     Route::delete('/pendaftaran/{id}',      [PendaftaranController::class, 'destroy']);
 
@@ -75,6 +78,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Notifikasi
     Route::get('/notifikasi',              [NotifikasiController::class, 'index']);
+    // English alias
+    Route::get('/notifications',           [NotifikasiController::class, 'index']);
     Route::get('/notifikasi/{id}',         [NotifikasiController::class, 'show']);
     Route::post('/notifikasi',             [NotifikasiController::class, 'store']);
     Route::post('/notifikasi/{id}/read',   [NotifikasiController::class, 'markAsRead']);

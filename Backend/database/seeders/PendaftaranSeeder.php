@@ -9,18 +9,16 @@ class PendaftaranSeeder extends Seeder
 {
     public function run(): void
     {
-        $users  = DB::table('users')->where('role', 'peserta')->pluck('id');
+        $timIds = DB::table('tim')->pluck('id');
         $admin  = DB::table('users')->where('role', 'admin')->value('id');
 
         $data = [];
 
-        foreach ($users as $i => $userId) {
+        foreach ($timIds as $i => $timId) {
             $data[] = [
-                'user_id'           => $userId,
+                'tim_id'            => $timId,
                 'event_id'          => 1,
                 'status'            => 'diterima',
-                'dokumen_pendukung' => 'dokumen/tim' . ($i + 1) . '.pdf',
-                'verified_by'       => $admin,
                 'tanggal_daftar'    => now(),
                 'created_at'        => now(),
                 'updated_at'        => now(),
