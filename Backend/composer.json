@@ -8,7 +8,13 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
+<<<<<<< Updated upstream
         "laravel/tinker": "^2.10.1"
+=======
+        "laravel/sanctum": "^4.3",
+        "laravel/tinker": "^2.10.1",
+        "midtrans/midtrans-php": "^2.6"
+>>>>>>> Stashed changes
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
