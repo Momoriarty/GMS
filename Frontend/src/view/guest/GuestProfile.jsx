@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import api from "../../data/api";
 import {
@@ -23,6 +23,24 @@ export default function GuestProfile() {
   const [error, setError] = useState(null);
   const [registrations, setRegistrations] = useState([]);
   const [payingId, setPayingId] = useState(null);
+
+  // States untuk Fitur Pembayaran Ulang
+  const [selectedReg, setSelectedReg] = useState(null); // Pendaftaran yang akan dibayar
+  const [paymentMethod, setPaymentMethod] = useState("qris");
+  const [paymentData, setPaymentData] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState("menunggu");
+  const [copied, setCopied] = useState(false);
+  const pollingRef = useRef(null);
+  const pollAttemptsRef = useRef(0);
+
+  const fmtCurrency = (amount) => {
+    if (amount === undefined || amount === null || amount === 0) return "Gratis";
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
   const [selectedPaymentMethods, setSelectedPaymentMethods] = useState({});
 
   // State untuk Fitur Edit Profil
@@ -84,51 +102,75 @@ export default function GuestProfile() {
     });
   };
 
-  const handlePayRegistration = async (registrationId) => {
+  const handlePayRegistration = (registration) => {
+    setSelectedReg(registration);
+    setPaymentMethod("qris");
+    setPaymentData(null);
+    setPaymentStatus("menunggu");
+  };
+
+  const handleProcessPayment = async () => {
+    if (!selectedReg) return;
     try {
-      setPayingId(registrationId);
-      const payment_method = selectedPaymentMethods[registrationId] || 'qris';
-      const res = await api.post(`/pendaftaran/${registrationId}/pay`, { payment_method });
+      setPayingId(selectedReg.id);
+      const res = await api.post(`/pendaftaran/${selectedReg.id}/pay`, { payment_method: paymentMethod });
       const data = res.data?.data || res.data;
-      const snapToken = data?.snap_token;
-
-      if (!snapToken) {
-        alert('Pembayaran tidak tersedia. Silakan hubungi panitia jika masalah berlanjut.');
-        return;
-      }
-
-      try {
-        const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY;
-        await loadSnapScript(clientKey);
-      } catch (loadErr) {
-        console.error(loadErr);
-        alert('Gagal memuat modul pembayaran. Silakan coba lagi nanti.');
-        return;
-      }
-
-      window.snap.pay(snapToken, {
-        onSuccess: function () {
-          alert('Pembayaran berhasil! Status akan diperbarui setelah konfirmasi.');
-          window.location.reload();
-        },
-        onPending: function () {
-          alert('Pembayaran Anda sedang menunggu. Status akan diperbarui setelah pembayaran diterima.');
-          window.location.reload();
-        },
-        onError: function () {
-          alert('Pembayaran gagal, silakan coba lagi.');
-        },
-        onClose: function () {
-          alert('Popup pembayaran ditutup sebelum selesai. Silakan coba lagi.');
-        }
-      });
+      
+      setPaymentData(data?.payment_data || data);
+      setPaymentStatus("menunggu");
+      pollAttemptsRef.current = 0;
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || 'Gagal memulai pembayaran. Silakan coba lagi.');
+      alert(err.response?.data?.message || 'Gagal memproses pembayaran. Cek koneksi Anda.');
     } finally {
       setPayingId(null);
     }
   };
+
+  // Polling status pembayaran ulang pendaftaran
+  useEffect(() => {
+    if (!selectedReg?.id || !paymentData) return;
+
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+
+    const checkStatus = async () => {
+      try {
+        pollAttemptsRef.current += 1;
+        const res = await api.get(`/pendaftaran/${selectedReg.id}`);
+        const data = res.data?.data || res.data;
+        const status = data?.status;
+
+        if (status) {
+          setPaymentStatus(status);
+        }
+
+        if (status && status !== 'menunggu') {
+          if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
+          // Refresh registrations list
+          const regRes = await api.get('/pendaftaran');
+          setRegistrations(regRes.data?.data || regRes.data || []);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    checkStatus();
+    pollingRef.current = setInterval(() => {
+      if (pollAttemptsRef.current >= 40) {
+        clearInterval(pollingRef.current); pollingRef.current = null;
+        return;
+      }
+      checkStatus();
+    }, 8000);
+
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    };
+  }, [selectedReg, paymentData]);
 
   // 3. Simpan Perubahan ke API Backend
   const handleSaveChanges = async (e) => {
@@ -249,41 +291,7 @@ export default function GuestProfile() {
             {isEditing ? "Perbarui Informasi Kontak" : "Biodata Pengguna"}
           </h2>
 
-          <div className="mt-6">
-            <h3 className="text-sm font-semibold text-white/80 mb-3">Riwayat Pendaftaran</h3>
-            {registrations.length === 0 ? (
-              <p className="text-xs text-white/50">Belum ada riwayat pendaftaran.</p>
-            ) : (
-              <div className="space-y-3">
-                {registrations.map((r) => (
-                  <div key={r.id} className="rounded-xl p-3 bg-slate-900/60 border border-white/5">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="text-xs text-white/50">Event</div>
-                        <div className="font-bold">{r.event?.nama_event || '—'}</div>
-                        <div className="text-xs text-white/40">Tim: {r.tim?.nama_tim || '-'}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`text-sm font-semibold ${r.status === 'diterima' ? 'text-success' : r.status === 'ditolak' ? 'text-error' : 'text-white/70'}`}>{r.status}</div>
-                        <div className="text-xs text-white/40">{r.tanggal_daftar ? new Date(r.tanggal_daftar).toLocaleString('id-ID') : ''}</div>
-                      </div>
-                    </div>
-                    {r.status === 'menunggu' && (
-                      <div className="mt-3 flex justify-end">
-                        <button
-                          onClick={() => handlePayRegistration(r.id)}
-                          disabled={payingId === r.id}
-                          className="btn btn-xs bg-[#ff4800] border-none text-white hover:bg-[#e34f00]"
-                        >
-                          {payingId === r.id ? 'Memproses...' : 'Bayar Sekarang'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Riwayat Pendaftaran has been moved below as a separate card */}
 
           {!isEditing ? (
             /* MODE PREVIEW DATA */
@@ -384,6 +392,349 @@ export default function GuestProfile() {
           )}
         </div>
       </div>
+
+      {/* TABEL RIWAYAT PENDAFTARAN MINIMALIS */}
+      <div className="mx-auto max-w-4xl px-6 mt-6 pb-12">
+        <div className="rounded-3xl border border-white/5 bg-slate-900 p-6 md:p-8 shadow-xl">
+          <h3 className="text-base font-bold text-white mb-6 flex items-center gap-2">
+            📋 Riwayat Pendaftaran
+          </h3>
+          {registrations.length === 0 ? (
+            <p className="text-xs text-white/40 italic py-2">Belum ada riwayat pendaftaran.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-white/10 text-white/40 uppercase font-bold tracking-wider">
+                    <th className="pb-3 pr-4 font-semibold text-[10px]">Event / Tim</th>
+                    <th className="pb-3 px-4 font-semibold text-[10px] hidden md:table-cell">Tanggal Daftar</th>
+                    <th className="pb-3 px-4 font-semibold text-[10px]">Status</th>
+                    <th className="pb-3 pl-4 font-semibold text-[10px] text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {registrations.map((r) => {
+                    const statusColors = 
+                      r.status === 'diterima' 
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                        : r.status === 'ditolak' 
+                          ? 'bg-red-500/10 text-red-400 border-red-500/20' 
+                          : 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                    
+                    return (
+                      <tr key={r.id} className="hover:bg-white/[0.01] transition-colors">
+                        <td className="py-4 pr-4">
+                          <div className="font-bold text-white/90 text-[13px]">{r.event?.nama_event || '—'}</div>
+                          <div className="text-white/40 text-[11px] mt-0.5">Tim: <span className="text-white/70 font-semibold">{r.tim?.nama_tim || '-'}</span></div>
+                        </td>
+                        <td className="py-4 px-4 text-white/50 hidden md:table-cell">
+                          {r.tanggal_daftar ? new Date(r.tanggal_daftar).toLocaleDateString('id-ID', {
+                            day: 'numeric', month: 'short', year: 'numeric'
+                          }) : '—'}
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold border ${statusColors} uppercase tracking-wider`}>
+                            {r.status === 'menunggu' && <span className="w-1 h-1 rounded-full bg-amber-400 animate-pulse" />}
+                            {r.status === 'diterima' && <span className="w-1 h-1 rounded-full bg-emerald-400" />}
+                            {r.status === 'ditolak' && <span className="w-1 h-1 rounded-full bg-red-400" />}
+                            {r.status}
+                          </span>
+                        </td>
+                        <td className="py-4 pl-4 text-right">
+                          {r.status === 'menunggu' ? (
+                            <button
+                              onClick={() => handlePayRegistration(r)}
+                              disabled={payingId === r.id}
+                              className="btn btn-xs min-h-[28px] h-[28px] bg-[#ff4800] hover:bg-[#e34f00] text-white border-none font-bold rounded-lg px-3 shadow-sm transition-all"
+                            >
+                              {payingId === r.id ? 'Memproses...' : 'Bayar'}
+                            </button>
+                          ) : (
+                            <span className="text-white/30 italic text-[11px]">Tidak ada aksi</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* MODAL PEMBAYARAN */}
+      {selectedReg && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-6 animate-in zoom-in-95 duration-300">
+            
+            {/* Header Modal */}
+            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+              <h3 className="font-bold text-white text-base">Pembayaran Event</h3>
+              <button 
+                onClick={() => {
+                  setSelectedReg(null);
+                  setPaymentData(null);
+                  setPaymentStatus("menunggu");
+                }} 
+                className="text-white/40 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Konten A: Memilih Metode Pembayaran */}
+            {!paymentData ? (
+              <div className="space-y-4">
+                <div className="bg-white/5 p-4 rounded-2xl text-xs space-y-1">
+                  <p className="text-white/40 uppercase">Event</p>
+                  <p className="font-bold text-white text-sm">{selectedReg.event?.nama_event}</p>
+                  <p className="text-white/40 mt-2 uppercase">Biaya Pendaftaran</p>
+                  <p className="font-black text-[#ff4800] text-base">{fmtCurrency(selectedReg.event?.biaya_pendaftaran)}</p>
+                </div>
+
+                <p className="text-xs font-semibold text-white/70">Pilih Metode Pembayaran:</p>
+                <div className="max-h-60 overflow-y-auto space-y-2 pr-1 [scrollbar-width:thin]">
+                  {/* QRIS */}
+                  <button 
+                    onClick={() => setPaymentMethod("qris")}
+                    className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${paymentMethod === 'qris' ? 'border-[#ff4800] bg-[#ff4800]/5' : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03]'}`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold text-white">🔲 QRIS</p>
+                      <p className="text-[10px] text-white/40">Gopay, OVO, Dana, LinkAja</p>
+                    </div>
+                    {paymentMethod === 'qris' && <span className="text-xs text-[#ff4800]">✓ Selected</span>}
+                  </button>
+
+                  {/* Gopay */}
+                  <button 
+                    onClick={() => setPaymentMethod("gopay")}
+                    className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${paymentMethod === 'gopay' ? 'border-[#ff4800] bg-[#ff4800]/5' : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03]'}`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold text-white">💚 GoPay</p>
+                      <p className="text-[10px] text-white/40">Bayar instan via aplikasi Gojek</p>
+                    </div>
+                    {paymentMethod === 'gopay' && <span className="text-xs text-[#ff4800]">✓ Selected</span>}
+                  </button>
+
+                  {/* ShopeePay */}
+                  <button 
+                    onClick={() => setPaymentMethod("shopeepay")}
+                    className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${paymentMethod === 'shopeepay' ? 'border-[#ff4800] bg-[#ff4800]/5' : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03]'}`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold text-white">🧡 ShopeePay</p>
+                      <p className="text-[10px] text-white/40">Bayar instan via aplikasi Shopee</p>
+                    </div>
+                    {paymentMethod === 'shopeepay' && <span className="text-xs text-[#ff4800]">✓ Selected</span>}
+                  </button>
+
+                  {/* BCA */}
+                  <button 
+                    onClick={() => setPaymentMethod("bank_transfer_bca")}
+                    className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${paymentMethod === 'bank_transfer_bca' ? 'border-[#ff4800] bg-[#ff4800]/5' : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03]'}`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold text-white">🔵 BCA Virtual Account</p>
+                      <p className="text-[10px] text-white/40">Transfer melalui Virtual Account BCA</p>
+                    </div>
+                    {paymentMethod === 'bank_transfer_bca' && <span className="text-xs text-[#ff4800]">✓ Selected</span>}
+                  </button>
+
+                  {/* BNI */}
+                  <button 
+                    onClick={() => setPaymentMethod("bank_transfer_bni")}
+                    className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${paymentMethod === 'bank_transfer_bni' ? 'border-[#ff4800] bg-[#ff4800]/5' : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03]'}`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold text-white">🟠 BNI Virtual Account</p>
+                      <p className="text-[10px] text-white/40">Transfer melalui Virtual Account BNI</p>
+                    </div>
+                    {paymentMethod === 'bank_transfer_bni' && <span className="text-xs text-[#ff4800]">✓ Selected</span>}
+                  </button>
+
+                  {/* BRI */}
+                  <button 
+                    onClick={() => setPaymentMethod("bank_transfer_bri")}
+                    className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${paymentMethod === 'bank_transfer_bri' ? 'border-[#ff4800] bg-[#ff4800]/5' : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03]'}`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold text-white">🔵 BRI Virtual Account</p>
+                      <p className="text-[10px] text-white/40">Transfer melalui Virtual Account BRI</p>
+                    </div>
+                    {paymentMethod === 'bank_transfer_bri' && <span className="text-xs text-[#ff4800]">✓ Selected</span>}
+                  </button>
+
+                  {/* Mandiri */}
+                  <button 
+                    onClick={() => setPaymentMethod("bank_transfer_mandiri")}
+                    className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${paymentMethod === 'bank_transfer_mandiri' ? 'border-[#ff4800] bg-[#ff4800]/5' : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03]'}`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold text-white">🟡 Mandiri Virtual Account</p>
+                      <p className="text-[10px] text-white/40">Transfer melalui Bill Payment Mandiri</p>
+                    </div>
+                    {paymentMethod === 'bank_transfer_mandiri' && <span className="text-xs text-[#ff4800]">✓ Selected</span>}
+                  </button>
+
+                  {/* Permata */}
+                  <button 
+                    onClick={() => setPaymentMethod("bank_transfer_permata")}
+                    className={`w-full p-3 rounded-xl border text-left flex justify-between items-center transition-all ${paymentMethod === 'bank_transfer_permata' ? 'border-[#ff4800] bg-[#ff4800]/5' : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03]'}`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold text-white">🟢 Permata Virtual Account</p>
+                      <p className="text-[10px] text-white/40">Transfer melalui Virtual Account Permata</p>
+                    </div>
+                    {paymentMethod === 'bank_transfer_permata' && <span className="text-xs text-[#ff4800]">✓ Selected</span>}
+                  </button>
+                </div>
+
+                <button 
+                  onClick={handleProcessPayment}
+                  disabled={payingId !== null}
+                  className="w-full btn btn-sm min-h-[40px] h-[40px] bg-[#ff4800] hover:bg-[#e03e00] text-white border-none font-bold rounded-xl text-xs shadow-md"
+                >
+                  {payingId !== null ? "Memproses..." : "Lanjut Bayar →"}
+                </button>
+              </div>
+            ) : (
+              /* Konten B: Menampilkan Detail Pembayaran / Hasil Sukses */
+              <div className="space-y-5 text-center">
+                {paymentStatus === "diterima" ? (
+                  <div className="space-y-4 py-2">
+                    <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black text-3xl flex items-center justify-center rounded-full mx-auto animate-bounce">
+                      ✓
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-emerald-400 font-extrabold uppercase tracking-widest">Transaksi Sukses</p>
+                      <h4 className="text-lg font-black text-white">Pembayaran Berhasil!</h4>
+                      <p className="text-xs text-white/50 max-w-xs mx-auto mt-2">
+                        Pendaftaran tim <span className="text-white font-bold">{selectedReg.tim?.nama_tim}</span> untuk event <span className="text-white font-bold">{selectedReg.event?.nama_event}</span> telah lunas dan terverifikasi.
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setSelectedReg(null);
+                        setPaymentData(null);
+                        setPaymentStatus("menunggu");
+                      }}
+                      className="btn btn-sm bg-emerald-500 hover:bg-emerald-600 border-none text-white font-bold rounded-xl w-full text-xs"
+                    >
+                      Selesai
+                    </button>
+                  </div>
+                ) : paymentStatus === "ditolak" ? (
+                  <div className="space-y-4 py-2">
+                    <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 text-red-500 font-black text-3xl flex items-center justify-center rounded-full mx-auto">
+                      ✕
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-red-400 font-extrabold uppercase tracking-widest">Transaksi Gagal</p>
+                      <h4 className="text-lg font-black text-white">Pembayaran Ditolak</h4>
+                      <p className="text-xs text-white/50 max-w-xs mx-auto mt-2">
+                        Pembayaran ditolak oleh sistem. Silakan coba kembali atau hubungi panitia.
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => setPaymentData(null)}
+                      className="btn btn-sm bg-red-500 hover:bg-red-600 border-none text-white font-bold rounded-xl w-full text-xs"
+                    >
+                      Coba Lagi
+                    </button>
+                  </div>
+                ) : (
+                  /* Menampilkan Informasi VA / QRIS */
+                  <div className="space-y-4">
+                    {/* QRIS */}
+                    {paymentMethod === "qris" && (
+                      <div className="space-y-4">
+                        <p className="text-[11px] text-white/40 uppercase tracking-widest">Scan QR di Bawah</p>
+                        <div className="bg-white rounded-2xl p-4 inline-block mx-auto">
+                          {paymentData.qr_code_url ? (
+                            <img src={paymentData.qr_code_url} alt="QRIS" className="w-48 h-48 object-contain" />
+                          ) : (
+                            <div className="w-48 h-48 flex items-center justify-center text-xs text-slate-500">QR tidak tersedia</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Gopay / ShopeePay */}
+                    {(paymentMethod === "gopay" || paymentMethod === "shopeepay") && (
+                      <div className="space-y-4">
+                        <p className="text-[11px] text-white/40 uppercase tracking-widest">Aplikasi {paymentMethod === "gopay" ? "GoPay" : "ShopeePay"}</p>
+                        {paymentData.qr_code_url && (
+                          <div className="bg-white rounded-2xl p-4 inline-block mx-auto">
+                            <img src={paymentData.qr_code_url} alt="QR" className="w-48 h-48 object-contain" />
+                          </div>
+                        )}
+                        {paymentData.deeplink_url && (
+                          <a href={paymentData.deeplink_url} target="_blank" rel="noopener noreferrer" className="btn btn-sm w-full bg-[#ff4800] hover:bg-[#e34f00] text-white border-none font-bold rounded-xl text-xs py-2">
+                            Buka Aplikasi {paymentMethod === "gopay" ? "GoPay" : "ShopeePay"}
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Bank Transfer (Virtual Account) */}
+                    {paymentMethod.startsWith("bank_transfer") && (() => {
+                      const isMandiri = paymentData.bill_key && paymentData.biller_code;
+                      const vaNumber = isMandiri ? paymentData.bill_key : (paymentData.va_numbers?.[0]?.va_number || paymentData.permata_va_number || "—");
+                      const bankName = isMandiri ? "MANDIRI" : (paymentData.va_numbers?.[0]?.bank?.toUpperCase() || (paymentMethod === "bank_transfer_permata" ? "PERMATA" : "BANK"));
+                      
+                      return (
+                        <div className="space-y-4">
+                          <p className="text-[11px] uppercase tracking-widest text-[#ff4800] font-bold">Virtual Account {bankName}</p>
+                          <div className="bg-white/5 border border-[#ff4800]/30 rounded-2xl p-4 text-center">
+                            {isMandiri && (
+                              <div className="mb-2">
+                                <p className="text-[10px] text-white/40 uppercase tracking-wider">Kode Perusahaan (Biller)</p>
+                                <p className="text-base font-bold text-white tracking-widest">{paymentData.biller_code}</p>
+                              </div>
+                            )}
+                            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">
+                              {isMandiri ? "Kode Bayar (Bill Key)" : "Nomor Virtual Account"}
+                            </p>
+                            <p className="text-2xl font-black text-white tracking-widest">{vaNumber}</p>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(vaNumber);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 2000);
+                              }}
+                              className="mt-2 btn btn-xs bg-[#ff4800]/15 border border-[#ff4800]/30 text-[#ff4800] hover:bg-[#ff4800]/25 rounded-full px-3"
+                            >
+                              {copied ? "✓ Tersalin" : "Salin"}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/20 p-3 text-[11px] text-yellow-300 text-left">
+                      ⚠️ Lakukan pembayaran sesuai petunjuk. Sistem akan mendeteksi transaksi secara otomatis dalam 1-5 menit.
+                    </div>
+
+                    <button 
+                      onClick={() => {
+                        setSelectedReg(null);
+                        setPaymentData(null);
+                        setPaymentStatus("menunggu");
+                      }}
+                      className="btn btn-xs bg-transparent border border-white/10 hover:bg-white/5 text-white/40 hover:text-white rounded-xl w-full py-1.5"
+                    >
+                      Tutup & Bayar Nanti
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

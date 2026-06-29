@@ -22,47 +22,48 @@ const Navbar = () => {
     { label: "Tentang", path: "/about" },
   ];
 
+  const hasFetched = React.useRef(false);
+
   const fetchData = async () => {
     const token = localStorage.getItem("access_token") || localStorage.getItem("token");
-
-    // JIKA TIDAK ADA TOKEN, LANGSUNG RESET USER DAN NOTIFIKASI
     if (!token) {
       setUser(null);
-      setNotifications([]); // <--- Reset notifikasi di sini
+      setNotifications([]);
       setLoadingUser(false);
       return;
     }
 
     try {
-      // Hanya panggil API jika token dipastikan ada
       const [userRes, notifRes] = await Promise.all([
         api.get('/user'),
         api.get('/notifikasi').catch(() => null)
       ]);
-
       if (userRes) setUser(userRes.data?.user || userRes.data?.data || userRes.data);
       if (notifRes) setNotifications(notifRes.data?.data || notifRes.data || []);
-    } catch (error) {
+    } catch {
       setUser(null);
-      setNotifications([]); // <--- Reset juga jika token kedaluwarsa / error 401
+      setNotifications([]);
     } finally {
-      loadingUser && setLoadingUser(false);
+      setLoadingUser(false);
     }
   };
 
+  // Fetch hanya sekali saat komponen mount
   useEffect(() => {
-    fetchData();
-  }, [location.pathname]);
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      fetchData();
+    }
+  }, []);
 
+  // Re-fetch saat ada perubahan auth (login/logout) dari halaman lain
   useEffect(() => {
-    window.addEventListener("storage", fetchData);
-    window.addEventListener("authChange", fetchData);
-    window.addEventListener("focus", fetchData);
-
+    const onAuthChange = () => fetchData();
+    window.addEventListener("storage", onAuthChange);
+    window.addEventListener("authChange", onAuthChange);
     return () => {
-      window.removeEventListener("storage", fetchData);
-      window.removeEventListener("authChange", fetchData);
-      window.removeEventListener("focus", fetchData);
+      window.removeEventListener("storage", onAuthChange);
+      window.removeEventListener("authChange", onAuthChange);
     };
   }, []);
 

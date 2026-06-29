@@ -102,30 +102,44 @@ class PendaftaranController extends Controller
             $params['notification_url'] = $notificationUrl;
         }
 
-        switch ($method) {
-            case 'qris':
-                $params['payment_type'] = 'qris';
-                $params['qris']         = ['acquirer' => 'gopay'];
-                break;
-
-            case 'gopay':
-                $params['payment_type'] = 'gopay';
-                $params['gopay']        = ['enable_callback' => false];
-                break;
-
-            case 'shopeepay':
-                $params['payment_type'] = 'shopeepay';
-                $params['shopeepay']    = ['callback_url' => ''];
-                break;
-
-            case 'bank_transfer':
+        if (str_starts_with($method, 'bank_transfer_')) {
+            $bank = substr($method, 14); // e.g. "bca", "bni", "bri", "mandiri", "permata"
+            if ($bank === 'mandiri') {
+                $params['payment_type'] = 'echannel';
+                $params['echannel'] = [
+                    'bill_info1' => 'Pembayaran:',
+                    'bill_info2' => 'Registrasi Turnamen'
+                ];
+            } else {
                 $params['payment_type']   = 'bank_transfer';
-                $params['bank_transfer']  = ['bank' => 'bca'];
-                break;
+                $params['bank_transfer']  = ['bank' => $bank];
+            }
+        } else {
+            switch ($method) {
+                case 'qris':
+                    $params['payment_type'] = 'qris';
+                    $params['qris']         = ['acquirer' => 'gopay'];
+                    break;
 
-            default:
-                $params['payment_type'] = 'qris';
-                $params['qris']         = ['acquirer' => 'gopay'];
+                case 'gopay':
+                    $params['payment_type'] = 'gopay';
+                    $params['gopay']        = ['enable_callback' => false];
+                    break;
+
+                case 'shopeepay':
+                    $params['payment_type'] = 'shopeepay';
+                    $params['shopeepay']    = ['callback_url' => ''];
+                    break;
+
+                case 'bank_transfer':
+                    $params['payment_type']   = 'bank_transfer';
+                    $params['bank_transfer']  = ['bank' => 'bca'];
+                    break;
+
+                default:
+                    $params['payment_type'] = 'qris';
+                    $params['qris']         = ['acquirer' => 'gopay'];
+            }
         }
 
         return CoreApi::charge($params);
@@ -138,7 +152,7 @@ class PendaftaranController extends Controller
             'nama_tim'       => 'required|string|max:255',
             'kelompok_umur'  => 'required|string',
             'logo_tim'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'payment_method' => 'nullable|string|in:qris,gopay,shopeepay,bank_transfer',
+            'payment_method' => 'nullable|string|in:qris,gopay,shopeepay,bank_transfer,bank_transfer_bca,bank_transfer_bni,bank_transfer_bri,bank_transfer_mandiri,bank_transfer_permata',
         ]);
 
         $user  = Auth::user();
@@ -291,6 +305,64 @@ class PendaftaranController extends Controller
             'success' => true,
             'message' => "Status berhasil diubah dari {$oldStatus} menjadi {$validated['status']}",
             'data'    => $pendaftaran,
+        ]);
+    }
+
+    public function pay(Request $request, int $id)
+    {
+        $request->validate([
+            'payment_method' => 'nullable|string|in:qris,gopay,shopeepay,bank_transfer,bank_transfer_bca,bank_transfer_bni,bank_transfer_bri,bank_transfer_mandiri,bank_transfer_permata',
+        ]);
+
+        $pendaftaran = Pendaftaran::with(['tim.user', 'event'])->find($id);
+
+        if (!$pendaftaran) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pendaftaran tidak ditemukan'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($pendaftaran->status === 'diterima') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pendaftaran ini sudah lunas/diterima'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $paymentMethod = $request->input('payment_method', 'qris');
+
+        // Setup & charge Midtrans Core API
+        $this->setupMidtrans();
+
+        $paymentData  = null;
+        $paymentError = null;
+
+        try {
+            $response = $this->chargePayment(
+                $paymentMethod,
+                [
+                    'order_id'     => 'ORDER-' . $pendaftaran->id . '-' . time(),
+                    'gross_amount' => (int) $pendaftaran->event->biaya_pendaftaran,
+                ],
+                [
+                    'first_name' => $pendaftaran->tim->user->name,
+                    'email'      => $pendaftaran->tim->user->email,
+                    'phone'      => $pendaftaran->tim->user->no_wa ?? $pendaftaran->tim->user->phone_number ?? '',
+                ],
+                env('MIDTRANS_NOTIFICATION_URL')
+            );
+
+            $paymentData = json_decode(json_encode($response), true);
+        } catch (Exception $e) {
+            Log::error('Midtrans Core API Error: ' . $e->getMessage());
+            $paymentError = $e->getMessage();
+        }
+
+        return response()->json([
+            'success'       => true,
+            'payment_data'  => $paymentData,
+            'payment_error' => $paymentError,
         ]);
     }
 

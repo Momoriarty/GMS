@@ -13,7 +13,10 @@ class EventController extends Controller
 {
     public function index()
     {
-        $events = Event::all();
+        $events = Event::withCount(['pendaftaran' => function ($query) {
+            $query->where('status', 'diterima');
+        }])->get();
+
         return response()->json([
             'success' => true,
             'data' => $events
@@ -22,7 +25,9 @@ class EventController extends Controller
 
     public function show(int $id)
     {
-        $event = Event::find($id);
+        $event = Event::withCount(['pendaftaran' => function ($query) {
+            $query->where('status', 'diterima');
+        }])->find($id);
 
         if (!$event) {
             return response()->json([

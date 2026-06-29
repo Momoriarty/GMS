@@ -93,7 +93,9 @@ class HomeController extends Controller
 
     public function events()
     {
-        $events = Event::withCount('pendaftaran')
+        $events = Event::withCount(['pendaftaran' => function ($query) {
+            $query->where('status', 'diterima');
+        }])
             ->where('status', 'aktif')
             ->orderBy('tanggal_mulai')
             ->get();

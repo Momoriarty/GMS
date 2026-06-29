@@ -17,14 +17,9 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-
-    console.log("API REQUEST TO:", config.url);
-    console.log("TOKEN:", token);
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => Promise.reject(error)
@@ -34,24 +29,15 @@ api.interceptors.request.use(
  * RESPONSE INTERCEPTOR
  */
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    console.log("API ERROR:", error.response?.status, error.response?.data);
-
     if (error.response?.status === 401) {
-      console.log("TOKEN EXPIRED / INVALID");
-
       localStorage.removeItem("token");
       localStorage.removeItem("role");
-
-      // lebih aman pakai router kalau ada
       window.location.href = "/login";
     }
-
     return Promise.reject(error);
   }
 );
 
-export default api;
+export default api;

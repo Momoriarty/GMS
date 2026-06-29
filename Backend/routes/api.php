@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\TimController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
@@ -39,6 +40,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users',         [UserController::class, 'index']);
     Route::put('/user/update', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+    // Tim
+    Route::get('/tim/my-teams', [TimController::class, 'myTeams']);
 
     // Events
     Route::get('/events',         [EventController::class, 'index']);
