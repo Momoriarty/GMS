@@ -16,10 +16,8 @@ const Navbar = () => {
   // Konfigurasi Rute Menu Navigasi Tengah
   const navigationMenu = [
     { label: "Beranda", path: "/" },
-    { label: "Event", path: "/events" },
-    { label: "Jadwal", path: "/schedules" },
-    { label: "Leaderboard", path: "/leaderboard" },
-    { label: "Tentang", path: "/about" },
+    { label: "Event", path: "#events", sectionId: "events" },
+    { label: "Leaderboard", path: "#leaderboard", sectionId: "leaderboard" },
   ];
 
   const hasFetched = React.useRef(false);
@@ -67,6 +65,31 @@ const Navbar = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (location.pathname !== "/") {
+      window.history.replaceState(null, "", location.pathname);
+    }
+  }, [location.pathname]);
+
+  const handleNavClick = (item) => {
+    if (item.path.startsWith("#") && location.pathname === "/") {
+      const id = item.sectionId || item.path.replace("#", "");
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      window.history.replaceState(null, "", item.path);
+      return;
+    }
+
+    if (item.path === "/") {
+      navigate("/");
+      return;
+    }
+
+    navigate("/");
+  };
+
   const handleLogout = async () => {
     try { await api.post("/logout", {}); } catch (err) { }
     localStorage.removeItem("access_token");
@@ -89,17 +112,17 @@ const Navbar = () => {
 
       {/* CENTER: NAVIGATION MENU */}
       <div className="hidden md:flex items-center gap-7">
-        {navigationMenu.map((item) => {
-          const isActive = location.pathname === item.path;
+        {(location.pathname === "/" ? navigationMenu : [{ label: "Beranda", path: "/" }]).map((item) => {
+          const isActive = location.pathname === "/" && location.hash === item.path;
           return (
-            <a
+            <button
               key={item.label}
-              onClick={() => navigate(item.path)}
-              className={`text-[13px] font-semibold tracking-wide no-underline cursor-pointer transition-colors duration-200 ${isActive ? "text-white font-bold" : "text-white/60 hover:text-white"
-                }`}
+              type="button"
+              onClick={() => handleNavClick(item)}
+              className={`text-[13px] font-semibold tracking-wide no-underline cursor-pointer transition-colors duration-200 ${isActive ? "text-white font-bold" : "text-white/60 hover:text-white"}`}
             >
               {item.label}
-            </a> // <--- Di sini tadinya terditulis </td>, sekarang sudah benar menjadi </a>
+            </button>
           );
         })}
       </div>

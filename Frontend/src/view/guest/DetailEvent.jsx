@@ -291,6 +291,10 @@ export default function EventDetail() {
   const [existingTeams, setExistingTeams] = useState([]);
   const [teamMode, setTeamMode] = useState("new"); // "new" | "existing"
   const [selectedTeamId, setSelectedTeamId] = useState(null);
+  const [myRegistration, setMyRegistration] = useState(null);
+  const [myMatches, setMyMatches] = useState([]);
+  const [standings, setStandings] = useState([]);
+  const [loadingParticipantData, setLoadingParticipantData] = useState(false);
 
   const paymentGroups = [
     {
@@ -336,6 +340,51 @@ export default function EventDetail() {
     };
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    const loadParticipantData = async () => {
+      if (!id) return;
+
+      setLoadingParticipantData(true);
+      try {
+        if (!currentUser) {
+          const standingsRes = await api.get("/klasemen", { params: { event_id: id } });
+          setStandings(standingsRes.data?.data || []);
+          setMyRegistration(null);
+          setMyMatches([]);
+          return;
+        }
+
+        const [registrationRes, standingsRes] = await Promise.all([
+          api.get("/pendaftaran", { params: { event_id: id } }),
+          api.get("/klasemen", { params: { event_id: id } }),
+        ]);
+
+        const registrations = registrationRes.data?.data || [];
+        const registration = registrations.find((item) => item?.tim?.id) || null;
+        setMyRegistration(registration);
+        setStandings(standingsRes.data?.data || []);
+
+        if (registration?.tim?.id) {
+          const matchesRes = await api.get("/jadwal-pertandingan", {
+            params: { event_id: id, tim_id: registration.tim.id },
+          });
+          setMyMatches(matchesRes.data?.data || []);
+        } else {
+          setMyMatches([]);
+        }
+      } catch (err) {
+        console.error("Gagal memuat data peserta event", err);
+        setMyRegistration(null);
+        setMyMatches([]);
+        setStandings([]);
+      } finally {
+        setLoadingParticipantData(false);
+      }
+    };
+
+    loadParticipantData();
+  }, [id, currentUser]);
 
   // Listen for messages from Midtrans Snap embed iframe
   useEffect(() => {
@@ -706,16 +755,23 @@ export default function EventDetail() {
             </div>
 
             {!showForm && !paymentData && (
-              <button
-                disabled={isClosed}
-                onClick={handleToggleForm}
-                className={`w-full h-12 rounded-xl font-bold text-sm transition-colors ${isClosed
-                    ? "bg-white/5 text-white/25 cursor-not-allowed"
-                    : "bg-[#ff4800] hover:bg-[#e03e00] text-white"
-                  }`}
-              >
-                {isClosed ? "Pendaftaran Ditutup" : "Daftar Sekarang"}
-              </button>
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 gap-2">
+                  <button
+                    disabled={isClosed}
+                    onClick={handleToggleForm}
+                    className={`h-12 rounded-xl font-bold text-sm transition-colors ${isClosed
+                        ? "bg-white/5 text-white/25 cursor-not-allowed"
+                        : "bg-[#ff4800] hover:bg-[#e03e00] text-white"
+                      }`}
+                  >
+                    {isClosed ? "Pendaftaran Ditutup" : "Daftar Sekarang"}
+                  </button>
+                </div>
+                <div className="rounded-xl border border-[#ff4800]/20 bg-[#ff4800]/10 px-3 py-2 text-[11px] leading-relaxed text-[#ffb08a]">
+                  Setelah daftar, lihat jadwal dan klasemen tim Anda langsung di halaman ini.
+                </div>
+              </div>
             )}
 
             {showForm && !paymentData && (
@@ -736,6 +792,114 @@ export default function EventDetail() {
                 {event.deskripsi ||
                   "Format sistem gugur. Maksimal 10 pemain per tim (5 inti + 5 cadangan). Peserta wajib hadir 30 menit sebelum pertandingan dimulai."}
               </p>
+            </section>
+
+            <section id="participant-info" className="rounded-2xl border border-white/[0.07] bg-[#0f1120] p-6 space-y-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Jadwal Tim Anda</p>
+                  <h2 className="text-lg font-black text-white">Kapan timmu main?</h2>
+                </div>
+                {myRegistration?.tim?.nama_tim && (
+                  <span className="inline-flex items-center rounded-full border border-[#ff4800]/20 bg-[#ff4800]/10 px-3 py-1 text-[11px] font-semibold text-[#ff4800]">
+                    {myRegistration.tim.nama_tim}
+                  </span>
+                )}
+              </div>
+
+              {!currentUser ? (
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 text-sm text-white/50">
+                  Login untuk melihat jadwal tim Anda di event ini.
+                </div>
+              ) : !myRegistration ? (
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 text-sm text-white/50">
+                  Anda belum terdaftar di event ini, jadi belum ada jadwal yang bisa ditampilkan.
+                </div>
+              ) : loadingParticipantData ? (
+                <div className="text-sm text-white/50">Memuat jadwal pertandingan...</div>
+              ) : myMatches.length ? (
+                <div className="space-y-2">
+                  {myMatches.map((match) => (
+                    <div key={match.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-white">
+                            {match.tim_1_nama || "Tim 1"} vs {match.tim_2_nama || "Tim 2"}
+                          </p>
+                          <p className="mt-1 text-[11px] text-white/40">
+                            {fmtDate(match.waktu_pertandingan)} • {match.lokasi_lapangan || event.lokasi}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          {match.status === "selesai" ? (
+                            <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-400">
+                              {match.skor_tim_1 ?? 0} - {match.skor_tim_2 ?? 0}
+                            </span>
+                          ) : match.status === "berlangsung" ? (
+                            <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold text-amber-400">
+                              Berlangsung
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-white/60">
+                              Terjadwal
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 text-sm text-white/50">
+                  Belum ada jadwal pertandingan untuk tim Anda dalam event ini.
+                </div>
+              )}
+            </section>
+
+            <section className="rounded-2xl border border-white/[0.07] bg-[#0f1120] p-6 space-y-4">
+              <div>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Klasemen Event</p>
+                <h2 className="text-lg font-black text-white">Riwayat klasemen event ini</h2>
+              </div>
+
+              {standings.length ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-white/[0.06] text-white/40">
+                        <th className="py-2 pr-3">#</th>
+                        <th className="py-2 pr-3">Tim</th>
+                        <th className="py-2 pr-3">Main</th>
+                        <th className="py-2 pr-3">Menang</th>
+                        <th className="py-2 pr-3">Seri</th>
+                        <th className="py-2 pr-3">Kalah</th>
+                        <th className="py-2 pr-3">GM</th>
+                        <th className="py-2 pr-3">GK</th>
+                        <th className="py-2 pr-3">+/-</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {standings.map((team, index) => (
+                        <tr key={team.tim_id || team.id || index} className="border-b border-white/[0.04] text-white/70">
+                          <td className="py-3 pr-3 font-semibold text-white">{index + 1}</td>
+                          <td className="py-3 pr-3">{team.nama_tim || "—"}</td>
+                          <td className="py-3 pr-3">{team.main ?? 0}</td>
+                          <td className="py-3 pr-3">{team.menang ?? 0}</td>
+                          <td className="py-3 pr-3">{team.seri ?? 0}</td>
+                          <td className="py-3 pr-3">{team.kalah ?? 0}</td>
+                          <td className="py-3 pr-3">{team.gol_masuk ?? 0}</td>
+                          <td className="py-3 pr-3">{team.gol_kemasukan ?? 0}</td>
+                          <td className="py-3 pr-3">{team.selisih_gol ?? 0}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 text-sm text-white/50">
+                  Belum ada data klasemen untuk event ini.
+                </div>
+              )}
             </section>
 
             {showForm && !paymentData && (

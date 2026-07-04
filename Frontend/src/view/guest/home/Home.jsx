@@ -145,7 +145,7 @@ const Home = () => {
       <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent)", margin: "0 32px" }} />
 
       {/* Event Section */}
-      <section style={{ padding: "56px 32px", position: "relative", zIndex: 2 }}>
+      <section id="events" style={{ padding: "56px 32px", position: "relative", zIndex: 2 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
           <div>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 11, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "#ff7300", marginBottom: 10 }}>
@@ -187,7 +187,9 @@ const Home = () => {
       <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent)", margin: "0 32px" }} />
 
       {/* 2. TEMPAT KLASEMEN DILETAKKAN (Dibawah Jadwal Pertandingan) */}
-      <Klasemen />
+      <div id="leaderboard">
+        <Klasemen />
+      </div>
 
       {/* Divider Akhir */}
       <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent)", margin: "0 32px" }} />

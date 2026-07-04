@@ -100,21 +100,37 @@ export default function EventCard({ event }) {
         </div>
 
         {/* Tombol Aksi Navigasi */}
-        <div className="card-actions mt-2">
+        <div className="card-actions mt-2 gap-2">
           {isClosed ? (
-            <button
-              disabled
-              className="btn btn-sm w-full font-bold tracking-wide btn-disabled bg-base-300 text-base-content/30"
-            >
-              {getButtonLabel()}
-            </button>
+            <>
+              <button
+                disabled
+                className="btn btn-sm flex-1 font-bold tracking-wide btn-disabled bg-base-300 text-base-content/30"
+              >
+                {getButtonLabel()}
+              </button>
+              <Link
+                to={`/events/${eventId}`}
+                className="btn btn-sm flex-1 font-bold tracking-wide bg-white/10 hover:bg-white/20 text-base-content border border-base-300 text-center flex items-center justify-center no-underline transition-colors duration-200"
+              >
+                Detail
+              </Link>
+            </>
           ) : (
-            <Link
-              to={`/events/${eventId}`}
-              className="btn btn-sm w-full font-bold tracking-wide bg-[#ff4800] hover:bg-[#e03e00] text-white border-none shadow-md text-center flex items-center justify-center no-underline transition-colors duration-200"
-            >
-              {getButtonLabel()}
-            </Link>
+            <>
+              <Link
+                to={`/events/${eventId}`}
+                className="btn btn-sm flex-1 font-bold tracking-wide bg-[#ff4800] hover:bg-[#e03e00] text-white border-none shadow-md text-center flex items-center justify-center no-underline transition-colors duration-200"
+              >
+                {getButtonLabel()}
+              </Link>
+              <Link
+                to={`/events/${eventId}`}
+                className="btn btn-sm flex-1 font-bold tracking-wide bg-white/10 hover:bg-white/20 text-base-content border border-base-300 text-center flex items-center justify-center no-underline transition-colors duration-200"
+              >
+                Detail
+              </Link>
+            </>
           )}
         </div>
 
