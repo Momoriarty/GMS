@@ -1,0 +1,356 @@
+
+> frontend@0.0.0 lint
+> eslint .
+
+
+D:\Kode\GMS\Frontend\src\utils\scheduleGenerator.js
+   73:11  error  'maxMatchCap' is assigned a value but never used  no-unused-vars
+  224:10  error  'generateMatches' is defined but never used       no-unused-vars
+  395:10  error  'generateMatchTime' is defined but never used     no-unused-vars
+  434:9   error  'teamAge' is assigned a value but never used      no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\DataCard.jsx
+  1:10  error  'useState' is defined but never used  no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\DataTable.jsx
+   15:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-refresh/only-export-components
+   22:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-refresh/only-export-components
+   36:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-refresh/only-export-components
+   48:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-refresh/only-export-components
+  299:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  297 |   useEffect(() => {
+  298 |     if (row) {
+> 299 |       setForm(Object.fromEntries(editFields.map((f) => {
+      |       ^^^^^^^ Avoid calling setState() directly within an effect
+  300 |         let val = String(row[f.key] ?? "").trim();
+  301 |         if (f.type === "datetime-local" && val.length > 16) val = val.slice(0, 16);
+  302 |         return [f.key, val];  react-hooks/set-state-in-effect
+  306:6   warning  React Hook useEffect has a missing dependency: 'editFields'. Either include it or remove the dependency array. If 'setForm' needs the current value of 'editFields', you can also switch to useReducer instead of useState and read 'editFields' in the reducer                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react-hooks/exhaustive-deps
+  337:21  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  335 |   const [loading, setLoading] = useState(false);
+  336 |   const [error, setError] = useState("");
+> 337 |   useEffect(() => { setError(""); }, [row]);
+      |                     ^^^^^^^^ Avoid calling setState() directly within an effect
+  338 |
+  339 |   const del = async () => {
+  340 |     setLoading(true); setError("");                                           react-hooks/set-state-in-effect
+  583:6   warning  React Hook useEffect has a missing dependency: 'dataKey'. Either include it or remove the dependency array. If 'setRows' needs the current value of 'dataKey', you can also switch to useReducer instead of useState and read 'dataKey' in the reducer                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
+  611:6   warning  React Hook useMemo has missing dependencies: 'filterFields' and 'searchKeys'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+
+D:\Kode\GMS\Frontend\src\view\admin\AuditLog.jsx
+  30:5   error    Error: Cannot access variable before it is declared
+
+`loadLogs` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  28 |
+  29 |   useEffect(() => {
+> 30 |     loadLogs();
+     |     ^^^^^^^^ `loadLogs` accessed before it is declared
+  31 |     loadUsers();
+  32 |   }, []);
+  33 |
+
+  32 |   }, []);
+  33 |
+> 34 |   const loadLogs = async (page = 1) => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 35 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 36 |     try {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 54 |     }
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 55 |   };
+     | ^^^^^ `loadLogs` is declared here
+  56 |
+  57 |   const loadUsers = async () => {
+  58 |     try {                                                                                                                                                                                                                                                                                                             react-hooks/immutability
+  31:5   error    Error: Cannot access variable before it is declared
+
+`loadUsers` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  29 |   useEffect(() => {
+  30 |     loadLogs();
+> 31 |     loadUsers();
+     |     ^^^^^^^^^ `loadUsers` accessed before it is declared
+  32 |   }, []);
+  33 |
+  34 |   const loadLogs = async (page = 1) => {
+
+  55 |   };
+  56 |
+> 57 |   const loadUsers = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |     try {
+     | ^^^^^^^^^
+> 59 |       const response = await userApi.getAll();
+     | ^^^^^^^^^
+> 60 |       if (response.data.success) {
+     | ^^^^^^^^^
+> 61 |         setUsers(response.data.data);
+     | ^^^^^^^^^
+> 62 |       }
+     | ^^^^^^^^^
+> 63 |     } catch (error) {
+     | ^^^^^^^^^
+> 64 |       console.error("Error loading users:", error);
+     | ^^^^^^^^^
+> 65 |     }
+     | ^^^^^^^^^
+> 66 |   };
+     | ^^^^^ `loadUsers` is declared here
+  67 |
+  68 |   const handleFilterChange = () => {
+  69 |     setCurrentPage(1);  react-hooks/immutability
+  32:6   warning  React Hook useEffect has a missing dependency: 'loadLogs'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
+  34:27  error    'page' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\admin\GenerateJadwalRandom.jsx
+  8:15  error  'timId' is assigned a value but never used  no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\admin\HasilPertandingan.jsx
+  19:5  error  Error: Cannot access variable before it is declared
+
+`loadHasil` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  17 |
+  18 |   useEffect(() => {
+> 19 |     loadHasil();
+     |     ^^^^^^^^^ `loadHasil` accessed before it is declared
+  20 |     loadJadwal();
+  21 |   }, []);
+  22 |
+
+  21 |   }, []);
+  22 |
+> 23 |   const loadHasil = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 24 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 25 |     try {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 35 |     }
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 36 |   };
+     | ^^^^^ `loadHasil` is declared here
+  37 |
+  38 |   const loadJadwal = async () => {
+  39 |     try {                                                                                                                                                                                                                                                                                                                                                                 react-hooks/immutability
+  20:5  error  Error: Cannot access variable before it is declared
+
+`loadJadwal` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  18 |   useEffect(() => {
+  19 |     loadHasil();
+> 20 |     loadJadwal();
+     |     ^^^^^^^^^^ `loadJadwal` accessed before it is declared
+  21 |   }, []);
+  22 |
+  23 |   const loadHasil = async () => {
+
+  36 |   };
+  37 |
+> 38 |   const loadJadwal = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 39 |     try {
+     | ^^^^^^^^^
+> 40 |       const response = await jadwalApi.getAll({ status: "berlangsung" });
+     | ^^^^^^^^^
+> 41 |       if (response.data.success) {
+     | ^^^^^^^^^
+> 42 |         setJadwal(response.data.data);
+     | ^^^^^^^^^
+> 43 |       }
+     | ^^^^^^^^^
+> 44 |     } catch (error) {
+     | ^^^^^^^^^
+> 45 |       console.error("Error loading jadwal:", error);
+     | ^^^^^^^^^
+> 46 |     }
+     | ^^^^^^^^^
+> 47 |   };
+     | ^^^^^ `loadJadwal` is declared here
+  48 |
+  49 |   const handleInputChange = (e) => {
+  50 |     const { name, value } = e.target;  react-hooks/immutability
+
+D:\Kode\GMS\Frontend\src\view\admin\JadwalPertandingan.jsx
+  149:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  147 |   useEffect(() => {
+  148 |     if (id) {
+> 149 |       fetchEvent();
+      |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  150 |       fetchJadwal();
+  151 |     }
+  152 |   }, [id, fetchEvent, fetchJadwal]);  react-hooks/set-state-in-effect
+
+D:\Kode\GMS\Frontend\src\view\admin\Notifikasi.jsx
+  20:5  error  Error: Cannot access variable before it is declared
+
+`loadNotifikasi` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  18 |
+  19 |   useEffect(() => {
+> 20 |     loadNotifikasi();
+     |     ^^^^^^^^^^^^^^ `loadNotifikasi` accessed before it is declared
+  21 |     loadUsers();
+  22 |   }, []);
+  23 |
+
+  22 |   }, []);
+  23 |
+> 24 |   const loadNotifikasi = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 25 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 26 |     try {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 36 |     }
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 37 |   };
+     | ^^^^^ `loadNotifikasi` is declared here
+  38 |
+  39 |   const loadUsers = async () => {
+  40 |     try {                                                                                                                                                                                                                                                                              react-hooks/immutability
+  21:5  error  Error: Cannot access variable before it is declared
+
+`loadUsers` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  19 |   useEffect(() => {
+  20 |     loadNotifikasi();
+> 21 |     loadUsers();
+     |     ^^^^^^^^^ `loadUsers` accessed before it is declared
+  22 |   }, []);
+  23 |
+  24 |   const loadNotifikasi = async () => {
+
+  37 |   };
+  38 |
+> 39 |   const loadUsers = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 40 |     try {
+     | ^^^^^^^^^
+> 41 |       const response = await userApi.getAll();
+     | ^^^^^^^^^
+> 42 |       if (response.data.success) {
+     | ^^^^^^^^^
+> 43 |         setUsers(response.data.data);
+     | ^^^^^^^^^
+> 44 |       }
+     | ^^^^^^^^^
+> 45 |     } catch (error) {
+     | ^^^^^^^^^
+> 46 |       console.error(error);
+     | ^^^^^^^^^
+> 47 |     }
+     | ^^^^^^^^^
+> 48 |   };
+     | ^^^^^ `loadUsers` is declared here
+  49 |
+  50 |   const handleInputChange = (e) => {
+  51 |     const { name, value } = e.target;  react-hooks/immutability
+
+D:\Kode\GMS\Frontend\src\view\admin\Pendaftaran.jsx
+  1:20  error  'Eye' is defined but never used  no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\admin\layout\navbar.jsx
+   9:5   error  'themeToggle' is defined but never used           no-unused-vars
+  15:12  error  'loadingUser' is assigned a value but never used  no-unused-vars
+  67:14  error  'err' is defined but never used                   no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\admin\layout\sidebar.jsx
+  11:3   error  'Calendar' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           no-unused-vars
+  12:3   error  'CheckCircle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-unused-vars
+  14:3   error  'BarChart3' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          no-unused-vars
+  57:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  55 |
+  56 |   useEffect(() => {
+> 57 |     setMenuUtama([
+     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  58 |       { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
+  59 |       { label: "Event", icon: Trophy, href: "/admin/events" },
+  60 |       { label: "Pendaftaran", icon: ClipboardList, href: "/admin/pendaftaran" },  react-hooks/set-state-in-effect
+  85:12  error  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\auth\AuthLayout.jsx
+  1:10  error  'Mail' is defined but never used    no-unused-vars
+  1:16  error  'Lock' is defined but never used    no-unused-vars
+  1:22  error  'User' is defined but never used    no-unused-vars
+  1:28  error  'Phone' is defined but never used   no-unused-vars
+  1:35  error  'Eye' is defined but never used     no-unused-vars
+  1:40  error  'EyeOff' is defined but never used  no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\guest\DetailEvent.jsx
+    1:8   error  'React' is defined but never used                    no-unused-vars
+  288:10  error  'paymentMessage' is assigned a value but never used  no-unused-vars
+  331:16  error  'err' is defined but never used                      no-unused-vars
+  360:20  error  'err' is defined but never used                      no-unused-vars
+  432:16  error  'err' is defined but never used                      no-unused-vars
+  469:22  error  'err' is defined but never used                      no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\guest\GuestLayout.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\guest\GuestProfile.jsx
+   1:8   error  'React' is defined but never used                               no-unused-vars
+   6:3   error  'MapPin' is defined but never used                              no-unused-vars
+  12:3   error  'Sparkles' is defined but never used                            no-unused-vars
+  44:10  error  'selectedPaymentMethods' is assigned a value but never used     no-unused-vars
+  44:34  error  'setSelectedPaymentMethods' is assigned a value but never used  no-unused-vars
+  76:18  error  'err' is defined but never used                                 no-unused-vars
+  79:16  error  'err' is defined but never used                                 no-unused-vars
+  93:9   error  'loadSnapScript' is assigned a value but never used             no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\guest\home\EventCard.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\guest\home\Home.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\guest\home\Klasemen.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\guest\home\LiveMatch.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Kode\GMS\Frontend\src\view\guest\layout\navbar.jsx
+   3:8   error  'axios' is defined but never used  no-unused-vars
+  71:51  error  'err' is defined but never used    no-unused-vars
+  71:56  error  Empty block statement              no-empty
+
+D:\Kode\GMS\Frontend\vite.config.js
+  13:25  error  '__dirname' is not defined  no-undef
+
+✖ 62 problems (58 errors, 4 warnings)
+

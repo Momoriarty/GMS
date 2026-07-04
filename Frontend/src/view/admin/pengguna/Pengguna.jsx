@@ -1,4 +1,4 @@
-import DataTable from "../DataTable";
+import DataTable from "../../DataTable";
 
 const STATUS_COLORS = {
   active: { bg: "rgba(99,153,34,0.12)", color: "#3b6d11", dot: true },

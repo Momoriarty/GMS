@@ -14,6 +14,7 @@ import {
   BarChart3,
   Bell,
   FileText,
+  Wallet,
 } from "lucide-react";
 
 function NavItem({ item }) {
@@ -58,6 +59,7 @@ export default function Sidebar({ isOpen, onClose }) {
       { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
       { label: "Event", icon: Trophy, href: "/admin/events" },
       { label: "Pendaftaran", icon: ClipboardList, href: "/admin/pendaftaran" },
+      { label: "Laporan", icon: Wallet, href: "/admin/keuangan" },
       { label: "Notifikasi", icon: Bell, href: "/admin/notifikasi" },
       { label: "Pengguna", icon: Users, href: "/admin/pengguna" },
     ]);
@@ -71,9 +73,6 @@ export default function Sidebar({ isOpen, onClose }) {
   const handleLogout = async () => {
   const token = localStorage.getItem("token");
 
-  console.log("LOGOUT CLICKED");
-  console.log("TOKEN:", token);
-
   try {
     await axios.post(
       "http://localhost:8000/api/logout",
@@ -85,10 +84,8 @@ export default function Sidebar({ isOpen, onClose }) {
         },
       }
     );
-
-    console.log("LOGOUT SUCCESS");
   } catch (err) {
-    console.error("LOGOUT ERROR:", err.response?.data || err.message);
+    // Silently handle error
   }
 
   localStorage.removeItem("token");
@@ -98,7 +95,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
   return (
     <aside className={`
-      fixed left-0 top-0 bottom-0 w-[220px] flex flex-col z-50
+      fixed left-0 top-0 bottom-0 w-55 flex flex-col z-50
       bg-base-300 border-r border-base-content/5 text-base-content
       transition-transform duration-300 ease-in-out
       ${isOpen ? "translate-x-0" : "-translate-x-full"}
@@ -114,7 +111,7 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* Logo */}
       <div className="px-5 pt-6 pb-5 border-b border-base-content/5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-sm bg-gradient-to-br from-amber-500 to-amber-600 shadow-md shadow-amber-500/20 text-neutral-content">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-sm bg-linear-to-br from-amber-500 to-amber-600 shadow-md shadow-amber-500/20 text-neutral-content">
             GM
           </div>
 
@@ -123,14 +120,14 @@ export default function Sidebar({ isOpen, onClose }) {
               Garuda Melayu
             </p>
             <p className="text-[10px] font-bold tracking-[2px] uppercase mt-0.5 text-warning/70">
-              Futsal & SSB
+              Futsal
             </p>
           </div>
         </div>
       </div>
 
       {/* Menu */}
-      <nav className="flex-1 px-3 py-3 overflow-y-auto space-y-5 [scrollbar-width:none]">
+      <nav className="flex-1 px-3 py-3 overflow-y-auto space-y-5 scrollbar-none">
         <div>
           <p className="text-[9px] font-extrabold tracking-[2px] uppercase mb-2 px-2 text-base-content/30">
             Menu Utama

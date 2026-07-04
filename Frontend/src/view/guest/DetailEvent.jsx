@@ -543,10 +543,14 @@ export default function EventDetail() {
       setSubmitting(true);
       const formDataToSend = new FormData();
       formDataToSend.append("event_id", id);
-      formDataToSend.append("nama_tim", namaTim);
-      formDataToSend.append("kelompok_umur", kelompokUmur);
       formDataToSend.append("payment_method", paymentMethod);
-      if (logoTim) formDataToSend.append("logo_tim", logoTim);
+      if (teamMode === "existing" && selectedTeamId) {
+        formDataToSend.append("tim_id", selectedTeamId);
+      } else {
+        formDataToSend.append("nama_tim", namaTim);
+        formDataToSend.append("kelompok_umur", kelompokUmur);
+        if (logoTim) formDataToSend.append("logo_tim", logoTim);
+      }
       formDataToSend.append("email_pendaftar", currentUser?.email || "");
       formDataToSend.append("no_wa_pendaftar", currentUser?.no_wa || currentUser?.phone || currentUser?.phone_number || "");
 
@@ -897,7 +901,7 @@ export default function EventDetail() {
                     <input
                       type="file"
                       accept="image/*"
-                      required
+                      required={teamMode === "new"}
                       onChange={(e) => e.target.files[0] && setLogoTim(e.target.files[0])}
                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-2.5 text-white/45 text-xs file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-[#ff4800]/10 file:text-[#ff4800] file:text-xs file:font-bold hover:file:bg-[#ff4800]/20 transition-colors"
                     />

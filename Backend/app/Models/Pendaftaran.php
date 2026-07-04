@@ -14,7 +14,6 @@ class Pendaftaran extends Model
         'event_id',
         'status',
         'dokumen_pendukung',
-        'verified_by',
         'tanggal_daftar',
     ];
 

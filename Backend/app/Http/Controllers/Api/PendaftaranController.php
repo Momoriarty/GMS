@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pendaftaran;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use App\Models\Tim;
 use App\Models\Event;
+use App\Models\Transaksi;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Midtrans\Config;
 use Midtrans\CoreApi;
 use Illuminate\Support\Facades\Log;
@@ -149,8 +150,9 @@ class PendaftaranController extends Controller
     {
         $request->validate([
             'event_id'       => 'required|exists:events,id',
-            'nama_tim'       => 'required|string|max:255',
-            'kelompok_umur'  => 'required|string',
+            'tim_id'         => 'nullable|exists:tim,id',
+            'nama_tim'       => 'required_without:tim_id|string|max:255',
+            'kelompok_umur'  => 'required_without:tim_id|string',
             'logo_tim'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'payment_method' => 'nullable|string|in:qris,gopay,shopeepay,bank_transfer,bank_transfer_bca,bank_transfer_bni,bank_transfer_bri,bank_transfer_mandiri,bank_transfer_permata',
         ]);
@@ -158,25 +160,42 @@ class PendaftaranController extends Controller
         $user  = Auth::user();
         $event = Event::findOrFail($request->event_id);
 
-        // Simpan tim
-        $tim = Tim::create([
-            'user_id'       => $user->id,
-            'nama_tim'      => $request->nama_tim,
-            'kelompok_umur' => $request->kelompok_umur,
-            'logo_tim'      => $request->hasFile('logo_tim')
-                ? $request->file('logo_tim')->store('logo_tim', 'public')
-                : null,
-        ]);
+        if ($request->filled('tim_id')) {
+            $tim = Tim::where('id', $request->tim_id)
+                ->where('user_id', $user->id)
+                ->firstOrFail();
+
+            // Cek apakah tim ini sudah mendaftar di event yang sama
+            $existingPendaftaran = Pendaftaran::where('event_id', $request->event_id)
+                ->where('tim_id', $tim->id)
+                ->exists();
+
+            if ($existingPendaftaran) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tim ini sudah terdaftar pada event ini.',
+                ], 422);
+            }
+        } else {
+            $tim = Tim::create([
+                'user_id'       => $user->id,
+                'nama_tim'      => $request->nama_tim,
+                'kelompok_umur' => $request->kelompok_umur,
+                'logo_tim'      => $request->hasFile('logo_tim')
+                    ? $request->file('logo_tim')->store('logo_tim', 'public')
+                    : null,
+            ]);
+        }
 
         // Simpan pendaftaran
+        $paymentMethod = $request->input('payment_method', 'qris');
+
         $pendaftaran = Pendaftaran::create([
             'tim_id'         => $tim->id,
             'event_id'       => $event->id,
             'status'         => 'menunggu',
             'tanggal_daftar' => now(),
         ]);
-
-        $paymentMethod = $request->input('payment_method', 'qris');
 
         // Setup & charge Midtrans Core API
         $this->setupMidtrans();
@@ -249,6 +268,26 @@ class PendaftaranController extends Controller
         // Create a notification only when registration is accepted ('diterima')
         if ($status === 'diterima') {
             try {
+                // Create transaction record for successful registration payment
+                $paymentMethod = $request->payment_type ?? $request->payment_method ?? 'unknown';
+                $existing = Transaksi::where('pendaftaran_id', $pendaftaran->id)
+                    ->where('jenis', 'pendaftaran')
+                    ->first();
+
+                if (!$existing) {
+                    Transaksi::create([
+                        'event_id'         => $pendaftaran->event_id,
+                        'pendaftaran_id'   => $pendaftaran->id,
+                        'jenis'            => 'pemasukan',
+                        'nominal'          => (float) $pendaftaran->event->biaya_pendaftaran,
+                        'kategori'         => 'pendaftaran',
+                        'metode_pembayaran'=> $paymentMethod,
+                        'keterangan'       => "Pembayaran pendaftaran event via Midtrans ({$paymentMethod})",
+                        'tanggal_transaksi'=> now(),
+                        'dibuat_oleh'      => $pendaftaran->tim->user_id,
+                    ]);
+                }
+
                 $notifikasi = Notifikasi::create([
                     'user_id' => $pendaftaran->tim->user_id,
                     'judul'   => 'Status Pendaftaran',

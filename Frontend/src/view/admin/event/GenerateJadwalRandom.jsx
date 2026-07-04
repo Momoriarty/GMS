@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { generateSchedule } from "../../utils/scheduleGenerator";
+import { generateSchedule } from "../../../utils/scheduleGenerator";
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
 export default function GenerateJadwalRandom() {
   const { id, timId } = useParams();
   const [minPertandingan, setMinPertandingan] = useState(1);
+  const [courtCount, setCourtCount] = useState(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
@@ -14,15 +15,21 @@ export default function GenerateJadwalRandom() {
   const [showPreview, setShowPreview] = useState(false);
 
   const handleGenerate = async () => {
-    if (minPertandingan < 1) {
-      setMessageType("error");
-      setMessage("Minimum pertandingan harus minimal 1x");
-      return;
-    }
-
     try {
       setLoading(true);
-      setMessage("");
+
+      if (minPertandingan < 1) {
+        setMessageType("error");
+        setMessage("Minimum pertandingan harus minimal 1x");
+        return;
+      }
+
+      if (courtCount < 1) {
+        setMessageType("error");
+        setMessage("Jumlah lapangan harus minimal 1");
+        return;
+      }
+
       const token = localStorage.getItem("token");
       const headers = {
         Authorization: `Bearer ${token}`,
@@ -36,7 +43,6 @@ export default function GenerateJadwalRandom() {
       if (!event || !event.id) {
         setMessageType("error");
         setMessage("Event tidak ditemukan");
-        setLoading(false);
         return;
       }
 
@@ -52,22 +58,28 @@ export default function GenerateJadwalRandom() {
         : [];
 
       const teams = pendaftaranList
-        .map((p) => ({ user: p.user, tim: p.user?.tim }))
+        .map((p) => ({ user: p.user, tim: p.tim, pendaftaran_id: p.id }))
         .filter((p) => p.tim)
-        .map((p) => ({
-          id: p.tim.id,
-          nama_tim: p.tim.nama_tim,
-          kelompok_umur: p.tim.kelompok_umur,
-        }));
+        .map((p, index, arr) => {
+          const count = arr.filter(x => x.tim.id === p.tim.id).length;
+          const sameTimIndex = arr.filter(x => x.tim.id === p.tim.id).findIndex(x => x.pendaftaran_id === p.pendaftaran_id);
+          const namaTim = count > 1 ? `${p.tim.nama_tim} (${sameTimIndex + 1})` : p.tim.nama_tim;
+          
+          return {
+            id: p.pendaftaran_id,
+            asli_tim_id: p.tim.id,
+            nama_tim: namaTim,
+            kelompok_umur: p.tim.kelompok_umur,
+          };
+        });
 
       if (teams.length < 2) {
         setMessageType("error");
         setMessage("Minimal 2 tim yang diterima dibutuhkan untuk generate jadwal");
-        setLoading(false);
         return;
       }
 
-      const result = generateSchedule(teams, event, minPertandingan);
+      const result = generateSchedule(teams, event, minPertandingan, courtCount);
 
       if (result.success) {
         setPreviewData(result);
@@ -98,13 +110,19 @@ export default function GenerateJadwalRandom() {
       setLoading(true);
       const token = localStorage.getItem("token");
 
+      const jadwalListPayload = previewData.data.map(d => ({
+        ...d,
+        tim_1_id: d.tim_1_asli_id || d.tim_1_id,
+        tim_2_id: d.tim_2_asli_id || d.tim_2_id
+      }));
+
       const res = await fetch(`${API_BASE}/jadwal-pertandingan/bulk-save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ jadwal_list: previewData.data }),
+        body: JSON.stringify({ jadwal_list: jadwalListPayload }),
       });
 
       const json = await res.json();
@@ -198,6 +216,38 @@ export default function GenerateJadwalRandom() {
             </div>
             <p className="text-xs text-base-content/40 mt-2">
               Setiap tim akan bermain minimal sejumlah ini untuk setiap kelompok umur.
+            </p>
+          </div>
+
+          {/* Jumlah Lapangan */}
+          <div className="mb-5">
+            <label className="label pb-2">
+              <span className="label-text text-xs font-medium uppercase tracking-wide text-base-content/50">
+                Jumlah lapangan
+              </span>
+            </label>
+            <div className="flex items-center gap-3">
+              <button
+                className="btn btn-sm btn-ghost border border-base-300"
+                onClick={() => setCourtCount(Math.max(1, courtCount - 1))}
+                disabled={loading || courtCount <= 1}
+              >
+                −
+              </button>
+              <span className="text-2xl font-semibold w-10 text-center tabular-nums">
+                {courtCount}
+              </span>
+              <button
+                className="btn btn-sm btn-ghost border border-base-300"
+                onClick={() => setCourtCount(courtCount + 1)}
+                disabled={loading}
+              >
+                +
+              </button>
+              <span className="text-sm text-base-content/50">lapangan</span>
+            </div>
+            <p className="text-xs text-base-content/40 mt-2">
+              Setiap slot 15 menit dapat menampung jumlah pertandingan sesuai lapangan.
             </p>
           </div>
 

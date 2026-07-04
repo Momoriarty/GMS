@@ -8,7 +8,7 @@ export function GarudaLogo() {
             </div>
             <div>
                 <p className="text-white font-bold text-lg leading-tight">Garuda Melayu</p>
-                <p className="text-slate-500 text-[11px] tracking-widest">FUTSAL & SSB</p>
+                <p className="text-slate-500 text-[11px] tracking-widest">FUTSAL</p>
             </div>
         </div>
     );
@@ -65,7 +65,7 @@ export function AuthCard({ children }) {
                         </p>
                     </div>
                     <div className="mt-10 space-y-3">
-                        {["Manajemen Anggota & SSB", "Penjadwalan Lapangan", "Laporan Keuangan Real-time", "Notifikasi Otomatis"].map((f) => (
+                        {["Manajemen Anggota", "Penjadwalan Lapangan", "Laporan Keuangan Real-time", "Notifikasi Otomatis"].map((f) => (
                             <div key={f} className="flex items-center gap-3">
                                 <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
                                 <span className="text-slate-400 text-sm">{f}</span>

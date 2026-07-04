@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import DataCard from "../DataCard";
+import DataCard from "../../DataCard";
 import GenerateJadwalRandom from "./GenerateJadwalRandom";
 
 const API_BASE = "http://127.0.0.1:8000/api";
@@ -127,7 +127,11 @@ export default function JadwalPertandingan() {
 
       const res = await fetch(endpoint, { headers: getHeaders() });
       const json = await res.json();
-      const data = json?.data || json;
+      
+      // Handle Laravel Paginator response structure (json.data might be the paginator object)
+      const data = Array.isArray(json?.data?.data) 
+        ? json.data.data 
+        : (Array.isArray(json?.data) ? json.data : []);
 
       if (Array.isArray(data)) {
         setJadwalList(data);

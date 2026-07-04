@@ -14,16 +14,17 @@ import GuestEvent from "./view/guest/DetailEvent";
 
 // Admin
 import AdminLayout from "./view/admin/AdminLayout";
-import AdminDashboard from "./view/admin/Dashboard";
-import Profile from "./view/admin/Profile";
-import Pengguna from "./view/admin/Pengguna";
-import Events from "./view/admin/Events";
-import JadwalPertandingan from "./view/admin/JadwalPertandingan";
-import HasilPertandingan from "./view/admin/HasilPertandingan";
-import Pendaftaran from "./view/admin/Pendaftaran";
-import Klasemen from "./view/admin/Klasemen";
-import Notifikasi from "./view/admin/Notifikasi";
-import AuditLog from "./view/admin/AuditLog";
+import AdminDashboard from "./view/admin/dashboard/Dashboard";
+import Profile from "./view/admin/profile/profile";
+import Pengguna from "./view/admin/pengguna/Pengguna";
+import Events from "./view/admin/event/Events";
+import JadwalPertandingan from "./view/admin/event/JadwalPertandingan";
+import HasilPertandingan from "./view/admin/event/HasilPertandingan";
+import Pendaftaran from "./view/admin/pendaftaran/Pendaftaran";
+import Klasemen from "./view/admin/event/Klasemen";
+import Notifikasi from "./view/admin/notifikasi/Notifikasi";
+import AuditLog from "./view/admin/auditLog/AuditLog";
+import Keuangan from "./view/admin/laporan/Keuangan";
 
 // Route Guard
 import ProtectedRoute from "./ProtectedRoute";
@@ -50,6 +51,8 @@ function RouteApp() {
           <Route path="pendaftaran" element={<Pendaftaran />} />
 
           <Route path="notifikasi" element={<Notifikasi />} />
+
+          <Route path="keuangan" element={<Keuangan />} />
 
           <Route path="audit-log" element={<AuditLog />} />
 

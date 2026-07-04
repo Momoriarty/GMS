@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard
     Route::get('/dashboard/aktivitas', [DashboardController::class, 'aktivitasTerbaru']);
+    Route::get('/dashboard/keuangan', [DashboardController::class, 'keuangan']);
 
     // Users
     Route::get('/users',         [UserController::class, 'index']);

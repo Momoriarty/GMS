@@ -52,8 +52,6 @@ export default function Navbar({
     }, []);
 
     const handleLogout = async () => {
-    console.log("TOMBOL LOGOUT DIKLIK");
-
     try {
         const token = localStorage.getItem("token");
 
@@ -66,10 +64,8 @@ export default function Navbar({
                 },
             }
         );
-
-        console.log("REQUEST LOGOUT TERKIRIM");
     } catch (err) {
-        console.error(err);
+        // Silently handle error
     }
 
     localStorage.removeItem("token");

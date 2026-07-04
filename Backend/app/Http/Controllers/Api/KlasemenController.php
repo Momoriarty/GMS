@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Klasemen;
+use App\Models\Pendaftaran;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,9 +20,38 @@ class KlasemenController extends Controller
             $query->where('event_id', $request->event_id);
         }
 
-        $klasemen = $query->get()->map(function ($item) {
+        $klasemen = $query->get();
+
+        if ($request->event_id && $klasemen->isEmpty()) {
+            $registeredTeams = Pendaftaran::with('tim')
+                ->where('event_id', $request->event_id)
+                ->where('status', 'diterima')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => null,
+                        'tim_id' => $item->tim_id,
+                        'nama_tim' => $item->tim?->nama_tim,
+                        'main' => 0,
+                        'menang' => 0,
+                        'seri' => 0,
+                        'kalah' => 0,
+                        'gol_masuk' => 0,
+                        'gol_kemasukan' => 0,
+                        'selisih_gol' => 0,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $registeredTeams
+            ]);
+        }
+
+        $formatted = $klasemen->map(function ($item) {
             return [
                 'id' => $item->id,
+                'tim_id' => $item->tim_id,
                 'nama_tim' => $item->tim?->nama_tim,
                 'main' => $item->main,
                 'menang' => $item->menang,
@@ -35,7 +65,7 @@ class KlasemenController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $klasemen
+            'data' => $formatted
         ]);
     }
 

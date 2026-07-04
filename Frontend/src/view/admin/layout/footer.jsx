@@ -6,7 +6,7 @@ export default function Footer() {
       <span className="text-base-content/50 text-center sm:text-left tracking-wide">
         © {year}{" "}
         <span className="font-bold text-base-content">Garuda Melayu</span> —{" "}
-        Futsal & SSB. All rights reserved.
+        Futsal. All rights reserved.
       </span>
       <span className="font-medium text-base-content/40 bg-base-content/5 px-3 py-1 rounded-full border border-base-content/10 hover:text-base-content/70 transition-colors cursor-default">
         v1.0.0

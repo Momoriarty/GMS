@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import DataTable from "../DataTable";
+import DataTable from "../../DataTable";
 import { Calendar } from "lucide-react";
 
 const API_BASE = "http://127.0.0.1:8000/api";
@@ -100,7 +100,7 @@ export default function Klasemen() {
             tooltip: "Lihat Jadwal Tim",
             color: "oklch(var(--su))",
             onClick: (row) =>
-              navigate(`/admin/events/${id}/tim/${row.id}/jadwal`)
+              navigate(`/admin/events/${id}/tim/${row.tim_id}/jadwal`)
           },
         ]}
       />
