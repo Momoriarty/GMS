@@ -93,7 +93,7 @@ class NotifikasiController extends Controller
         ]);
     }
 
-    
+
     public function markAsRead(int $id)
     {
         $user = Auth::user();
@@ -117,9 +117,8 @@ class NotifikasiController extends Controller
         ]);
     }
 
-    /**
-     * Delete notifikasi
-     */
+
+
     public function destroy(int $id)
     {
         $user = Auth::user();
