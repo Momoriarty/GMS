@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\JadwalPertandingan;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Carbon\Carbon;
 use App\Models\Event;
+use App\Models\JadwalPertandingan;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Log;
+use Symfony\Component\HttpFoundation\Response;
 
 class JadwalPertandinganController extends Controller
 {
@@ -31,9 +32,9 @@ class JadwalPertandinganController extends Controller
             });
         }
 
-        $jadwal = $query->get();
+        $jadwal = $query->paginate(50);
 
-        $formatted = $jadwal->map(function ($item) {
+        $formatted = $jadwal->through(function ($item) {
             return [
                 'id' => $item->id,
                 'event_id' => $item->event_id,
@@ -51,7 +52,13 @@ class JadwalPertandinganController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $formatted
+            'data' => $formatted,
+            'meta' => [
+                'current_page' => $jadwal->currentPage(),
+                'last_page' => $jadwal->lastPage(),
+                'per_page' => $jadwal->perPage(),
+                'total' => $jadwal->total(),
+            ],
         ]);
     }
 
@@ -292,7 +299,7 @@ class JadwalPertandinganController extends Controller
                 ]
             ], $savedCount > 0 ? Response::HTTP_CREATED : Response::HTTP_BAD_REQUEST);
         } catch (\Exception $e) {
-            \Log::error('Error bulk save jadwal: ' . $e->getMessage() . ' ' . $e->getTraceAsString());
+            Log::error('Error bulk save jadwal: ' . $e->getMessage() . ' ' . $e->getTraceAsString());
 
             return response()->json([
                 'success' => false,

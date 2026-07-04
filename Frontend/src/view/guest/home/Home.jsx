@@ -20,12 +20,29 @@ const Home = () => {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchStaticData = async () => {
       try {
-        const [resLive, resUpcoming, resStats] = await Promise.all([
+        const [resStats, resEvents] = await Promise.all([
+          fetch("http://localhost:8000/api/home/stats"),
+          fetch("http://localhost:8000/api/home/events"),
+        ]);
+
+        const dataStats = await resStats.json();
+        if (dataStats.success) setStats(dataStats.data);
+
+        const dataEvents = await resEvents.json();
+        if (dataEvents.success) setEvents(dataEvents.data);
+      } catch (error) {
+        console.error("Gagal memuat data statis:", error);
+      }
+    };
+
+    const fetchLiveData = async () => {
+      try {
+        const [resLive, resUpcoming, resRecent] = await Promise.all([
           fetch("http://localhost:8000/api/jadwal/live-match"),
           fetch("http://localhost:8000/api/jadwal/upcoming-match"),
-          fetch("http://localhost:8000/api/home/stats"),
+          fetch("http://localhost:8000/api/jadwal/recent-results"),
         ]);
 
         const dataLive = await resLive.json();
@@ -34,24 +51,17 @@ const Home = () => {
         const dataUpcoming = await resUpcoming.json();
         if (dataUpcoming.success) setUpcomingMatches(dataUpcoming.data);
 
-        const dataStats = await resStats.json();
-        if (dataStats.success) setStats(dataStats.data);
-
-        const resRecent = await fetch("http://localhost:8000/api/jadwal/recent-results");
         const dataRecent = await resRecent.json();
         if (dataRecent.success) setRecentResults(dataRecent.data);
-
-        const resEvents = await fetch("http://localhost:8000/api/home/events");
-        const dataEvents = await resEvents.json();
-        if (dataEvents.success) setEvents(dataEvents.data);
-
       } catch (error) {
-        console.error("Gagal memuat data:", error);
+        console.error("Gagal memuat data live:", error);
       }
     };
 
-    fetchData();
-    const interval = setInterval(fetchData, 30000);
+    fetchStaticData();
+    fetchLiveData();
+
+    const interval = setInterval(fetchLiveData, 30000);
     return () => clearInterval(interval);
   }, []);
 

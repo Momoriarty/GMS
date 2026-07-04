@@ -23,11 +23,11 @@ class Event extends Model
     ];
 
     protected $casts = [
-        'tanggal_mulai' => 'datetime:Y-m-d H:i:s',   // ← tanpa Z, tanpa UTC
-        'tanggal_selesai' => 'datetime:Y-m-d H:i:s',  // ← tanpa Z, tanpa UTC
+        'tanggal_mulai' => 'datetime:Y-m-d H:i:s',   
+        'tanggal_selesai' => 'datetime:Y-m-d H:i:s',  
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
-        'biaya_pendaftaran' => 'integer',              // ← fix 50jt jadi 500rb
+        'biaya_pendaftaran' => 'integer',
         'kuota_tim' => 'integer',
     ];
 
