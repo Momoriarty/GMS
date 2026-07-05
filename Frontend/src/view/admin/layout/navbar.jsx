@@ -114,6 +114,26 @@ export default function Navbar({
     }
   };
 
+const handleMarkAllAsRead = async () => {
+    const token = localStorage.getItem("token");
+
+    try {
+        await axios.post(
+            "http://localhost:8000/api/notifikasi/read-all",
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        fetchNotifications();
+    } catch (error) {
+        console.error("Gagal menandai semua notifikasi", error);
+    }
+};
+
   return (
     <>
       {(notifOpen || profileOpen) && (
@@ -225,7 +245,10 @@ export default function Navbar({
                       </span>
                     )}
                   </div>
-                  <button className="text-[11px] font-bold text-amber-500 hover:text-amber-600">
+                  <button
+                    onClick={handleMarkAllAsRead}
+                    className="text-[11px] font-bold text-amber-500 hover:text-amber-600"
+                  >
                     Tandai semua dibaca
                   </button>
                 </div>
@@ -241,9 +264,13 @@ export default function Navbar({
                       .map((notif) => (
                         <div
                           key={notif.id}
-                          className={`px-4 py-3 border-b cursor-pointer hover:bg-base-300 ${
-                            !notif.is_read ? "bg-amber-50" : ""
-                          }`}
+                          className={`px-4 py-3 border-b border-base-content/10 cursor-pointer transition-all duration-200
+${
+  !notif.is_read
+    ? "bg-amber-500/10 border-l-4 border-l-amber-500"
+    : "bg-base-200"
+}
+hover:bg-base-300`}
                         >
                           <h4 className="font-semibold text-[12px]">
                             {notif.judul}

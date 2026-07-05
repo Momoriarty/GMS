@@ -88,6 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifikasi/{id}',         [NotifikasiController::class, 'show']);
     Route::post('/notifikasi',             [NotifikasiController::class, 'store']);
     Route::post('/notifikasi/{id}/read',   [NotifikasiController::class, 'markAsRead']);
+    Route::post('/notifikasi/read-all', [NotifikasiController::class, 'markAllAsRead']);
     Route::delete('/notifikasi/{id}',      [NotifikasiController::class, 'destroy']);
 
     // Audit Log

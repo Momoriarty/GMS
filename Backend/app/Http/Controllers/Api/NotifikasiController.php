@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Models\AuditLog;
 use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
@@ -86,6 +87,12 @@ class NotifikasiController extends Controller
             'is_read' => false,
         ]);
 
+        $this->logActivity(
+            'create',
+            'notifikasi',
+            'Mengirim notifikasi "' . $validated['judul'] . '" kepada user ID ' . $validated['user_id']
+        );
+
         return response()->json([
             'success' => true,
             'message' => 'Notifikasi berhasil dikirim',
@@ -118,6 +125,9 @@ class NotifikasiController extends Controller
     }
 
 
+    
+
+
 
     public function destroy(int $id)
     {
@@ -140,12 +150,12 @@ class NotifikasiController extends Controller
         ]);
     }
     private function logActivity($aksi, $tabel, $deskripsi = null)
-{
-    AuditLog::create([
-        'user_id' => Auth::id(),
-        'aksi' => $aksi,
-        'tabel' => $tabel,
-        'deskripsi' => $deskripsi,
-    ]);
-}
+    {
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'aksi' => $aksi,
+            'tabel' => $tabel,
+            'deskripsi' => $deskripsi,
+        ]);
+    }
 }
