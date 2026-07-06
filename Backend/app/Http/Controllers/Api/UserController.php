@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
+use App\Models\AuditLog;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -41,6 +43,15 @@ class UserController extends Controller
 
         $user->update($validated);
 
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'tabel' => 'users',
+                'aksi' => 'update',
+                'deskripsi' => 'Pengguna memperbarui profil: ' . $user->name,
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Profil berhasil diperbarui',
@@ -59,7 +70,17 @@ class UserController extends Controller
             ], 404);
         }
 
+        $userName = $user->name;
         $user->delete();
+
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'tabel' => 'users',
+                'aksi' => 'delete',
+                'deskripsi' => 'Pengguna dihapus: ' . $userName,
+            ]);
+        }
 
         return response()->json([
             'success' => true,

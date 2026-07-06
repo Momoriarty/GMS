@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Models\JadwalPertandingan;
 use App\Models\Klasemen;
 use Illuminate\Support\Facades\DB;
+use App\Models\AuditLog;
 
 class HasilPertandinganController extends Controller
 {
@@ -46,6 +47,15 @@ class HasilPertandinganController extends Controller
         $validated['input_by'] = Auth::id();
 
         $hasil = HasilPertandingan::create($validated);
+
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'tabel' => 'hasil_pertandingan',
+                'aksi' => 'create',
+                'deskripsi' => 'Hasil pertandingan ditambahkan untuk jadwal ID: ' . $hasil->jadwal_id,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -224,6 +234,15 @@ class HasilPertandinganController extends Controller
                 }
             });
 
+            if (Auth::check()) {
+                AuditLog::create([
+                    'user_id' => Auth::id(),
+                    'tabel' => 'hasil_pertandingan',
+                    'aksi' => 'update',
+                    'deskripsi' => 'Hasil pertandingan diperbarui untuk jadwal ID: ' . $jadwal->id,
+                ]);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data pertandingan berhasil diperbarui.',
@@ -252,7 +271,17 @@ class HasilPertandinganController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
+        $hasilId = $hasil->id;
         $hasil->delete();
+
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'tabel' => 'hasil_pertandingan',
+                'aksi' => 'delete',
+                'deskripsi' => 'Hasil pertandingan dihapus (ID: ' . $hasilId . ')',
+            ]);
+        }
 
         return response()->json([
             'success' => true,

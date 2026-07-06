@@ -7,6 +7,8 @@ use App\Models\Klasemen;
 use App\Models\Pendaftaran;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
+use App\Models\AuditLog;
 
 class KlasemenController extends Controller
 {
@@ -93,6 +95,15 @@ class KlasemenController extends Controller
         ]);
 
         $klasemen->update($validated);
+
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'tabel' => 'klasemen',
+                'aksi' => 'update',
+                'deskripsi' => "Klasemen diperbarui untuk tim ID: {$klasemen->tim_id} di event ID: {$klasemen->event_id}",
+            ]);
+        }
 
         return response()->json([
             'success' => true,

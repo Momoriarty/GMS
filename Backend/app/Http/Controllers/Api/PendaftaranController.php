@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Exception;
 use App\Models\Notifikasi;
 use Illuminate\Support\Facades\Auth;
+use App\Models\AuditLog;
 
 class PendaftaranController extends Controller
 {
@@ -197,6 +198,15 @@ class PendaftaranController extends Controller
             'tanggal_daftar' => now(),
         ]);
 
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'tabel' => 'pendaftaran',
+                'aksi' => 'create',
+                'deskripsi' => 'Pendaftaran baru untuk tim: ' . $tim->nama_tim,
+            ]);
+        }
+
         // Setup & charge Midtrans Core API
         $this->setupMidtrans();
 
@@ -328,6 +338,15 @@ class PendaftaranController extends Controller
         $oldStatus = $pendaftaran->status;
         $pendaftaran->update(['status' => $validated['status']]);
 
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'tabel' => 'pendaftaran',
+                'aksi' => 'update',
+                'deskripsi' => "Status pendaftaran tim {$pendaftaran->tim->nama_tim} diverifikasi menjadi {$validated['status']}",
+            ]);
+        }
+
         try {
             Notifikasi::create([
                 'user_id' => $pendaftaran->tim->user_id,
@@ -416,7 +435,17 @@ class PendaftaranController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
+        $pendaftaranId = $pendaftaran->id;
         $pendaftaran->delete();
+
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'tabel' => 'pendaftaran',
+                'aksi' => 'delete',
+                'deskripsi' => "Pendaftaran dibatalkan/dihapus (ID: {$pendaftaranId})",
+            ]);
+        }
 
         return response()->json([
             'success' => true,
