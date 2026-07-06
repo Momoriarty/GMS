@@ -7,8 +7,10 @@ use App\Models\Event;
 use App\Models\JadwalPertandingan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Log;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\AuditLog;
 
 class JadwalPertandinganController extends Controller
 {
@@ -172,6 +174,15 @@ class JadwalPertandinganController extends Controller
 
         $jadwal = JadwalPertandingan::create($validated);
 
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'tabel' => 'jadwal_pertandingan',
+                'aksi' => 'create',
+                'deskripsi' => 'Jadwal pertandingan baru dibuat: Tim ' . $jadwal->tim_1_id . ' vs Tim ' . $jadwal->tim_2_id,
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Jadwal berhasil dibuat',
@@ -203,6 +214,15 @@ class JadwalPertandinganController extends Controller
 
         $jadwal->update($validated);
 
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'tabel' => 'jadwal_pertandingan',
+                'aksi' => 'update',
+                'deskripsi' => 'Jadwal pertandingan diperbarui (ID: ' . $jadwal->id . ')',
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Jadwal berhasil diperbarui',
@@ -224,7 +244,17 @@ class JadwalPertandinganController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
+        $jadwalId = $jadwal->id;
         $jadwal->delete();
+
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'tabel' => 'jadwal_pertandingan',
+                'aksi' => 'delete',
+                'deskripsi' => 'Jadwal pertandingan dihapus (ID: ' . $jadwalId . ')',
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -287,6 +317,15 @@ class JadwalPertandinganController extends Controller
             $message = "Jadwal berhasil disimpan ({$savedCount} dari " . count($validated['jadwal_list']) . " jadwal)";
             if (!empty($errors)) {
                 $message .= ". Errors: " . implode("; ", $errors);
+            }
+
+            if ($savedCount > 0 && Auth::check()) {
+                AuditLog::create([
+                    'user_id' => Auth::id(),
+                    'tabel' => 'jadwal_pertandingan',
+                    'aksi' => 'create',
+                    'deskripsi' => "Bulk save jadwal berhasil disimpan ({$savedCount} jadwal)",
+                ]);
             }
 
             return response()->json([

@@ -13,27 +13,58 @@ class AuditLogController extends Controller
      */
     public function index(Request $request)
     {
-        $query = AuditLog::with('user')
-            ->orderBy('created_at', 'desc');
+        $query = AuditLog::with('user');
 
-        if ($request->user_id) {
-            $query->where('user_id', $request->user_id);
+        if ($request->search) {
+            $search = strtolower($request->search);
+            $query->where(function($q) use ($search) {
+                $q->whereRaw('LOWER(tabel) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(aksi) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(deskripsi) LIKE ?', ["%{$search}%"])
+                  ->orWhereHas('user', function($qUser) use ($search) {
+                      $qUser->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
+                  });
+            });
         }
 
-        if ($request->tabel) {
+        if ($request->tabel && $request->tabel !== 'all') {
             $query->where('tabel', $request->tabel);
         }
 
-        if ($request->aksi) {
+        if ($request->aksi && $request->aksi !== 'all') {
             $query->where('aksi', $request->aksi);
         }
 
-        $perPage = $request->per_page ?? 50;
+        if ($request->sort_by) {
+            $dir = $request->sort_dir === 'desc' ? 'desc' : 'asc';
+            if ($request->sort_by === 'user_name') {
+                $query->join('users', 'audit_logs.user_id', '=', 'users.id')
+                      ->select('audit_logs.*')
+                      ->orderBy('users.name', $dir);
+            } else {
+                $query->orderBy($request->sort_by, $dir);
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $perPage = $request->per_page ?? 10;
         $logs = $query->paginate($perPage);
+
+        $formatted = $logs->map(function($log) {
+            return [
+                'id' => $log->id,
+                'created_at' => $log->created_at,
+                'user_name' => $log->user->name ?? '-',
+                'tabel' => $log->tabel,
+                'aksi' => $log->aksi,
+                'deskripsi' => $log->deskripsi,
+            ];
+        });
 
         return response()->json([
             'success' => true,
-            'data' => $logs->items(),
+            'data' => $formatted,
             'pagination' => [
                 'total' => $logs->total(),
                 'per_page' => $logs->perPage(),

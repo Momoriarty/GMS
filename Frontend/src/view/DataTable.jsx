@@ -545,6 +545,8 @@ export default function DataTable({
   createFields = [],
   onCreate,
   sortable = true, // aktifkan sorting kolom
+  serverSide = false,
+  filterOptionsProp = {},
 }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -556,6 +558,8 @@ export default function DataTable({
   const [toasts, setToasts] = useState([]);
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState("asc");
+  const [totalServerPages, setTotalServerPages] = useState(1);
+  const [totalServerItems, setTotalServerItems] = useState(0);
 
   const MODAL_EDIT = "modal-edit";
   const MODAL_DEL = "modal-delete";
@@ -571,23 +575,45 @@ export default function DataTable({
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
       try {
-        const res = await axios.get(endpoint, { headers: authHeaders() });
-        setRows(res.data[dataKey] || []);
+        const params = serverSide ? {
+          page,
+          per_page: perPage,
+          search,
+          sort_by: sortKey,
+          sort_dir: sortDir,
+          ...filters
+        } : {};
+        
+        const res = await axios.get(endpoint, { params, headers: authHeaders() });
+        setRows(res.data[dataKey] || res.data.data || []);
+
+        if (serverSide) {
+          const pag = res.data.pagination;
+          if (pag) {
+            setTotalServerPages(pag.last_page || 1);
+            setTotalServerItems(pag.total || 0);
+          } else {
+            setTotalServerPages(res.data.last_page || 1);
+            setTotalServerItems(res.data.total || 0);
+          }
+        }
       } catch (err) {
         setError(err.response?.data?.message || "Gagal memuat data.");
       } finally {
         setLoading(false);
       }
     })();
-  }, [endpoint]);
+  }, [endpoint, serverSide, serverSide ? page : null, serverSide ? search : null, serverSide ? sortKey : null, serverSide ? sortDir : null, serverSide ? JSON.stringify(filters) : null]);
 
-  const filterOptions = useMemo(
-    () => Object.fromEntries(filterFields.map((f) => [f, [...new Set(rows.map((r) => r[f]).filter(Boolean))]])),
-    [rows, filterFields]
-  );
+  const filterOptions = useMemo(() => {
+    if (serverSide) return filterOptionsProp || {};
+    return Object.fromEntries(filterFields.map((f) => [f, [...new Set(rows.map((r) => r[f]).filter(Boolean))]]));
+  }, [rows, filterFields, serverSide, filterOptionsProp]);
 
   const filtered = useMemo(() => {
+    if (serverSide) return rows;
     const q = search.toLowerCase();
     let result = rows.filter((row) => {
       const matchSearch = !q || searchKeys.some((k) => String(row[k] ?? "").toLowerCase().includes(q));
@@ -608,11 +634,12 @@ export default function DataTable({
     }
 
     return result;
-  }, [rows, search, filters, sortKey, sortDir]);
+  }, [rows, search, filters, sortKey, sortDir, serverSide, searchKeys, filterFields]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-  const safePage = Math.min(page, totalPages);
-  const pageData = filtered.slice((safePage - 1) * perPage, safePage * perPage);
+  const totalPages = serverSide ? totalServerPages : Math.max(1, Math.ceil(filtered.length / perPage));
+  const safePage = serverSide ? page : Math.min(page, totalPages);
+  const pageData = serverSide ? rows : filtered.slice((safePage - 1) * perPage, safePage * perPage);
+  const totalItemsCount = serverSide ? totalServerItems : filtered.length;
   const hasFilter = search !== "" || filterFields.some((f) => filters[f] !== "all");
 
   const clearFilters = () => {
@@ -708,7 +735,7 @@ export default function DataTable({
           <div className="flex items-center gap-2.5">
             <h2 className="font-semibold text-sm">{title}</h2>
             <div className="badge badge-neutral badge-sm tabular-nums">
-              {filtered.length}{hasFilter && filtered.length !== rows.length ? ` / ${rows.length}` : ""} data
+              {totalItemsCount}{hasFilter && totalItemsCount !== (serverSide ? totalServerItems : rows.length) ? ` / ${serverSide ? totalServerItems : rows.length}` : ""} data
             </div>
           </div>
           {creatable && (
@@ -863,7 +890,7 @@ export default function DataTable({
           </table>
         </div>
 
-        <Pagination page={safePage} totalPages={totalPages} total={filtered.length} perPage={perPage} onChange={setPage} />
+        <Pagination page={safePage} totalPages={totalPages} total={totalItemsCount} perPage={perPage} onChange={setPage} />
       </div>
     </div>
   );
