@@ -2,15 +2,13 @@
 
 namespace App\Events;
 
+use App\Models\Notifikasi;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Notifikasi;
 
 class NotifikasiCreated implements ShouldBroadcastNow
 {
@@ -30,11 +28,11 @@ class NotifikasiCreated implements ShouldBroadcastNow
      * Get the channels the event should broadcast on.
      * Broadcasting on a private channel for the specific user.
      *
-     * @return \Illuminate\Broadcasting\Channel|array
+     * @return Channel|array
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('notifikasi.' . $this->notifikasi->user_id);
+        return new PrivateChannel('notifikasi.'.$this->notifikasi->user_id);
     }
 
     public function broadcastWith()

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -17,13 +18,13 @@ class AuditLogController extends Controller
 
         if ($request->search) {
             $search = strtolower($request->search);
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(tabel) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(aksi) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(deskripsi) LIKE ?', ["%{$search}%"])
-                  ->orWhereHas('user', function($qUser) use ($search) {
-                      $qUser->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
-                  });
+                    ->orWhereRaw('LOWER(aksi) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(deskripsi) LIKE ?', ["%{$search}%"])
+                    ->orWhereHas('user', function ($qUser) use ($search) {
+                        $qUser->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
+                    });
             });
         }
 
@@ -39,8 +40,8 @@ class AuditLogController extends Controller
             $dir = $request->sort_dir === 'desc' ? 'desc' : 'asc';
             if ($request->sort_by === 'user_name') {
                 $query->join('users', 'audit_logs.user_id', '=', 'users.id')
-                      ->select('audit_logs.*')
-                      ->orderBy('users.name', $dir);
+                    ->select('audit_logs.*')
+                    ->orderBy('users.name', $dir);
             } else {
                 $query->orderBy($request->sort_by, $dir);
             }
@@ -51,7 +52,7 @@ class AuditLogController extends Controller
         $perPage = $request->per_page ?? 10;
         $logs = $query->paginate($perPage);
 
-        $formatted = $logs->map(function($log) {
+        $formatted = $logs->map(function ($log) {
             return [
                 'id' => $log->id,
                 'created_at' => $log->created_at,
@@ -70,7 +71,7 @@ class AuditLogController extends Controller
                 'per_page' => $logs->perPage(),
                 'current_page' => $logs->currentPage(),
                 'last_page' => $logs->lastPage(),
-            ]
+            ],
         ]);
     }
 
@@ -81,16 +82,16 @@ class AuditLogController extends Controller
     {
         $log = AuditLog::with('user')->find($id);
 
-        if (!$log) {
+        if (! $log) {
             return response()->json([
                 'success' => false,
-                'message' => 'Log audit tidak ditemukan'
+                'message' => 'Log audit tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
         return response()->json([
             'success' => true,
-            'data' => $log
+            'data' => $log,
         ]);
     }
 
@@ -111,7 +112,7 @@ class AuditLogController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Log audit berhasil dibuat',
-            'data' => $log
+            'data' => $log,
         ], Response::HTTP_CREATED);
     }
 }

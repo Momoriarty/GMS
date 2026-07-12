@@ -1,0 +1,5 @@
+2026/07/12-16:11:17.171 5b90 Reusing MANIFEST D:\Kode\GMS\Backend\whatsapp-gateway\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/07/12-16:11:17.172 5b90 Recovering log #30
+2026/07/12-16:11:17.229 5b90 Reusing old log D:\Kode\GMS\Backend\whatsapp-gateway\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000030.log 
+2026/07/12-16:11:17.230 5b90 Delete type=2 #29
+2026/07/12-16:11:17.230 5b90 Delete type=2 #31

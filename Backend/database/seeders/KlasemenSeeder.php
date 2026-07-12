@@ -10,7 +10,7 @@ class KlasemenSeeder extends Seeder
     public function run(): void
     {
         $event = DB::table('events')->where('status', 'aktif')->value('id');
-        $tim   = DB::table('tim')->pluck('id');
+        $tim = DB::table('tim')->pluck('id');
 
         foreach ($tim as $timId) {
             DB::table('klasemen')->insert([

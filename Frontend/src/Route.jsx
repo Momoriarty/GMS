@@ -1,87 +1,99 @@
+import { lazy, Suspense } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 
+// Route Guard (Keep static)
+import ProtectedRoute from "./ProtectedRoute";
+
+// Lazy Loaded Components
 // Auth
-import Login from "./view/auth/Login";
-import Register from "./view/auth/Register";
-import Forgot from "./view/auth/Forgot";
+const Login = lazy(() => import("./pages/auth/Login"));
+const Register = lazy(() => import("./pages/auth/Register"));
+const Forgot = lazy(() => import("./pages/auth/Forgot"));
+const GoogleCallback = lazy(() => import("./pages/auth/GoogleCallback"));
 
 // Guest
-import Home from "./view/guest/home/Home";
-import GuestLayout from "./view/guest/GuestLayout";
-import GuestProfile from "./view/guest/GuestProfile";
-import GuestEvent from "./view/guest/DetailEvent";
-
+const Home = lazy(() => import("./pages/guest/home/Home"));
+const GuestLayout = lazy(() => import("./pages/guest/layout/GuestLayout"));
+const GuestProfile = lazy(() => import("./pages/guest/profile/GuestProfile"));
+const GuestEvent = lazy(() => import("./pages/guest/event/DetailEvent"));
 
 // Admin
-import AdminLayout from "./view/admin/AdminLayout";
-import AdminDashboard from "./view/admin/dashboard/Dashboard";
-import Profile from "./view/admin/profile/profile";
-import Pengguna from "./view/admin/pengguna/Pengguna";
-import Events from "./view/admin/event/Events";
-import JadwalPertandingan from "./view/admin/event/JadwalPertandingan";
-import HasilPertandingan from "./view/admin/event/HasilPertandingan";
-import Pendaftaran from "./view/admin/pendaftaran/Pendaftaran";
-import Klasemen from "./view/admin/event/Klasemen";
-import Notifikasi from "./view/admin/notifikasi/Notifikasi";
-import AuditLog from "./view/admin/auditLog/AuditLog";
-import Keuangan from "./view/admin/laporan/Keuangan";
+const AdminLayout = lazy(() => import("./pages/admin/layout/AdminLayout"));
+const AdminDashboard = lazy(() => import("./pages/admin/dashboard/Dashboard"));
+const Profile = lazy(() => import("./pages/admin/profile/profile"));
+const Pengguna = lazy(() => import("./pages/admin/pengguna/Pengguna"));
+const Events = lazy(() => import("./pages/admin/event/Events"));
+const JadwalPertandingan = lazy(() => import("./pages/admin/event/JadwalPertandingan"));
+const HasilPertandingan = lazy(() => import("./pages/admin/event/HasilPertandingan"));
+const Pendaftaran = lazy(() => import("./pages/admin/pendaftaran/Pendaftaran"));
+const Klasemen = lazy(() => import("./pages/admin/event/Klasemen"));
+const Notifikasi = lazy(() => import("./pages/admin/notifikasi/Notifikasi"));
+const AuditLog = lazy(() => import("./pages/admin/auditLog/AuditLog"));
+const Keuangan = lazy(() => import("./pages/admin/laporan/Keuangan"));
+const Database = lazy(() => import("./pages/admin/database/Database"));
 
-// Route Guard
-import ProtectedRoute from "./ProtectedRoute";
+// Loading Spinner Component
+const FallbackLoader = () => (
+  <div className="flex items-center justify-center min-h-screen bg-slate-950">
+    <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
 function RouteApp() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<Forgot />} />
+    <Suspense fallback={<FallbackLoader />}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<Forgot />} />
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
-      <Route element={<ProtectedRoute />}>
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="dashboard" replace />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
 
-          <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
 
-          <Route path="profile" element={<Profile />} />
+            <Route path="profile" element={<Profile />} />
 
-          <Route path="pengguna" element={<Pengguna />} />
+            <Route path="pengguna" element={<Pengguna />} />
 
-          <Route path="hasil-pertandingan" element={<HasilPertandingan />} />
+            <Route path="hasil-pertandingan" element={<HasilPertandingan />} />
 
-          <Route path="pendaftaran" element={<Pendaftaran />} />
+            <Route path="pendaftaran" element={<Pendaftaran />} />
 
-          <Route path="notifikasi" element={<Notifikasi />} />
+            <Route path="notifikasi" element={<Notifikasi />} />
 
-          <Route path="keuangan" element={<Keuangan />} />
+            <Route path="keuangan" element={<Keuangan />} />
 
-          <Route path="audit-log" element={<AuditLog />} />
+            <Route path="audit-log" element={<AuditLog />} />
 
-          <Route path="events">
-            <Route index element={<Events />} />
+            <Route path="database" element={<Database />} />
 
-            <Route path=":id/klasemen" element={<Klasemen />} />
-            <Route path=":id/jadwal" element={<JadwalPertandingan />} />
+            <Route path="events">
+              <Route index element={<Events />} />
 
-            <Route
-              path=":id/tim/:timId/jadwal"
-              element={<JadwalPertandingan />}
-            />
+              <Route path=":id/klasemen" element={<Klasemen />} />
+              <Route path=":id/jadwal" element={<JadwalPertandingan />} />
+
+              <Route
+                path=":id/tim/:timId/jadwal"
+                element={<JadwalPertandingan />}
+              />
+            </Route>
+
           </Route>
-
-
         </Route>
-      </Route>
 
-      <Route path="/" element={<GuestLayout />}>
-        <Route index element={<Home />} />
-        <Route path="/profile" element={<GuestProfile />} />
-        <Route path="/events/:id" element={<GuestEvent />} />
-      </Route>
+        <Route path="/" element={<GuestLayout />}>
+          <Route index element={<Home />} />
+          <Route path="/profile" element={<GuestProfile />} />
+          <Route path="/events/:id" element={<GuestEvent />} />
+        </Route>
 
-
-
-      {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\AuditLog;
 
 class EventController extends Controller
 {
@@ -15,11 +15,17 @@ class EventController extends Controller
     {
         $events = Event::withCount(['pendaftaran' => function ($query) {
             $query->where('status', 'diterima');
-        }])->get();
+        }])->paginate(50);
 
         return response()->json([
             'success' => true,
-            'data' => $events
+            'data' => $events->items(),
+            'meta' => [
+                'current_page' => $events->currentPage(),
+                'last_page' => $events->lastPage(),
+                'per_page' => $events->perPage(),
+                'total' => $events->total(),
+            ],
         ]);
     }
 
@@ -29,16 +35,16 @@ class EventController extends Controller
             $query->where('status', 'diterima');
         }])->find($id);
 
-        if (!$event) {
+        if (! $event) {
             return response()->json([
                 'success' => false,
-                'message' => 'Event tidak ditemukan'
+                'message' => 'Event tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
         return response()->json([
             'success' => true,
-            'data' => $event
+            'data' => $event,
         ]);
     }
 
@@ -69,7 +75,7 @@ class EventController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Event berhasil dibuat',
-            'data' => $event
+            'data' => $event,
         ], Response::HTTP_CREATED);
     }
 
@@ -77,10 +83,10 @@ class EventController extends Controller
     {
         $event = Event::find($id);
 
-        if (!$event) {
+        if (! $event) {
             return response()->json([
                 'success' => false,
-                'message' => 'Event tidak ditemukan'
+                'message' => 'Event tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -107,7 +113,7 @@ class EventController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Event berhasil diperbarui',
-            'data' => $event
+            'data' => $event,
         ]);
     }
 
@@ -115,10 +121,10 @@ class EventController extends Controller
     {
         $event = Event::find($id);
 
-        if (!$event) {
+        if (! $event) {
             return response()->json([
                 'success' => false,
-                'message' => 'Event tidak ditemukan'
+                'message' => 'Event tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -135,7 +141,7 @@ class EventController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Event berhasil dihapus'
+            'message' => 'Event berhasil dihapus',
         ]);
     }
 }

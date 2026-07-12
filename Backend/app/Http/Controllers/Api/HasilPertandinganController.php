@@ -1,15 +1,16 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\HasilPertandingan;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
 use App\Models\JadwalPertandingan;
 use App\Models\Klasemen;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Models\AuditLog;
+use Symfony\Component\HttpFoundation\Response;
 
 class HasilPertandinganController extends Controller
 {
@@ -28,7 +29,7 @@ class HasilPertandinganController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $hasil
+            'data' => $hasil,
         ]);
     }
 
@@ -53,14 +54,14 @@ class HasilPertandinganController extends Controller
                 'user_id' => Auth::id(),
                 'tabel' => 'hasil_pertandingan',
                 'aksi' => 'create',
-                'deskripsi' => 'Hasil pertandingan ditambahkan untuk jadwal ID: ' . $hasil->jadwal_id,
+                'deskripsi' => 'Hasil pertandingan ditambahkan untuk jadwal ID: '.$hasil->jadwal_id,
             ]);
         }
 
         return response()->json([
             'success' => true,
             'message' => 'Hasil pertandingan berhasil disimpan',
-            'data' => $hasil
+            'data' => $hasil,
         ], Response::HTTP_CREATED);
     }
 
@@ -69,10 +70,10 @@ class HasilPertandinganController extends Controller
         // 1. Cari Jadwal Pertandingan beserta data hasil lamanya (jika ada)
         $jadwal = JadwalPertandingan::with('hasil')->find($id);
 
-        if (!$jadwal) {
+        if (! $jadwal) {
             return response()->json([
                 'success' => false,
-                'message' => 'Jadwal pertandingan tidak ditemukan'
+                'message' => 'Jadwal pertandingan tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -80,7 +81,7 @@ class HasilPertandinganController extends Controller
         $validated = $request->validate([
             'skor_tim_1' => 'required|integer|min:0',
             'skor_tim_2' => 'required|integer|min:0',
-            'status' => 'required|in:terjadwal,selesai,dibatalkan'
+            'status' => 'required|in:terjadwal,selesai,dibatalkan',
         ]);
 
         $skor1Baru = (int) $validated['skor_tim_1'];
@@ -97,7 +98,7 @@ class HasilPertandinganController extends Controller
         if ($statusBaru === 'selesai') {
             if ($skor1Baru > $skor2Baru) {
                 $timPemenangIdBaru = $jadwal->tim_1_id;
-            } else if ($skor2Baru > $skor1Baru) {
+            } elseif ($skor2Baru > $skor1Baru) {
                 $timPemenangIdBaru = $jadwal->tim_2_id;
             }
         }
@@ -116,7 +117,7 @@ class HasilPertandinganController extends Controller
                         'skor_tim_1' => $skor1Baru,
                         'skor_tim_2' => $skor2Baru,
                         'tim_pemenang_id' => $timPemenangIdBaru,
-                        'input_by' => auth()->id()
+                        'input_by' => auth()->id(),
                     ]
                 );
 
@@ -150,20 +151,22 @@ class HasilPertandinganController extends Controller
                         // Kurangi data lama terlebih dahulu agar kembali netral sebelum disuntik skor baru
 
                         // Netralkan Status Menang/Seri/Kalah Lama Tim 1
-                        if ($timPemenangIdLama === $jadwal->tim_1_id)
+                        if ($timPemenangIdLama === $jadwal->tim_1_id) {
                             $klasemenTim1->menang -= 1;
-                        elseif ($timPemenangIdLama === $jadwal->tim_2_id)
+                        } elseif ($timPemenangIdLama === $jadwal->tim_2_id) {
                             $klasemenTim1->kalah -= 1;
-                        else
+                        } else {
                             $klasemenTim1->seri -= 1;
+                        }
 
                         // Netralkan Status Menang/Seri/Kalah Lama Tim 2
-                        if ($timPemenangIdLama === $jadwal->tim_2_id)
+                        if ($timPemenangIdLama === $jadwal->tim_2_id) {
                             $klasemenTim2->menang -= 1;
-                        elseif ($timPemenangIdLama === $jadwal->tim_1_id)
+                        } elseif ($timPemenangIdLama === $jadwal->tim_1_id) {
                             $klasemenTim2->kalah -= 1;
-                        else
+                        } else {
                             $klasemenTim2->seri -= 1;
+                        }
 
                         // Sesuaikan selisih gol (Skor Baru dikurangi Skor Lama)
                         $klasemenTim1->gol_masuk += ($skor1Baru - $skor1Lama);
@@ -239,20 +242,20 @@ class HasilPertandinganController extends Controller
                     'user_id' => Auth::id(),
                     'tabel' => 'hasil_pertandingan',
                     'aksi' => 'update',
-                    'deskripsi' => 'Hasil pertandingan diperbarui untuk jadwal ID: ' . $jadwal->id,
+                    'deskripsi' => 'Hasil pertandingan diperbarui untuk jadwal ID: '.$jadwal->id,
                 ]);
             }
 
             return response()->json([
                 'success' => true,
                 'message' => 'Data pertandingan berhasil diperbarui.',
-                'data' => $hasilPertandingan
+                'data' => $hasilPertandingan,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memperbarui data: ' . $e->getMessage()
+                'message' => 'Gagal memperbarui data: '.$e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -264,10 +267,10 @@ class HasilPertandinganController extends Controller
     {
         $hasil = HasilPertandingan::find($id);
 
-        if (!$hasil) {
+        if (! $hasil) {
             return response()->json([
                 'success' => false,
-                'message' => 'Hasil tidak ditemukan'
+                'message' => 'Hasil tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -279,13 +282,13 @@ class HasilPertandinganController extends Controller
                 'user_id' => Auth::id(),
                 'tabel' => 'hasil_pertandingan',
                 'aksi' => 'delete',
-                'deskripsi' => 'Hasil pertandingan dihapus (ID: ' . $hasilId . ')',
+                'deskripsi' => 'Hasil pertandingan dihapus (ID: '.$hasilId.')',
             ]);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Hasil berhasil dihapus'
+            'message' => 'Hasil berhasil dihapus',
         ]);
     }
 }

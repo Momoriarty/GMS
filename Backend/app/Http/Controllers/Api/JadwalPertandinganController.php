@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Event;
 use App\Models\JadwalPertandingan;
 use Carbon\Carbon;
@@ -10,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Log;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\AuditLog;
 
 class JadwalPertandinganController extends Controller
 {
@@ -74,11 +74,11 @@ class JadwalPertandinganController extends Controller
         // Ambil event yang sedang berlangsung
         $event = Event::where('status', 'aktif')->first();
 
-        if (!$event) {
+        if (! $event) {
             return response()->json([
                 'success' => true,
                 'data' => null,
-                'message' => 'Tidak ada event aktif.'
+                'message' => 'Tidak ada event aktif.',
             ]);
         }
 
@@ -92,11 +92,11 @@ class JadwalPertandinganController extends Controller
             ->orderBy('waktu_pertandingan', 'desc') // Ambil yang paling baru dimulai
             ->first();
 
-        if (!$match) {
+        if (! $match) {
             return response()->json([
                 'success' => true,
                 'data' => null,
-                'message' => 'Tidak ada live match saat ini.'
+                'message' => 'Tidak ada live match saat ini.',
             ]);
         }
 
@@ -112,7 +112,7 @@ class JadwalPertandinganController extends Controller
                 'skor_tim_2' => $match->hasil->skor_tim_2 ?? 0,
                 'waktu_pertandingan' => $match->waktu_pertandingan,
                 'lokasi_lapangan' => $match->lokasi_lapangan ?? 'Lapangan Utama',
-            ]
+            ],
         ]);
     }
 
@@ -126,11 +126,11 @@ class JadwalPertandinganController extends Controller
         // 1. Ambil event yang sedang aktif terlebih dahulu
         $event = Event::where('status', 'aktif')->first();
 
-        if (!$event) {
+        if (! $event) {
             return response()->json([
                 'success' => true,
                 'data' => [],
-                'message' => 'Tidak ada event aktif.'
+                'message' => 'Tidak ada event aktif.',
             ]);
         }
 
@@ -154,7 +154,7 @@ class JadwalPertandinganController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $formatted
+            'data' => $formatted,
         ]);
     }
 
@@ -179,14 +179,14 @@ class JadwalPertandinganController extends Controller
                 'user_id' => Auth::id(),
                 'tabel' => 'jadwal_pertandingan',
                 'aksi' => 'create',
-                'deskripsi' => 'Jadwal pertandingan baru dibuat: Tim ' . $jadwal->tim_1_id . ' vs Tim ' . $jadwal->tim_2_id,
+                'deskripsi' => 'Jadwal pertandingan baru dibuat: Tim '.$jadwal->tim_1_id.' vs Tim '.$jadwal->tim_2_id,
             ]);
         }
 
         return response()->json([
             'success' => true,
             'message' => 'Jadwal berhasil dibuat',
-            'data' => $jadwal
+            'data' => $jadwal,
         ], Response::HTTP_CREATED);
     }
 
@@ -197,10 +197,10 @@ class JadwalPertandinganController extends Controller
     {
         $jadwal = JadwalPertandingan::find($id);
 
-        if (!$jadwal) {
+        if (! $jadwal) {
             return response()->json([
                 'success' => false,
-                'message' => 'Jadwal tidak ditemukan'
+                'message' => 'Jadwal tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -219,14 +219,14 @@ class JadwalPertandinganController extends Controller
                 'user_id' => Auth::id(),
                 'tabel' => 'jadwal_pertandingan',
                 'aksi' => 'update',
-                'deskripsi' => 'Jadwal pertandingan diperbarui (ID: ' . $jadwal->id . ')',
+                'deskripsi' => 'Jadwal pertandingan diperbarui (ID: '.$jadwal->id.')',
             ]);
         }
 
         return response()->json([
             'success' => true,
             'message' => 'Jadwal berhasil diperbarui',
-            'data' => $jadwal
+            'data' => $jadwal,
         ]);
     }
 
@@ -237,10 +237,10 @@ class JadwalPertandinganController extends Controller
     {
         $jadwal = JadwalPertandingan::find($id);
 
-        if (!$jadwal) {
+        if (! $jadwal) {
             return response()->json([
                 'success' => false,
-                'message' => 'Jadwal tidak ditemukan'
+                'message' => 'Jadwal tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -252,13 +252,13 @@ class JadwalPertandinganController extends Controller
                 'user_id' => Auth::id(),
                 'tabel' => 'jadwal_pertandingan',
                 'aksi' => 'delete',
-                'deskripsi' => 'Jadwal pertandingan dihapus (ID: ' . $jadwalId . ')',
+                'deskripsi' => 'Jadwal pertandingan dihapus (ID: '.$jadwalId.')',
             ]);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Jadwal berhasil dihapus'
+            'message' => 'Jadwal berhasil dihapus',
         ]);
     }
 
@@ -285,17 +285,18 @@ class JadwalPertandinganController extends Controller
                 try {
                     if ($jadwalData['tim_1_id'] === $jadwalData['tim_2_id']) {
                         $errors[] = "Index {$index}: Tim 1 dan Tim 2 tidak boleh sama";
+
                         continue;
                     }
 
                     $waktuStr = $jadwalData['waktu_pertandingan'];
                     if (strpos($waktuStr, 'T') !== false) {
-                        $waktu = \Carbon\Carbon::parse($waktuStr);
+                        $waktu = Carbon::parse($waktuStr);
                     } else {
                         try {
-                            $waktu = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $waktuStr);
+                            $waktu = Carbon::createFromFormat('Y-m-d H:i:s', $waktuStr);
                         } catch (\Exception $e) {
-                            $waktu = \Carbon\Carbon::parse($waktuStr);
+                            $waktu = Carbon::parse($waktuStr);
                         }
                     }
 
@@ -310,13 +311,13 @@ class JadwalPertandinganController extends Controller
 
                     $savedCount++;
                 } catch (\Exception $e) {
-                    $errors[] = "Index {$index}: " . $e->getMessage();
+                    $errors[] = "Index {$index}: ".$e->getMessage();
                 }
             }
 
-            $message = "Jadwal berhasil disimpan ({$savedCount} dari " . count($validated['jadwal_list']) . " jadwal)";
-            if (!empty($errors)) {
-                $message .= ". Errors: " . implode("; ", $errors);
+            $message = "Jadwal berhasil disimpan ({$savedCount} dari ".count($validated['jadwal_list']).' jadwal)';
+            if (! empty($errors)) {
+                $message .= '. Errors: '.implode('; ', $errors);
             }
 
             if ($savedCount > 0 && Auth::check()) {
@@ -334,16 +335,16 @@ class JadwalPertandinganController extends Controller
                 'data' => [
                     'saved_count' => $savedCount,
                     'total_count' => count($validated['jadwal_list']),
-                    'errors' => $errors
-                ]
+                    'errors' => $errors,
+                ],
             ], $savedCount > 0 ? Response::HTTP_CREATED : Response::HTTP_BAD_REQUEST);
         } catch (\Exception $e) {
-            Log::error('Error bulk save jadwal: ' . $e->getMessage() . ' ' . $e->getTraceAsString());
+            Log::error('Error bulk save jadwal: '.$e->getMessage().' '.$e->getTraceAsString());
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat menyimpan jadwal: ' . $e->getMessage(),
-                'data' => []
+                'message' => 'Terjadi kesalahan saat menyimpan jadwal: '.$e->getMessage(),
+                'data' => [],
             ], Response::HTTP_BAD_REQUEST);
         }
     }

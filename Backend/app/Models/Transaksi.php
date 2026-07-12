@@ -41,4 +41,3 @@ class Transaksi extends Model
         return $this->belongsTo(User::class, 'dibuat_oleh');
     }
 }
-

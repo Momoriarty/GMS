@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\AuditLog;
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,10 +18,10 @@ class NotifikasiController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthenticated'
+                'message' => 'Unauthenticated',
             ], 401);
         }
 
@@ -51,10 +51,10 @@ class NotifikasiController extends Controller
 
         $notifikasi = Notifikasi::find($id);
 
-        if (!$notifikasi || $notifikasi->user_id !== $user?->id) {
+        if (! $notifikasi || $notifikasi->user_id !== $user?->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Notifikasi tidak ditemukan'
+                'message' => 'Notifikasi tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -63,7 +63,7 @@ class NotifikasiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $notifikasi
+            'data' => $notifikasi,
         ]);
     }
 
@@ -90,16 +90,15 @@ class NotifikasiController extends Controller
         $this->logActivity(
             'create',
             'notifikasi',
-            'Mengirim notifikasi "' . $validated['judul'] . '" kepada user ID ' . $validated['user_id']
+            'Mengirim notifikasi "'.$validated['judul'].'" kepada user ID '.$validated['user_id']
         );
 
         return response()->json([
             'success' => true,
             'message' => 'Notifikasi berhasil dikirim',
-            'data' => $notifikasi
+            'data' => $notifikasi,
         ]);
     }
-
 
     public function markAsRead(int $id)
     {
@@ -107,10 +106,10 @@ class NotifikasiController extends Controller
 
         $notifikasi = Notifikasi::find($id);
 
-        if (!$notifikasi || $notifikasi->user_id !== $user?->id) {
+        if (! $notifikasi || $notifikasi->user_id !== $user?->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Notifikasi tidak ditemukan'
+                'message' => 'Notifikasi tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -120,14 +119,30 @@ class NotifikasiController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Notifikasi berhasil ditandai sudah dibaca',
-            'data' => $notifikasi
+            'data' => $notifikasi,
         ]);
     }
 
+    public function markAllAsRead()
+    {
+        $user = Auth::user();
 
-    
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated',
+            ], 401);
+        }
 
+        Notifikasi::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
 
+        return response()->json([
+            'success' => true,
+            'message' => 'Semua notifikasi berhasil ditandai sudah dibaca',
+        ]);
+    }
 
     public function destroy(int $id)
     {
@@ -135,10 +150,10 @@ class NotifikasiController extends Controller
 
         $notifikasi = Notifikasi::find($id);
 
-        if (!$notifikasi || $notifikasi->user_id !== $user?->id) {
+        if (! $notifikasi || $notifikasi->user_id !== $user?->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Notifikasi tidak ditemukan'
+                'message' => 'Notifikasi tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -146,9 +161,10 @@ class NotifikasiController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Notifikasi berhasil dihapus'
+            'message' => 'Notifikasi berhasil dihapus',
         ]);
     }
+
     private function logActivity($aksi, $tabel, $deskripsi = null)
     {
         AuditLog::create([

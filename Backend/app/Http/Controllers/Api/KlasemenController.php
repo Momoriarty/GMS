@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Klasemen;
 use App\Models\Pendaftaran;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
-use App\Models\AuditLog;
+use Symfony\Component\HttpFoundation\Response;
 
 class KlasemenController extends Controller
 {
@@ -46,7 +46,7 @@ class KlasemenController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $registeredTeams
+                'data' => $registeredTeams,
             ]);
         }
 
@@ -67,7 +67,7 @@ class KlasemenController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $formatted
+            'data' => $formatted,
         ]);
     }
 
@@ -78,10 +78,10 @@ class KlasemenController extends Controller
     {
         $klasemen = Klasemen::find($id);
 
-        if (!$klasemen) {
+        if (! $klasemen) {
             return response()->json([
                 'success' => false,
-                'message' => 'Klasemen tidak ditemukan'
+                'message' => 'Klasemen tidak ditemukan',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -108,7 +108,7 @@ class KlasemenController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Klasemen berhasil diperbarui',
-            'data' => $klasemen
+            'data' => $klasemen,
         ]);
     }
 }

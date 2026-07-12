@@ -23,8 +23,8 @@ class Event extends Model
     ];
 
     protected $casts = [
-        'tanggal_mulai' => 'datetime:Y-m-d H:i:s',   
-        'tanggal_selesai' => 'datetime:Y-m-d H:i:s',  
+        'tanggal_mulai' => 'datetime:Y-m-d H:i:s',
+        'tanggal_selesai' => 'datetime:Y-m-d H:i:s',
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
         'biaya_pendaftaran' => 'integer',

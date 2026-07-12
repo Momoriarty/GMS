@@ -75,7 +75,7 @@ export function generateSchedule(teams, event, minMatches, courtCount = 1) {
 
     const sortedAgeGroups = sortAgeGroups(Object.keys(ageGroups));
     const matchHistory = new Set();
-    const maxMatchCap = Math.max(minMatches, 3);
+
 
     sortedAgeGroups.forEach((ageGroup) => {
       const teamsInGroup = ageGroups[ageGroup];
@@ -467,7 +467,7 @@ function parseAgeGroup(ageGroup) {
 
 function findCrossGroupMatch(team, teamAgeGroup, sortedAgeGroups, ageGroups, minMatches, teamMatchCount, matchHistory) {
   const teamId = team.id;
-  const teamAge = parseAgeGroup(teamAgeGroup);
+
   const availableGroups = sortedAgeGroups.map((group) => ({
     name: group,
     value: parseAgeGroup(group),
